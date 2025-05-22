@@ -33,6 +33,20 @@ export function getTrackReadableName(trackCode: string): string {
 }
 
 /**
+ * Formats a timestamp into a readable time string
+ * @param timestamp ISO timestamp string
+ * @returns Formatted time string
+ */
+export function formatTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit',
+    hour12: true 
+  });
+}
+
+/**
  * Checks if a track is running today based on a weekly schedule
  * @param trackName The name of the track
  * @param schedule The weekly schedule for tracks
