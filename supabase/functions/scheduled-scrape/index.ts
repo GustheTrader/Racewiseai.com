@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.31.0";
 
@@ -137,10 +136,43 @@ serve(async (req) => {
       }
     }
     
+    // Import track schedule from config
+    import { TRACK_SCHEDULE, formatTrackUrl, isTrackRunningToday } from "../run-scrape-jobs/config.ts";
+
     // Start with base query for active jobs
     let jobsQuery = supabase.from('scrape_jobs')
       .select('*')
       .eq('is_active', true);
+
+    // If no specific job is requested, filter by today's running tracks
+    if (!jobId && !forceRun && !jobType) {
+      // Get the jobs for tracks that are running today
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+      
+      // Build an array of track names that run today
+      const todaysTracks = Object.entries(TRACK_SCHEDULE)
+        .filter(([_, days]) => days.includes(today))
+        .map(([track, _]) => track);
+      
+      console.log(`Tracks running today (${today}): ${todaysTracks.join(', ')}`);
+      
+      if (todaysTracks.length > 0) {
+        jobsQuery = jobsQuery.in('track_name', todaysTracks);
+      }
+      
+      // Then apply the usual time-based filters
+      if (isFullRunMinute) {
+        // At 15-minute intervals, run all job types that are due
+        console.log("Running full 15-minute interval jobs including results");
+        jobsQuery = jobsQuery.lte('next_run_at', currentTime.toISOString());
+      } else {
+        // At other minutes, only run odds and will_pays jobs
+        console.log("Running high-frequency jobs (odds, will_pays) only");
+        jobsQuery = jobsQuery
+          .in('job_type', ['odds', 'will_pays'])
+          .lte('next_run_at', currentTime.toISOString());
+      }
+    }
     
     // If job ID is provided, only get that specific job
     if (jobId) {
