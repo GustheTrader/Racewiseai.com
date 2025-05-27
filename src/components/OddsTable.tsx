@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { TrendingDown, TrendingUp, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertCircle, Loader2, Eye, EyeOff, ChevronUp, ChevronDown } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 interface OddsTableProps {
@@ -11,6 +11,9 @@ interface OddsTableProps {
   highlightUpdates?: boolean;
   isLoading?: boolean;
 }
+
+type SortField = 'pp' | 'name' | 'liveOdds' | 'mlOdds' | 'modelOdds' | 'qModelWinPct' | 'difference' | 'jockey' | 'trainer';
+type SortDirection = 'asc' | 'desc';
 
 // Map to convert post position to standard colors
 const getPostPositionColor = (position: number): string => {
@@ -37,6 +40,8 @@ const getPostPositionColor = (position: number): string => {
 
 const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false, isLoading = false }) => {
   const [hiddenHorses, setHiddenHorses] = useState<Set<number>>(new Set());
+  const [sortField, setSortField] = useState<SortField>('pp');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const toggleHorseVisibility = (horseId: number) => {
     setHiddenHorses(prev => {
@@ -50,10 +55,62 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
     });
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ChevronUp className="h-4 w-4 text-gray-500" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ChevronUp className="h-4 w-4 text-white" /> : 
+      <ChevronDown className="h-4 w-4 text-white" />;
+  };
+
+  const sortedHorses = [...horses].sort((a, b) => {
+    let aValue: any = a[sortField];
+    let bValue: any = b[sortField];
+
+    // Handle string sorting
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = bValue.toLowerCase();
+    }
+
+    // Handle null/undefined values
+    if (aValue == null && bValue == null) return 0;
+    if (aValue == null) return 1;
+    if (bValue == null) return -1;
+
+    if (sortDirection === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
+
   // Separate visible and hidden horses
-  const visibleHorses = horses.filter(horse => !hiddenHorses.has(horse.id));
-  const hiddenHorsesData = horses.filter(horse => hiddenHorses.has(horse.id));
+  const visibleHorses = sortedHorses.filter(horse => !hiddenHorses.has(horse.id));
+  const hiddenHorsesData = sortedHorses.filter(horse => hiddenHorses.has(horse.id));
   const orderedHorses = [...visibleHorses, ...hiddenHorsesData];
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <th 
+      className="px-4 py-3 text-left cursor-pointer hover:bg-gray-700 transition-colors select-none"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center justify-between">
+        {children}
+        {getSortIcon(field)}
+      </div>
+    </th>
+  );
 
   return (
     <Card className="border-4 border-betting-tertiaryPurple shadow-xl bg-betting-darkPurple overflow-hidden w-full">
@@ -73,15 +130,15 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
             <thead>
               <tr className="bg-gradient-to-r from-gray-800 to-gray-900 text-gray-200">
                 <th className="px-4 py-3 text-left w-8"></th>
-                <th className="px-4 py-3 text-left">PP</th>
-                <th className="px-4 py-3 text-left">Horse</th>
-                <th className="px-4 py-3 text-right">Live Odds</th>
-                <th className="px-4 py-3 text-right">ML Odds</th>
-                <th className="px-4 py-3 text-right">Q-Model Odds</th>
-                <th className="px-4 py-3 text-right">Q-Model Win %</th>
-                <th className="px-4 py-3 text-right">Difference</th>
-                <th className="px-4 py-3 text-left">Jockey</th>
-                <th className="px-4 py-3 text-left">Trainer</th>
+                <SortableHeader field="pp">PP</SortableHeader>
+                <SortableHeader field="name">Horse</SortableHeader>
+                <SortableHeader field="liveOdds">Live Odds</SortableHeader>
+                <SortableHeader field="mlOdds">ML Odds</SortableHeader>
+                <SortableHeader field="modelOdds">Q-Model Odds</SortableHeader>
+                <SortableHeader field="qModelWinPct">Q-Model Win %</SortableHeader>
+                <SortableHeader field="difference">Difference</SortableHeader>
+                <SortableHeader field="jockey">Jockey</SortableHeader>
+                <SortableHeader field="trainer">Trainer</SortableHeader>
                 <th className="px-4 py-3 text-center">J/T Stats</th>
                 <th className="px-4 py-3 text-center">HFactors</th>
               </tr>

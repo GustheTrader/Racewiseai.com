@@ -13,6 +13,7 @@ import HorseComments from '../HorseComments';
 import RaceNavBar from '../RaceNavBar';
 import LivePaddockComments from '../LivePaddockComments';
 import AIThorianValue from '../AIThorianValue';
+import TicketBetGenerator from '../TicketBetGenerator';
 import EmptyStatePrompt from './EmptyStatePrompt';
 
 interface DashboardContentProps {
@@ -74,6 +75,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           highlightUpdates={showUpdateNotification} 
           isLoading={isLoading}
         />
+      </div>
+
+      {/* Ticket Bet Generator */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <TicketBetGenerator horses={data.horses} />
       </div>
       
       {/* Sharp Bettor Timeline with Sharp Movement on the right */}
