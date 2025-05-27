@@ -77,7 +77,8 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
                 <th className="px-4 py-3 text-left">Horse</th>
                 <th className="px-4 py-3 text-right">Live Odds</th>
                 <th className="px-4 py-3 text-right">ML Odds</th>
-                <th className="px-4 py-3 text-right">Model Odds</th>
+                <th className="px-4 py-3 text-right">Q-Model Odds</th>
+                <th className="px-4 py-3 text-right">Q-Model Win %</th>
                 <th className="px-4 py-3 text-right">Difference</th>
                 <th className="px-4 py-3 text-left">Jockey</th>
                 <th className="px-4 py-3 text-left">Trainer</th>
@@ -88,7 +89,7 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
             <tbody className="divide-y divide-gray-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="h-8 w-8 animate-spin mb-2" />
                       <span>Fetching latest odds data...</span>
@@ -97,7 +98,7 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
                 </tr>
               ) : horses.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
                   </td>
                 </tr>
@@ -155,6 +156,9 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {formatOdds(horse.modelOdds)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {horse.qModelWinPct ? `${horse.qModelWinPct}%` : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-right font-mono flex justify-end items-center">
                         <span className={getChangeClass(horse.difference)}>

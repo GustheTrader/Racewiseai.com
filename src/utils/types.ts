@@ -1,3 +1,4 @@
+
 // Define all type interfaces
 export interface Horse {
   id: number;
@@ -7,6 +8,7 @@ export interface Horse {
   liveOdds: number;
   mlOdds?: number;
   modelOdds: number;
+  qModelWinPct?: number;
   difference: number;
   jockey?: string;
   trainer?: string;
