@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import OddsTable from '../OddsTable';
 import LiveStreamingOdds from '../LiveStreamingOdds';
 import PoolsPanel from '../PoolsPanel';
@@ -41,6 +41,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   onTrackChange,
   onRaceChange
 }) => {
+  const [ticketSelections, setTicketSelections] = useState<Set<number>>(new Set());
+
   if (!currentTrack || currentRace === 0) {
     return <EmptyStatePrompt />;
   }
@@ -74,6 +76,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           horses={data.horses} 
           highlightUpdates={showUpdateNotification} 
           isLoading={isLoading}
+          selectedHorseIds={ticketSelections}
         />
       </div>
 

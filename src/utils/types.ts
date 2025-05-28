@@ -16,6 +16,7 @@ export interface Horse {
   trainerWinPct?: number;
   fireNumber?: number;
   irregularBetting?: boolean;
+  isDisqualified?: boolean;
   hFactors?: {
     speed?: boolean;
     pace?: boolean;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
@@ -10,6 +9,7 @@ interface OddsTableProps {
   horses: Horse[];
   highlightUpdates?: boolean;
   isLoading?: boolean;
+  selectedHorseIds?: Set<number>;
 }
 
 type SortField = 'pp' | 'name' | 'liveOdds' | 'mlOdds' | 'modelOdds' | 'qModelWinPct' | 'difference' | 'jockey' | 'trainer';
@@ -38,7 +38,12 @@ const getPostPositionColor = (position: number): string => {
   }
 };
 
-const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false, isLoading = false }) => {
+const OddsTable: React.FC<OddsTableProps> = ({ 
+  horses, 
+  highlightUpdates = false, 
+  isLoading = false,
+  selectedHorseIds = new Set()
+}) => {
   const [hiddenHorses, setHiddenHorses] = useState<Set<number>>(new Set());
   const [sortField, setSortField] = useState<SortField>('pp');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -95,9 +100,10 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
     }
   });
 
-  // Separate visible and hidden horses
-  const visibleHorses = sortedHorses.filter(horse => !hiddenHorses.has(horse.id));
-  const hiddenHorsesData = sortedHorses.filter(horse => hiddenHorses.has(horse.id));
+  // Separate visible and hidden horses, filter out disqualified
+  const availableHorses = sortedHorses.filter(horse => !horse.isDisqualified);
+  const visibleHorses = availableHorses.filter(horse => !hiddenHorses.has(horse.id));
+  const hiddenHorsesData = availableHorses.filter(horse => hiddenHorses.has(horse.id));
   const orderedHorses = [...visibleHorses, ...hiddenHorsesData];
 
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
@@ -153,7 +159,7 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
                     </div>
                   </td>
                 </tr>
-              ) : horses.length === 0 ? (
+              ) : orderedHorses.length === 0 ? (
                 <tr>
                   <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
@@ -166,11 +172,12 @@ const OddsTable: React.FC<OddsTableProps> = ({ horses, highlightUpdates = false,
                   // Determine text color for legibility
                   const textColor = horse.pp === 2 || horse.pp === 4 || horse.pp === 12 ? "text-black" : "text-white";
                   const isHidden = hiddenHorses.has(horse.id);
+                  const isSelected = selectedHorseIds.has(horse.id);
                   
                   return (
                     <tr 
                       key={horse.id}
-                      className={`${horse.irregularBetting ? 'bg-red-900/20' : ''} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isHidden ? 'opacity-50 bg-gray-800/30' : ''}`}
+                      className={`${horse.irregularBetting ? 'bg-red-900/20' : ''} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isHidden ? 'opacity-50 bg-gray-800/30' : ''} ${isSelected ? 'bg-yellow-900/30 border-l-4 border-yellow-500' : ''}`}
                     >
                       <td className="px-2 py-3 text-center">
                         <button

@@ -118,6 +118,22 @@ export const generateHorses = (): Horse[] => {
       trainer: "M. Maker",
       hFactors: { pace: true, form: true }
     },
+    // Add a disqualified horse example
+    { 
+      id: 9, 
+      pp: 9, 
+      name: 'Scratched Runner', 
+      liveOdds: 0, 
+      mlOdds: 12.00,
+      modelOdds: 15.30,
+      qModelWinPct: 6.7,
+      difference: 0, 
+      isFavorite: false,
+      isDisqualified: true,
+      jockey: "B. Hernandez",
+      trainer: "W. Mott",
+      hFactors: { speed: true }
+    },
   ];
   
   return horses;
