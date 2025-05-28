@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Horse } from '../utils/types';
-import { Plus, Minus, Ticket, Calculator, DollarSign, Target, Sparkles, TrendingUp, Star, Trophy, Crown, Key, ChevronDown } from 'lucide-react';
+import { Plus, Minus, Ticket, Calculator, DollarSign, Target, Sparkles, TrendingUp, Star, Trophy, Crown, Key, ChevronDown, Box } from 'lucide-react';
 
 interface TicketBetGeneratorProps {
   horses: Horse[];
@@ -18,12 +18,15 @@ interface BetSelection {
   betType: 'win' | 'place' | 'show' | 'exacta' | 'trifecta' | 'superfecta' | 'daily_double' | 'pick_three' | 'win_place_show' | 'win_place' | 'win_show' | 'place_show';
   amount: number;
   isKeyHorse?: boolean;
-  extraBox?: boolean;
+  isBoxBet?: boolean;
+  raceNumber?: number; // For Daily Double and Pick Three
 }
 
 const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
   const [selections, setSelections] = useState<BetSelection[]>([]);
   const [selectedBetType, setSelectedBetType] = useState<BetSelection['betType']>('win');
+  const [selectedRaceForDD, setSelectedRaceForDD] = useState<number>(8); // Next race for DD
+  const [selectedRaceForP3, setSelectedRaceForP3] = useState<number>(8); // Next race for P3
 
   const betTypes = [
     { type: 'win' as const, label: 'WIN', color: 'bg-green-600' },
@@ -46,6 +49,13 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
   const addHorseToTicket = (horse: Horse) => {
     if (horse.isDisqualified) return;
     
+    let raceNumber = 7; // Current race
+    if (selectedBetType === 'daily_double') {
+      raceNumber = selectedRaceForDD;
+    } else if (selectedBetType === 'pick_three') {
+      raceNumber = selectedRaceForP3;
+    }
+    
     const newSelection: BetSelection = {
       horseId: horse.id,
       horseName: horse.name,
@@ -53,7 +63,8 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
       betType: selectedBetType,
       amount: 2,
       isKeyHorse: false,
-      extraBox: false
+      isBoxBet: false,
+      raceNumber: raceNumber
     };
     setSelections([...selections, newSelection]);
   };
@@ -71,12 +82,20 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
   const toggleKeyHorse = (index: number) => {
     const updated = [...selections];
     updated[index].isKeyHorse = !updated[index].isKeyHorse;
+    // If making it a key horse, turn off box bet
+    if (updated[index].isKeyHorse) {
+      updated[index].isBoxBet = false;
+    }
     setSelections(updated);
   };
 
-  const toggleExtraBox = (index: number) => {
+  const toggleBoxBet = (index: number) => {
     const updated = [...selections];
-    updated[index].extraBox = !updated[index].extraBox;
+    updated[index].isBoxBet = !updated[index].isBoxBet;
+    // If making it a box bet, turn off key horse
+    if (updated[index].isBoxBet) {
+      updated[index].isKeyHorse = false;
+    }
     setSelections(updated);
   };
 
@@ -91,7 +110,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
   const getTotalCost = () => {
     return selections.reduce((total, selection) => {
       let baseCost = selection.amount;
-      if (selection.extraBox) baseCost *= 2;
+      if (selection.isBoxBet) baseCost *= 2;
       return total + baseCost;
     }, 0);
   };
@@ -118,7 +137,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
       }
       
       let amount = selection.amount * multiplier;
-      if (selection.extraBox) amount *= 1.5;
+      if (selection.isBoxBet) amount *= 1.5;
       if (selection.isKeyHorse) amount *= 1.2;
       
       return total + amount;
@@ -148,16 +167,29 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
   };
 
   const formatTicketCombination = (betType: BetSelection['betType'], selections: BetSelection[]) => {
-    if (betType === 'trifecta' || betType === 'superfecta') {
-      const keyHorses = selections.filter(s => s.isKeyHorse && s.betType === betType).map(s => s.pp);
-      const regularHorses = selections.filter(s => !s.isKeyHorse && s.betType === betType).map(s => s.pp);
+    const sameBetSelections = selections.filter(s => s.betType === betType);
+    
+    if (betType === 'exacta' || betType === 'trifecta' || betType === 'superfecta') {
+      const keyHorses = sameBetSelections.filter(s => s.isKeyHorse).map(s => s.pp);
+      const boxHorses = sameBetSelections.filter(s => s.isBoxBet).map(s => s.pp);
+      const regularHorses = sameBetSelections.filter(s => !s.isKeyHorse && !s.isBoxBet).map(s => s.pp);
       
-      if (keyHorses.length > 0 && regularHorses.length > 0) {
+      if (boxHorses.length > 0) {
+        return `BOX: ${boxHorses.join(',')}`;
+      } else if (keyHorses.length > 0 && regularHorses.length > 0) {
         return `${keyHorses.join(',')}//${regularHorses.join(',')}`;
       }
-      return selections.filter(s => s.betType === betType).map(s => s.pp).join(',');
+      return sameBetSelections.map(s => s.pp).join(',');
     }
     return '';
+  };
+
+  const canUseBoxOrKey = (betType: BetSelection['betType']) => {
+    return ['exacta', 'trifecta', 'superfecta'].includes(betType);
+  };
+
+  const needsRaceSelection = (betType: BetSelection['betType']) => {
+    return ['daily_double', 'pick_three'].includes(betType);
   };
 
   return (
@@ -198,6 +230,36 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Race Selection for Multi-Race Bets */}
+        {needsRaceSelection(selectedBetType) && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-white">
+              Select {selectedBetType === 'daily_double' ? 'Next Race' : 'Starting Race'}
+            </h3>
+            <Select 
+              value={selectedBetType === 'daily_double' ? selectedRaceForDD.toString() : selectedRaceForP3.toString()} 
+              onValueChange={(value) => {
+                if (selectedBetType === 'daily_double') {
+                  setSelectedRaceForDD(parseInt(value));
+                } else {
+                  setSelectedRaceForP3(parseInt(value));
+                }
+              }}
+            >
+              <SelectTrigger className="w-full bg-gray-800 border-gray-600 text-white text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600 z-50">
+                {[8, 9, 10, 11, 12].map((race) => (
+                  <SelectItem key={race} value={race.toString()} className="text-white hover:bg-gray-700 text-sm">
+                    Race {race}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Horse Selection Grid */}
         <div className="space-y-2">
@@ -261,42 +323,52 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                     <Badge variant="outline" className="capitalize border-purple-400 text-purple-300 text-xs">
                       {selection.betType.replace('_', ' ')}
                     </Badge>
+                    {selection.raceNumber && selection.raceNumber !== 7 && (
+                      <Badge className="bg-cyan-600 text-white text-xs">
+                        R{selection.raceNumber}
+                      </Badge>
+                    )}
                     {selection.isKeyHorse && (
                       <Badge className="bg-yellow-600 text-white text-xs">
                         <Key className="h-2 w-2 mr-1" />
                         Key
                       </Badge>
                     )}
-                    {selection.extraBox && (
+                    {selection.isBoxBet && (
                       <Badge className="bg-blue-600 text-white text-xs">
-                        Extra
+                        <Box className="h-2 w-2 mr-1" />
+                        Box
                       </Badge>
                     )}
-                    {(selection.betType === 'trifecta' || selection.betType === 'superfecta') && (
+                    {canUseBoxOrKey(selection.betType) && (
                       <span className="text-xs text-cyan-300">
                         {formatTicketCombination(selection.betType, selections.filter(s => s.betType === selection.betType))}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => toggleKeyHorse(index)}
-                      className={`p-1 rounded transition-colors text-xs ${
-                        selection.isKeyHorse ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
-                      }`}
-                      title="Toggle key horse"
-                    >
-                      <Key className="h-2 w-2" />
-                    </button>
-                    <button
-                      onClick={() => toggleExtraBox(index)}
-                      className={`p-1 rounded transition-colors text-xs ${
-                        selection.extraBox ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
-                      }`}
-                      title="Toggle extra box"
-                    >
-                      <Plus className="h-2 w-2" />
-                    </button>
+                    {canUseBoxOrKey(selection.betType) && (
+                      <>
+                        <button
+                          onClick={() => toggleKeyHorse(index)}
+                          className={`p-1 rounded transition-colors text-xs ${
+                            selection.isKeyHorse ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                          }`}
+                          title="Toggle key horse"
+                        >
+                          <Key className="h-2 w-2" />
+                        </button>
+                        <button
+                          onClick={() => toggleBoxBet(index)}
+                          className={`p-1 rounded transition-colors text-xs ${
+                            selection.isBoxBet ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                          }`}
+                          title="Toggle box bet"
+                        >
+                          <Box className="h-2 w-2" />
+                        </button>
+                      </>
+                    )}
                     <button
                       onClick={() => updateAmount(index, selection.amount - 1)}
                       className="p-1 bg-red-600 rounded hover:bg-red-700 transition-colors"
