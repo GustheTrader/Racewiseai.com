@@ -79,20 +79,20 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           selectedHorseIds={ticketSelections}
         />
       </div>
-
-      {/* Ticket Bet Generator */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        <TicketBetGenerator horses={data.horses} />
-      </div>
       
-      {/* Sharp Bettor Timeline with Sharp Movement on the right */}
-      <div className="grid grid-cols-5 gap-4 mb-4">
-        <div className="col-span-4">
+      {/* Sharp Bettor Timeline with smaller Sharp Movement card */}
+      <div className="grid grid-cols-6 gap-4 mb-4">
+        <div className="col-span-5">
           <SharpBettorTimeline bettingData={data.bettingTimeline} />
         </div>
         <div className="col-span-1">
           <SharpMovement movements={data.sharpMovements} />
         </div>
+      </div>
+
+      {/* Ticket Bet Generator - moved below Sharp Bettor Timeline */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <TicketBetGenerator horses={data.horses} />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
