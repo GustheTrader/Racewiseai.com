@@ -15,7 +15,7 @@ interface BetSelection {
   horseId: number;
   horseName: string;
   pp: number;
-  betType: 'win' | 'place' | 'show' | 'exacta' | 'trifecta' | 'superfecta' | 'daily_double' | 'pick_three' | 'win_place_show' | 'win_place' | 'win_show' | 'place_show' | 'double' | 'pick_3';
+  betType: 'win' | 'place' | 'show' | 'exacta' | 'trifecta' | 'superfecta' | 'daily_double' | 'pick_three' | 'win_place_show' | 'win_place' | 'win_show' | 'place_show';
   amount: number;
   isKeyHorse?: boolean;
   extraBox?: boolean;
@@ -36,9 +36,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
     { type: 'exacta' as const, label: 'EXACTA', color: 'bg-orange-600' },
     { type: 'trifecta' as const, label: 'TRIFECTA', color: 'bg-red-600' },
     { type: 'superfecta' as const, label: 'SUPERFECTA', color: 'bg-pink-600' },
-    { type: 'double' as const, label: 'DOUBLE', color: 'bg-violet-600' },
     { type: 'daily_double' as const, label: 'DAILY DOUBLE', color: 'bg-indigo-700' },
-    { type: 'pick_3' as const, label: 'PICK 3', color: 'bg-emerald-700' },
     { type: 'pick_three' as const, label: 'PICK THREE', color: 'bg-green-700' },
   ];
 
@@ -115,9 +113,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         case 'exacta': multiplier = horse.liveOdds * 2.5; break;
         case 'trifecta': multiplier = horse.liveOdds * 8; break;
         case 'superfecta': multiplier = horse.liveOdds * 25; break;
-        case 'double': multiplier = horse.liveOdds * 2.8; break;
         case 'daily_double': multiplier = horse.liveOdds * 3.5; break;
-        case 'pick_3': multiplier = horse.liveOdds * 10; break;
         case 'pick_three': multiplier = horse.liveOdds * 12; break;
       }
       
@@ -151,38 +147,51 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
     return new Set(selections.map(s => s.horseId));
   };
 
+  const formatTicketCombination = (betType: BetSelection['betType'], selections: BetSelection[]) => {
+    if (betType === 'trifecta' || betType === 'superfecta') {
+      const keyHorses = selections.filter(s => s.isKeyHorse && s.betType === betType).map(s => s.pp);
+      const regularHorses = selections.filter(s => !s.isKeyHorse && s.betType === betType).map(s => s.pp);
+      
+      if (keyHorses.length > 0 && regularHorses.length > 0) {
+        return `${keyHorses.join(',')}//${regularHorses.join(',')}`;
+      }
+      return selections.filter(s => s.betType === betType).map(s => s.pp).join(',');
+    }
+    return '';
+  };
+
   return (
     <Card className="border-4 border-betting-tertiaryPurple shadow-xl bg-gradient-to-br from-betting-darkPurple to-gray-900 overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-green-700 via-blue-700 to-indigo-700 px-6 py-4">
-        <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
+        <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
           <div className="p-2 bg-white/20 rounded-lg backdrop-blur">
-            <Ticket className="h-5 w-5" />
+            <Ticket className="h-4 w-4" />
           </div>
-          <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent text-sm">
             BET TICKET GENERATOR
           </span>
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="p-6 space-y-4">
+      <CardContent className="p-5 space-y-3">
         {/* Bet Type Dropdown Wheel */}
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-white">Select Bet Type</h3>
+          <h3 className="text-sm font-semibold text-white">Select Bet Type</h3>
           <Select value={selectedBetType} onValueChange={(value) => setSelectedBetType(value as BetSelection['betType'])}>
-            <SelectTrigger className="w-full bg-gray-800 border-gray-600 text-white">
+            <SelectTrigger className="w-full bg-gray-800 border-gray-600 text-white text-sm">
               <SelectValue>
                 <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded ${betTypes.find(b => b.type === selectedBetType)?.color}`}></div>
-                  <span>{betTypes.find(b => b.type === selectedBetType)?.label}</span>
+                  <div className={`w-3 h-3 rounded ${betTypes.find(b => b.type === selectedBetType)?.color}`}></div>
+                  <span className="text-sm">{betTypes.find(b => b.type === selectedBetType)?.label}</span>
                 </div>
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-600 z-50">
               {betTypes.map((bet) => (
-                <SelectItem key={bet.type} value={bet.type} className="text-white hover:bg-gray-700">
+                <SelectItem key={bet.type} value={bet.type} className="text-white hover:bg-gray-700 text-sm">
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded ${bet.color}`}></div>
-                    <span>{bet.label}</span>
+                    <div className={`w-3 h-3 rounded ${bet.color}`}></div>
+                    <span className="text-sm">{bet.label}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -191,37 +200,37 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         </div>
 
         {/* Horse Selection Grid */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-white">Click Horses to Add to Ticket</h3>
-          <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto custom-scrollbar">
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-white">Click Horses to Add to Ticket</h3>
+          <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
             {availableHorses.slice(0, 10).map((horse) => {
               const isSelected = getSelectedHorseIds().has(horse.id);
               return (
                 <div 
                   key={horse.id} 
                   onClick={() => addHorseToTicket(horse)}
-                  className={`bg-gray-800/60 rounded-lg p-3 border transition-all cursor-pointer hover:bg-gray-700/60 ${
+                  className={`bg-gray-800/60 rounded-lg p-2 border transition-all cursor-pointer hover:bg-gray-700/60 ${
                     isSelected ? 'border-yellow-500 bg-yellow-900/20' : 'border-gray-700 hover:border-purple-500'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
                       <div 
-                        className="w-6 h-6 flex items-center justify-center border border-gray-500 rounded"
+                        className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded text-xs"
                         style={{ backgroundColor: getPostPositionColor(horse.pp) }}
                       >
-                        <span className={`font-bold ${horse.pp === 2 || horse.pp === 4 ? 'text-black' : 'text-white'}`}>
+                        <span className={`font-bold text-xs ${horse.pp === 2 || horse.pp === 4 ? 'text-black' : 'text-white'}`}>
                           {horse.pp}
                         </span>
                       </div>
                       <div>
-                        <span className={`text-white font-medium ${isSelected ? 'text-yellow-300' : ''}`}>
+                        <span className={`text-white font-medium text-sm ${isSelected ? 'text-yellow-300' : ''}`}>
                           {horse.name}
                         </span>
-                        <div className="text-sm text-gray-400">Odds: {horse.liveOdds}/1</div>
+                        <div className="text-xs text-gray-400">Odds: {horse.liveOdds}/1</div>
                       </div>
                     </div>
-                    <div className="text-sm text-green-400 font-bold">
+                    <div className="text-xs text-green-400 font-bold">
                       Click to Add
                     </div>
                   </div>
@@ -233,14 +242,14 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
 
         {/* Current Selections */}
         {selections.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-white">Your Ticket</h3>
-            <div className="bg-gray-800/60 rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-white">Your Ticket</h3>
+            <div className="bg-gray-800/60 rounded-lg p-2 space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
               {selections.map((selection, index) => (
                 <div key={index} className="flex items-center justify-between bg-gray-700/50 rounded-lg p-2">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
                     <div 
-                      className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded font-bold"
+                      className="w-4 h-4 flex items-center justify-center border border-gray-500 rounded font-bold text-xs"
                       style={{ 
                         backgroundColor: getPostPositionColor(selection.pp),
                         color: selection.pp === 2 || selection.pp === 4 ? 'black' : 'white'
@@ -248,61 +257,66 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                     >
                       {selection.pp}
                     </div>
-                    <span className="text-white">{selection.horseName}</span>
-                    <Badge variant="outline" className="capitalize border-purple-400 text-purple-300">
+                    <span className="text-white text-sm">{selection.horseName}</span>
+                    <Badge variant="outline" className="capitalize border-purple-400 text-purple-300 text-xs">
                       {selection.betType.replace('_', ' ')}
                     </Badge>
                     {selection.isKeyHorse && (
-                      <Badge className="bg-yellow-600 text-white">
-                        <Key className="h-3 w-3 mr-1" />
+                      <Badge className="bg-yellow-600 text-white text-xs">
+                        <Key className="h-2 w-2 mr-1" />
                         Key
                       </Badge>
                     )}
                     {selection.extraBox && (
-                      <Badge className="bg-blue-600 text-white">
+                      <Badge className="bg-blue-600 text-white text-xs">
                         Extra
                       </Badge>
                     )}
+                    {(selection.betType === 'trifecta' || selection.betType === 'superfecta') && (
+                      <span className="text-xs text-cyan-300">
+                        {formatTicketCombination(selection.betType, selections.filter(s => s.betType === selection.betType))}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
                     <button
                       onClick={() => toggleKeyHorse(index)}
-                      className={`p-1 rounded transition-colors ${
+                      className={`p-1 rounded transition-colors text-xs ${
                         selection.isKeyHorse ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                       }`}
                       title="Toggle key horse"
                     >
-                      <Key className="h-3 w-3" />
+                      <Key className="h-2 w-2" />
                     </button>
                     <button
                       onClick={() => toggleExtraBox(index)}
-                      className={`p-1 rounded transition-colors ${
+                      className={`p-1 rounded transition-colors text-xs ${
                         selection.extraBox ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                       }`}
                       title="Toggle extra box"
                     >
-                      <Plus className="h-3 w-3" />
+                      <Plus className="h-2 w-2" />
                     </button>
                     <button
                       onClick={() => updateAmount(index, selection.amount - 1)}
                       className="p-1 bg-red-600 rounded hover:bg-red-700 transition-colors"
                     >
-                      <Minus className="h-3 w-3 text-white" />
+                      <Minus className="h-2 w-2 text-white" />
                     </button>
-                    <span className="text-white font-mono min-w-[2rem] text-center">
+                    <span className="text-white font-mono min-w-[1.5rem] text-center text-xs">
                       ${selection.amount}
                     </span>
                     <button
                       onClick={() => updateAmount(index, selection.amount + 1)}
                       className="p-1 bg-green-600 rounded hover:bg-green-700 transition-colors"
                     >
-                      <Plus className="h-3 w-3 text-white" />
+                      <Plus className="h-2 w-2 text-white" />
                     </button>
                     <button
                       onClick={() => removeSelection(index)}
-                      className="p-1 bg-gray-600 rounded hover:bg-gray-700 transition-colors ml-2"
+                      className="p-1 bg-gray-600 rounded hover:bg-gray-700 transition-colors ml-1"
                     >
-                      <Minus className="h-3 w-3 text-white" />
+                      <Minus className="h-2 w-2 text-white" />
                     </button>
                   </div>
                 </div>
@@ -313,29 +327,29 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
 
         {/* Ticket Summary */}
         {selections.length > 0 && (
-          <div className="bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg p-4 border border-green-500/30">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg p-3 border border-green-500/30">
+            <div className="grid grid-cols-2 gap-3">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">${getTotalCost()}</div>
-                <div className="text-sm text-gray-400">Total Cost</div>
+                <div className="text-lg font-bold text-green-400">${getTotalCost()}</div>
+                <div className="text-xs text-gray-400">Total Cost</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-400">${getPotentialPayout().toFixed(2)}</div>
-                <div className="text-sm text-gray-400">Potential Payout</div>
+                <div className="text-lg font-bold text-yellow-400">${getPotentialPayout().toFixed(2)}</div>
+                <div className="text-xs text-gray-400">Potential Payout</div>
               </div>
             </div>
-            <div className="mt-4 flex space-x-3">
+            <div className="mt-3 flex space-x-2">
               <Button 
-                className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold"
+                className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold text-sm"
                 onClick={() => console.log('Place bets:', selections)}
               >
-                <Ticket className="h-4 w-4 mr-2" />
+                <Ticket className="h-3 w-3 mr-1" />
                 Place Ticket
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setSelections([])}
-                className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+                className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white text-sm"
               >
                 Clear All
               </Button>
@@ -344,9 +358,9 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         )}
 
         {selections.length === 0 && (
-          <div className="text-center py-8 text-gray-400">
-            <Ticket className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>Select bet type and click horses to build your ticket</p>
+          <div className="text-center py-6 text-gray-400">
+            <Ticket className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Select bet type and click horses to build your ticket</p>
           </div>
         )}
       </CardContent>
