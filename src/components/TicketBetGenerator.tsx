@@ -114,6 +114,23 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
     }));
   };
 
+  // New function to add horse to selection for win/place/show
+  const addHorseToSelection = (horse: Horse) => {
+    if (horse.isDisqualified) return;
+    
+    const newSelection: BetSelection = {
+      horseId: horse.id,
+      horseName: horse.name,
+      pp: horse.pp,
+      betType: selectedBetType,
+      amount: 2,
+      raceNumber: selectedBetType === 'daily_double' ? selectedRaceForDD : 
+                 selectedBetType === 'pick_three' ? selectedRaceForP3 : 7
+    };
+
+    setSelections(prev => [...prev, newSelection]);
+  };
+
   const buildTicket = () => {
     const { betType, boxHorses, keyHorses, withHorses, withPosition1, withPosition2, withPosition3, withPosition4, amount } = ticketConstruction;
     
@@ -397,8 +414,16 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
     return betType === 'superfecta';
   };
 
+  const canUseTrifectaPositions = (betType: BetSelection['betType']) => {
+    return betType === 'trifecta';
+  };
+
   const needsRaceSelection = (betType: BetSelection['betType']) => {
     return ['daily_double', 'pick_three'].includes(betType);
+  };
+
+  const isWinPlaceShowBet = (betType: BetSelection['betType']) => {
+    return ['win', 'place', 'show', 'win_place_show', 'win_place', 'win_show', 'place_show'].includes(betType);
   };
 
   return (
@@ -497,15 +522,42 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
               <Key className="h-3 w-3 mr-1" />
               Key
             </Button>
-            {!canUseWithPositions(selectedBetType) && (
+            {!canUseWithPositions(selectedBetType) && !canUseTrifectaPositions(selectedBetType) && (
               <Button
                 onClick={() => setTicketConstruction(prev => ({ ...prev, withHorses: [] }))}
-                className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1"
+                className={`text-white text-xs px-2 py-1 ${
+                  canUseBoxOrKey(selectedBetType) ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-500'
+                }`}
+                disabled={!canUseBoxOrKey(selectedBetType)}
               >
                 With
               </Button>
             )}
           </div>
+
+          {/* Trifecta Position Buttons */}
+          {canUseTrifectaPositions(selectedBetType) && (
+            <div className="grid grid-cols-3 gap-1 mb-2">
+              <Button
+                onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition1: [] }))}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
+              >
+                1
+              </Button>
+              <Button
+                onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition2: [] }))}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
+              >
+                2
+              </Button>
+              <Button
+                onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition3: [] }))}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
+              >
+                3
+              </Button>
+            </div>
+          )}
 
           {/* Superfecta Position Buttons */}
           {canUseWithPositions(selectedBetType) && (
@@ -514,25 +566,25 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                 onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition1: [] }))}
                 className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
               >
-                1st
+                1
               </Button>
               <Button
                 onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition2: [] }))}
                 className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
               >
-                2nd
+                2
               </Button>
               <Button
                 onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition3: [] }))}
                 className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
               >
-                3rd
+                3
               </Button>
               <Button
                 onClick={() => setTicketConstruction(prev => ({ ...prev, withPosition4: [] }))}
                 className="bg-green-600 hover:bg-green-700 text-white text-xs px-1 py-1"
               >
-                4th
+                4
               </Button>
             </div>
           )}
@@ -598,28 +650,31 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                     >
                       <Key className="h-3 w-3 mx-auto" />
                     </button>
-                    {!canUseWithPositions(selectedBetType) && (
+                    {!canUseWithPositions(selectedBetType) && !canUseTrifectaPositions(selectedBetType) && (
                       <button
                         onClick={() => addHorseToWith(horse)}
                         className={`flex-1 px-2 py-1 rounded text-xs ${
-                          isWithHorse ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                          canUseBoxOrKey(selectedBetType)
+                            ? (isWithHorse ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500')
+                            : 'bg-gray-500 text-gray-400'
                         }`}
+                        disabled={!canUseBoxOrKey(selectedBetType)}
                       >
                         W
                       </button>
                     )}
                   </div>
 
-                  {/* Superfecta position buttons */}
-                  {canUseWithPositions(selectedBetType) && (
-                    <div className="grid grid-cols-4 gap-1">
+                  {/* Trifecta position buttons */}
+                  {canUseTrifectaPositions(selectedBetType) && (
+                    <div className="grid grid-cols-3 gap-1 mb-1">
                       <button
                         onClick={() => addHorseToWithPosition(horse, 1)}
                         className={`px-1 py-1 rounded text-xs ${
                           isInWith1 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                         }`}
                       >
-                        1st
+                        1
                       </button>
                       <button
                         onClick={() => addHorseToWithPosition(horse, 2)}
@@ -627,7 +682,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                           isInWith2 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                         }`}
                       >
-                        2nd
+                        2
                       </button>
                       <button
                         onClick={() => addHorseToWithPosition(horse, 3)}
@@ -635,7 +690,37 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                           isInWith3 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                         }`}
                       >
-                        3rd
+                        3
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Superfecta position buttons */}
+                  {canUseWithPositions(selectedBetType) && (
+                    <div className="grid grid-cols-4 gap-1 mb-1">
+                      <button
+                        onClick={() => addHorseToWithPosition(horse, 1)}
+                        className={`px-1 py-1 rounded text-xs ${
+                          isInWith1 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                        }`}
+                      >
+                        1
+                      </button>
+                      <button
+                        onClick={() => addHorseToWithPosition(horse, 2)}
+                        className={`px-1 py-1 rounded text-xs ${
+                          isInWith2 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                        }`}
+                      >
+                        2
+                      </button>
+                      <button
+                        onClick={() => addHorseToWithPosition(horse, 3)}
+                        className={`px-1 py-1 rounded text-xs ${
+                          isInWith3 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                        }`}
+                      >
+                        3
                       </button>
                       <button
                         onClick={() => addHorseToWithPosition(horse, 4)}
@@ -643,9 +728,19 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                           isInWith4 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                         }`}
                       >
-                        4th
+                        4
                       </button>
                     </div>
+                  )}
+
+                  {/* Select button for win/place/show bets */}
+                  {isWinPlaceShowBet(selectedBetType) && (
+                    <button
+                      onClick={() => addHorseToSelection(horse)}
+                      className="w-full px-2 py-1 rounded text-xs bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                    >
+                      SELECT
+                    </button>
                   )}
                 </div>
               );
@@ -654,7 +749,9 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         </div>
 
         {/* Build Ticket Button */}
-        {(ticketConstruction.boxHorses.length > 0 || ticketConstruction.keyHorses.length > 0 || ticketConstruction.withHorses.length > 0) && (
+        {(ticketConstruction.boxHorses.length > 0 || ticketConstruction.keyHorses.length > 0 || ticketConstruction.withHorses.length > 0 || 
+          ticketConstruction.withPosition1.length > 0 || ticketConstruction.withPosition2.length > 0 || 
+          ticketConstruction.withPosition3.length > 0 || ticketConstruction.withPosition4.length > 0) && (
           <Button 
             onClick={buildTicket}
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm"
