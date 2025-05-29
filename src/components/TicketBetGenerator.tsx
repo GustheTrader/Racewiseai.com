@@ -386,13 +386,14 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
               className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1"
               disabled={!canUseBoxOrKey(selectedBetType)}
             >
-              K
+              <Key className="h-3 w-3 mr-1" />
+              Key
             </Button>
             <Button
               onClick={() => setTicketConstruction(prev => ({ ...prev, withHorses: [] }))}
               className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1"
             >
-              W
+              With
             </Button>
           </div>
           <div className="bg-gray-800/60 rounded p-2 text-white text-sm min-h-[2rem] flex items-center">
@@ -403,7 +404,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         {/* Horse Selection Grid */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-white">Click Horses to Add to Ticket</h3>
-          <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto custom-scrollbar">
+          <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto custom-scrollbar">
             {availableHorses.slice(0, 10).map((horse) => {
               const isInBox = ticketConstruction.boxHorses.includes(horse.pp);
               const isKeyHorse = ticketConstruction.keyHorses.includes(horse.pp);
@@ -444,7 +445,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                       }`}
                       disabled={!canUseBoxOrKey(selectedBetType)}
                     >
-                      K
+                      <Key className="h-3 w-3 mx-auto" />
                     </button>
                     <button
                       onClick={() => addHorseToWith(horse)}
@@ -498,7 +499,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
                       </Badge>
                     )}
                     {selection.isKeyHorse && (
-                      <Badge className="bg-yellow-600 text-white text-xs">K</Badge>
+                      <Badge className="bg-yellow-600 text-white text-xs">Key</Badge>
                     )}
                     {selection.isBoxBet && (
                       <Badge className="bg-blue-600 text-white text-xs">BOX</Badge>
@@ -570,7 +571,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         {selections.length === 0 && (
           <div className="text-center py-6 text-gray-400">
             <Ticket className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Select bet type and use BOX, K, or W buttons to build your ticket</p>
+            <p className="text-sm">Select bet type and use BOX, Key, or With buttons to build your ticket</p>
           </div>
         )}
       </CardContent>
