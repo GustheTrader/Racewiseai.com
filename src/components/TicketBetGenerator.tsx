@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -264,7 +263,7 @@ const TicketBetGenerator: React.FC<TicketBetGeneratorProps> = ({ horses }) => {
         {/* Horse Selection Grid */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-white">Click Horses to Add to Ticket</h3>
-          <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+          <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto custom-scrollbar">
             {availableHorses.slice(0, 10).map((horse) => {
               const isSelected = getSelectedHorseIds().has(horse.id);
               return (
