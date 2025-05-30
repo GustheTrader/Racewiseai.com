@@ -38,3 +38,6 @@ export const SAMPLE_RANKING_DATA = {
     ]
   }
 };
+
+// Export the default sample data for the rankings table
+export const rankingsData = SAMPLE_RANKING_DATA["CHURCHILL DOWNS"][1];

@@ -27,8 +27,8 @@ const QuantumRankingsPage = () => {
       <div className="space-y-6">
         <TrackRaceSelector 
           selectedTrack="Gulfstream Park"
-          selectedRace="7"
-          races={[]}
+          selectedRace={7}
+          races={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
           onTrackChange={() => {}}
           onRaceChange={() => {}}
         />
