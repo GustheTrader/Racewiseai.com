@@ -5,7 +5,6 @@ import RankingsTable from '@/components/rankings/RankingsTable';
 import TrackRaceSelector from '@/components/rankings/TrackRaceSelector';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { rankingsData } from '@/data/rankingsData';
 
 const QuantumRankingsPage = () => {
   const navigate = useNavigate();
@@ -25,14 +24,8 @@ const QuantumRankingsPage = () => {
       }
     >
       <div className="space-y-6">
-        <TrackRaceSelector 
-          selectedTrack="Gulfstream Park"
-          selectedRace={7}
-          races={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-          onTrackChange={() => {}}
-          onRaceChange={() => {}}
-        />
-        <RankingsTable rankings={rankingsData} />
+        <TrackRaceSelector />
+        <RankingsTable />
       </div>
     </DashboardLayout>
   );
