@@ -207,14 +207,13 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <SortableHeader field="jockey">Jockey</SortableHeader>
                 <SortableHeader field="trainer">Trainer</SortableHeader>
                 <th className="px-4 py-3 text-center">J/T Stats</th>
-                <th className="px-4 py-3 text-center">HFactors</th>
                 <th className="px-4 py-3 text-center">HC Factor</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="h-8 w-8 animate-spin mb-2" />
                       <span>Fetching latest odds data...</span>
@@ -223,7 +222,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 </tr>
               ) : visibleHorses.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
                   </td>
                 </tr>
@@ -305,20 +304,6 @@ const OddsTable: React.FC<OddsTableProps> = ({
                           <span className="text-xs">{horse.trainerWinPct || '0'}%</span>
                           {horse.fireNumber && (
                             <span className="fire-number ml-1">{horse.fireNumber}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center space-x-1">
-                          {horse.hFactors ? (
-                            <>
-                              {horse.hFactors.speed && <span className="px-1 py-0.5 text-xs bg-blue-700 text-white rounded">S</span>}
-                              {horse.hFactors.pace && <span className="px-1 py-0.5 text-xs bg-green-700 text-white rounded">P</span>}
-                              {horse.hFactors.form && <span className="px-1 py-0.5 text-xs bg-yellow-700 text-white rounded">F</span>}
-                              {horse.hFactors.class && <span className="px-1 py-0.5 text-xs bg-red-700 text-white rounded">C</span>}
-                            </>
-                          ) : (
-                            <span className="text-gray-500">-</span>
                           )}
                         </div>
                       </td>
