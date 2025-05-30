@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,7 +130,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search results..."
-            className="pl-8 bg-betting-dark text-white border-betting-tertiaryPurple"
+            className="pl-8 bg-betting-dark text-white border-betting-mediumBlue"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -139,20 +140,20 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           size="sm" 
           onClick={onRefresh}
           disabled={isLoading}
-          className="ml-2 border-betting-tertiaryPurple bg-betting-darkPurple hover:bg-betting-tertiaryPurple/20"
+          className="ml-2"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-md border-4 border-betting-tertiaryPurple bg-betting-darkPurple overflow-hidden">
+        <div className="rounded-md border border-betting-mediumBlue overflow-hidden">
           <Table>
-            <TableHeader className="bg-purple-header">
+            <TableHeader className="bg-betting-dark">
               <TableRow>
-                <TableHead className="text-white">Track</TableHead>
-                <TableHead className="text-white">Race</TableHead>
-                <TableHead className="text-white">Date</TableHead>
+                <TableHead className="text-gray-300">Track</TableHead>
+                <TableHead className="text-gray-300">Race</TableHead>
+                <TableHead className="text-gray-300">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,7 +167,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                 currentResults.map((result) => (
                   <TableRow 
                     key={result.id} 
-                    className={`hover:bg-betting-tertiaryPurple/20 cursor-pointer ${selectedResult?.id === result.id ? 'bg-betting-tertiaryPurple/30' : ''}`}
+                    className={`hover:bg-betting-dark/50 cursor-pointer ${selectedResult?.id === result.id ? 'bg-betting-dark/70' : ''}`}
                     onClick={() => setSelectedResult(result)}
                   >
                     <TableCell className="font-medium">{result.track_name}</TableCell>
@@ -182,22 +183,22 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         
         <div>
           {selectedResult ? (
-            <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple shadow-xl h-full overflow-hidden">
+            <Card className="bg-betting-dark border-betting-mediumBlue h-full overflow-hidden">
               <CardContent className="p-4">
-                <h3 className="text-lg font-medium mb-3 text-white">
+                <h3 className="text-lg font-medium mb-3">
                   {selectedResult.track_name} - Race {selectedResult.race_number}
                 </h3>
                 <div className="text-sm text-gray-400 mb-4">
                   Imported on {formatDate(selectedResult.created_at)}
                 </div>
                 
-                <div className="bg-betting-dark/50 p-4 rounded-md overflow-auto max-h-[500px]">
+                <div className="bg-betting-navyBlue p-4 rounded-md overflow-auto max-h-[500px]">
                   {selectedResult.results_data && (
                     <div className="space-y-4">
-                      <h4 className="text-md font-medium text-white">Final Results</h4>
+                      <h4 className="text-md font-medium">Final Results</h4>
                       {selectedResult.results_data.finishOrder ? (
                         <Table>
-                          <TableHeader className="bg-betting-tertiaryPurple/20">
+                          <TableHeader className="bg-betting-dark/50">
                             <TableRow>
                               <TableHead className="text-gray-300">Position</TableHead>
                               <TableHead className="text-gray-300">Horse</TableHead>
@@ -224,11 +225,11 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                       
                       {selectedResult.results_data.payouts && Object.keys(selectedResult.results_data.payouts).length > 0 ? (
                         <div className="mt-4">
-                          <h4 className="text-md font-medium mb-2 text-white">Payouts</h4>
+                          <h4 className="text-md font-medium mb-2">Payouts</h4>
                           <div className="grid grid-cols-2 gap-4">
                             {Object.entries(selectedResult.results_data.payouts).map(([bet, payout]: [string, any]) => (
-                              <div key={bet} className="bg-betting-tertiaryPurple/20 p-3 rounded-md">
-                                <div className="font-medium text-white">{bet}</div>
+                              <div key={bet} className="bg-betting-dark/30 p-3 rounded-md">
+                                <div className="font-medium">{bet}</div>
                                 <div className="text-green-400">${typeof payout === 'number' ? payout.toFixed(2) : payout}</div>
                               </div>
                             ))}
@@ -245,7 +246,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
               </CardContent>
             </Card>
           ) : (
-            <div className="flex items-center justify-center h-full border-4 border-dashed border-betting-tertiaryPurple rounded-md p-8">
+            <div className="flex items-center justify-center h-full border border-dashed border-betting-mediumBlue rounded-md p-8">
               <p className="text-gray-400 text-center">
                 Select a race result to view details
               </p>
