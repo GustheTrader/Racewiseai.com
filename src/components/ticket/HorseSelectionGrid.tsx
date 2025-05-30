@@ -63,7 +63,7 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-white">Click Horses to Add to Ticket</h3>
-      <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto custom-scrollbar">
+      <div className="grid grid-cols-3 gap-1 max-h-80 overflow-y-auto custom-scrollbar">
         {availableHorses.slice(0, 10).map((horse) => {
           const isInBox = ticketConstruction.boxHorses.includes(horse.pp);
           const isKeyHorse = ticketConstruction.keyHorses.includes(horse.pp);
@@ -74,11 +74,11 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
           const isInWith4 = ticketConstruction.withPosition4.includes(horse.pp);
           
           return (
-            <div key={horse.id} className="bg-gray-800/60 rounded-lg p-2 border border-gray-700">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
+            <div key={horse.id} className="bg-gray-800/60 rounded-md p-1 border border-gray-700">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center space-x-1">
                   <div 
-                    className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded text-xs"
+                    className="w-4 h-4 flex items-center justify-center border border-gray-500 rounded text-xs"
                     style={{ backgroundColor: getPostPositionColor(horse.pp) }}
                   >
                     <span className={`font-bold text-xs ${horse.pp === 2 || horse.pp === 4 ? 'text-black' : 'text-white'}`}>
@@ -86,8 +86,8 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
                     </span>
                   </div>
                   <div>
-                    <span className="text-white font-medium text-sm">{horse.name}</span>
-                    <div className="text-xs text-gray-400">Odds: {horse.liveOdds}/1</div>
+                    <span className="text-white font-medium text-xs">{horse.name}</span>
+                    <div className="text-xs text-gray-400">{horse.liveOdds}/1</div>
                   </div>
                 </div>
               </div>
@@ -96,11 +96,11 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
               {ticketConstruction.isBoxMode && canUseBoxOrKey(selectedBetType) && (
                 <button
                   onClick={() => onAddHorseToBox(horse)}
-                  className={`w-full px-2 py-1 rounded text-xs transition-colors ${
+                  className={`w-full px-1 py-0.5 rounded text-xs transition-colors ${
                     isInBox ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-blue-500'
                   }`}
                 >
-                  {isInBox ? 'SELECTED' : 'SELECT'}
+                  {isInBox ? 'SEL' : 'SEL'}
                 </button>
               )}
 
@@ -108,11 +108,11 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
               {ticketConstruction.isKeyMode && canUseBoxOrKey(selectedBetType) && (
                 <button
                   onClick={() => onAddHorseToKey(horse)}
-                  className={`w-full px-2 py-1 rounded text-xs transition-colors ${
+                  className={`w-full px-1 py-0.5 rounded text-xs transition-colors ${
                     isKeyHorse ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-yellow-500'
                   }`}
                 >
-                  {isKeyHorse ? 'SELECTED' : 'SELECT'}
+                  {isKeyHorse ? 'SEL' : 'SEL'}
                 </button>
               )}
 
@@ -120,20 +120,20 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
               {ticketConstruction.isWithMode && canUseBoxOrKey(selectedBetType) && !canUseWithPositions(selectedBetType) && !canUseTrifectaPositions(selectedBetType) && (
                 <button
                   onClick={() => onAddHorseToWith(horse)}
-                  className={`w-full px-2 py-1 rounded text-xs transition-colors ${
+                  className={`w-full px-1 py-0.5 rounded text-xs transition-colors ${
                     isWithHorse ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-green-500'
                   }`}
                 >
-                  {isWithHorse ? 'SELECTED' : 'SELECT'}
+                  {isWithHorse ? 'SEL' : 'SEL'}
                 </button>
               )}
 
               {/* Trifecta position buttons when no mode is active */}
               {!ticketConstruction.isBoxMode && !ticketConstruction.isKeyMode && !ticketConstruction.isWithMode && canUseTrifectaPositions(selectedBetType) && (
-                <div className="grid grid-cols-3 gap-1 mb-1">
+                <div className="grid grid-cols-3 gap-0.5 mb-0.5">
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 1)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith1 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -141,7 +141,7 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
                   </button>
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 2)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith2 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -149,7 +149,7 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
                   </button>
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 3)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith3 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -160,10 +160,10 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
 
               {/* Superfecta position buttons when no mode is active */}
               {!ticketConstruction.isBoxMode && !ticketConstruction.isKeyMode && !ticketConstruction.isWithMode && canUseWithPositions(selectedBetType) && (
-                <div className="grid grid-cols-4 gap-1 mb-1">
+                <div className="grid grid-cols-4 gap-0.5 mb-0.5">
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 1)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith1 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -171,7 +171,7 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
                   </button>
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 2)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith2 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -179,7 +179,7 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
                   </button>
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 3)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith3 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -187,7 +187,7 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
                   </button>
                   <button
                     onClick={() => onAddHorseToWithPosition(horse, 4)}
-                    className={`px-1 py-1 rounded text-xs ${
+                    className={`px-0.5 py-0.5 rounded text-xs ${
                       isInWith4 ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                     }`}
                   >
@@ -200,9 +200,9 @@ const HorseSelectionGrid: React.FC<HorseSelectionGridProps> = ({
               {isWinPlaceShowBet(selectedBetType) && (
                 <button
                   onClick={() => onAddHorseToSelection(horse)}
-                  className="w-full px-2 py-1 rounded text-xs bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                  className="w-full px-1 py-0.5 rounded text-xs bg-purple-600 text-white hover:bg-purple-700 transition-colors"
                 >
-                  SELECT
+                  SEL
                 </button>
               )}
             </div>
