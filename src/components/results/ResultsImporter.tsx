@@ -1,16 +1,14 @@
 
 import React, { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Link as LinkIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { RaceResult } from '@/types/RaceResultTypes';
-import { formatOTBUrl } from '../dashboard/utils/scraper-utils';
 import { toast } from 'sonner';
-import { TRACK_OPTIONS } from '@/types/ScraperTypes';
+import UrlInputSection from './importer/UrlInputSection';
+import TrackRaceInputSection from './importer/TrackRaceInputSection';
+import ResultsPreview from './importer/ResultsPreview';
+import ImportButton from './importer/ImportButton';
 
 interface ResultsImporterProps {
   trackName?: string;
@@ -26,25 +24,6 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
   const [raceNumber, setRaceNumber] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [previewData, setPreviewData] = useState<any>(null);
-
-  const handleTrackChange = (value: string) => {
-    setRaceTrack(value);
-    
-    // When track changes, update URL suggestion
-    if (value && raceNumber) {
-      setUrl(formatOTBUrl(value, parseInt(raceNumber)));
-    }
-  };
-
-  const handleRaceNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRaceNumber(value);
-    
-    // When race number changes, update URL suggestion
-    if (raceTrack && value) {
-      setUrl(formatOTBUrl(raceTrack, parseInt(value)));
-    }
-  };
 
   const handleScrapePreview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,88 +121,25 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
     }
   };
 
-  const generateUrlSuggestion = () => {
-    if (raceTrack && raceNumber) {
-      return formatOTBUrl(raceTrack, parseInt(raceNumber));
-    }
-    return '';
-  };
-
   return (
     <div className="space-y-6">
       <form onSubmit={handleScrapePreview} className="space-y-4">
         <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Results Page URL
-            </label>
-            <div className="flex gap-2">
-              <Input
-                type="url"
-                placeholder="https://app.offtrackbetting.com/#/lobby/live-racing"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="bg-betting-dark border-betting-tertiaryPurple text-white flex-grow"
-                required
-              />
-              {raceTrack && raceNumber && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setUrl(generateUrlSuggestion())}
-                  className="shrink-0 border-betting-tertiaryPurple bg-betting-darkPurple hover:bg-betting-tertiaryPurple/20"
-                  title="Generate URL for selected track/race"
-                >
-                  <LinkIcon className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Enter the URL of the race results page you want to import
-            </p>
-          </div>
+          <UrlInputSection
+            url={url}
+            setUrl={setUrl}
+            raceTrack={raceTrack}
+            raceNumber={raceNumber}
+          />
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Track Name
-              </label>
-              {trackName ? (
-                <Input 
-                  value={trackName} 
-                  disabled 
-                  className="bg-betting-dark border-betting-tertiaryPurple text-white"
-                />
-              ) : (
-                <Select value={raceTrack} onValueChange={handleTrackChange}>
-                  <SelectTrigger className="bg-betting-dark border-betting-tertiaryPurple text-white">
-                    <SelectValue placeholder="Select track" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-betting-darkPurple border-betting-tertiaryPurple text-white">
-                    {TRACK_OPTIONS.map(track => (
-                      <SelectItem key={track.value} value={track.value}>
-                        {track.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Race Number
-              </label>
-              <Input
-                type="number"
-                placeholder="Race number"
-                value={raceNumber}
-                onChange={handleRaceNumberChange}
-                min="1"
-                className="bg-betting-dark border-betting-tertiaryPurple text-white"
-              />
-            </div>
-          </div>
+          <TrackRaceInputSection
+            trackName={trackName}
+            raceTrack={raceTrack}
+            setRaceTrack={setRaceTrack}
+            raceNumber={raceNumber}
+            setRaceNumber={setRaceNumber}
+            setUrl={setUrl}
+          />
         </div>
         
         <Button 
@@ -242,27 +158,14 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
         </Button>
       </form>
       
-      {previewData && (
-        <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple shadow-xl">
-          <CardContent className="pt-4">
-            <h3 className="text-lg font-medium mb-3 text-white">Preview of Scraped Results</h3>
-            
-            <div className="bg-betting-dark/50 p-4 rounded-md overflow-auto max-h-80 mb-4">
-              <pre className="text-xs text-gray-300">
-                {JSON.stringify(previewData, null, 2)}
-              </pre>
-            </div>
-            
-            <Button 
-              onClick={handleImportResults} 
-              disabled={isImporting}
-              className="w-full bg-orange-500 hover:bg-orange-600"
-            >
-              Import Results to Database
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <ResultsPreview previewData={previewData} />
+      
+      <ImportButton
+        onClick={handleImportResults}
+        disabled={isImporting}
+        isImporting={isImporting}
+        hasPreviewData={!!previewData}
+      />
     </div>
   );
 };
