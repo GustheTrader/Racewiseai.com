@@ -1,4 +1,3 @@
-
 // Define all type interfaces
 export interface Horse {
   id: number;
@@ -23,6 +22,7 @@ export interface Horse {
     form?: boolean;
     class?: boolean;
   };
+  handicappingFactor?: number; // New field for HF values (15, 15a/15.5, 19, 20)
 }
 
 export interface PoolData {

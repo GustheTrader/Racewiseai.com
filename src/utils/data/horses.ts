@@ -16,7 +16,8 @@ export const generateHorses = (): Horse[] => {
       isFavorite: false,
       jockey: "J. Smith",
       trainer: "T. Brown",
-      hFactors: { speed: true, form: true }
+      hFactors: { speed: true, form: true },
+      handicappingFactor: 15 // Money Horse
     },
     { 
       id: 2, 
@@ -30,7 +31,8 @@ export const generateHorses = (): Horse[] => {
       isFavorite: false,
       jockey: "M. Johnson",
       trainer: "R. Davis",
-      hFactors: { speed: true, pace: true, class: true }
+      hFactors: { speed: true, pace: true, class: true },
+      handicappingFactor: 19 // Improving Horse
     },
     { 
       id: 3, 
@@ -45,7 +47,8 @@ export const generateHorses = (): Horse[] => {
       irregularBetting: true,
       jockey: "A. Williams",
       trainer: "S. Miller",
-      hFactors: { pace: true, form: true }
+      hFactors: { pace: true, form: true },
+      handicappingFactor: 15.5 // Money Horse (15a)
     },
     { 
       id: 4, 
@@ -74,7 +77,8 @@ export const generateHorses = (): Horse[] => {
       irregularBetting: true,
       jockey: "R. Martinez",
       trainer: "L. Garcia",
-      hFactors: { speed: true, class: true }
+      hFactors: { speed: true, class: true },
+      handicappingFactor: 20 // Live Longshot
     },
     { 
       id: 6, 
@@ -88,7 +92,8 @@ export const generateHorses = (): Horse[] => {
       isFavorite: false,
       jockey: "C. Taylor",
       trainer: "P. Anderson",
-      hFactors: { pace: true }
+      hFactors: { pace: true },
+      handicappingFactor: 19 // Improving Horse
     },
     { 
       id: 7, 
@@ -102,7 +107,8 @@ export const generateHorses = (): Horse[] => {
       isFavorite: false,
       jockey: "J. Castellano",
       trainer: "C. McGaughey",
-      hFactors: { speed: true, form: true, class: true }
+      hFactors: { speed: true, form: true, class: true },
+      handicappingFactor: 15 // Money Horse
     },
     { 
       id: 8, 
@@ -116,7 +122,8 @@ export const generateHorses = (): Horse[] => {
       isFavorite: false,
       jockey: "T. Gaffalione",
       trainer: "M. Maker",
-      hFactors: { pace: true, form: true }
+      hFactors: { pace: true, form: true },
+      handicappingFactor: 20 // Live Longshot
     },
     // Add a disqualified horse example
     { 

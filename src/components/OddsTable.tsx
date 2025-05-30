@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
@@ -106,6 +105,38 @@ const OddsTable: React.FC<OddsTableProps> = ({
   const visibleHorses = availableHorses.filter(horse => !collapsedHorses.has(horse.id));
   const collapsedHorsesData = availableHorses.filter(horse => collapsedHorses.has(horse.id));
 
+  const getHandicappingFactorDisplay = (hf?: number) => {
+    if (!hf) return <span className="text-gray-500">-</span>;
+    
+    if (hf === 15) {
+      return (
+        <span className="px-2 py-1 text-xs bg-green-600 text-white rounded font-bold">
+          $$$
+        </span>
+      );
+    } else if (hf === 15.5) { // 15a
+      return (
+        <span className="px-2 py-1 text-xs bg-green-700 text-white rounded font-bold">
+          $$$
+        </span>
+      );
+    } else if (hf === 19) {
+      return (
+        <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded font-bold">
+          IP
+        </span>
+      );
+    } else if (hf === 20) {
+      return (
+        <span className="px-2 py-1 text-xs bg-orange-600 text-white rounded font-bold">
+          LL
+        </span>
+      );
+    }
+    
+    return <span className="text-gray-500">-</span>;
+  };
+
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th 
       className="px-4 py-3 text-left cursor-pointer hover:bg-gray-700 transition-colors select-none"
@@ -177,12 +208,13 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <SortableHeader field="trainer">Trainer</SortableHeader>
                 <th className="px-4 py-3 text-center">J/T Stats</th>
                 <th className="px-4 py-3 text-center">HFactors</th>
+                <th className="px-4 py-3 text-center">HC Factor</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="h-8 w-8 animate-spin mb-2" />
                       <span>Fetching latest odds data...</span>
@@ -191,7 +223,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 </tr>
               ) : visibleHorses.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
                   </td>
                 </tr>
@@ -289,6 +321,9 @@ const OddsTable: React.FC<OddsTableProps> = ({
                             <span className="text-gray-500">-</span>
                           )}
                         </div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {getHandicappingFactorDisplay(horse.handicappingFactor)}
                       </td>
                     </tr>
                   );
