@@ -163,7 +163,7 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
                 placeholder="https://app.offtrackbetting.com/#/lobby/live-racing"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="bg-betting-dark border-betting-mediumBlue text-white flex-grow"
+                className="bg-betting-dark border-betting-tertiaryPurple text-white flex-grow"
                 required
               />
               {raceTrack && raceNumber && (
@@ -171,7 +171,7 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
                   type="button" 
                   variant="outline" 
                   onClick={() => setUrl(generateUrlSuggestion())}
-                  className="shrink-0"
+                  className="shrink-0 border-betting-tertiaryPurple bg-betting-darkPurple hover:bg-betting-tertiaryPurple/20"
                   title="Generate URL for selected track/race"
                 >
                   <LinkIcon className="h-4 w-4" />
@@ -192,14 +192,14 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
                 <Input 
                   value={trackName} 
                   disabled 
-                  className="bg-betting-dark border-betting-mediumBlue text-white"
+                  className="bg-betting-dark border-betting-tertiaryPurple text-white"
                 />
               ) : (
                 <Select value={raceTrack} onValueChange={handleTrackChange}>
-                  <SelectTrigger className="bg-betting-dark border-betting-mediumBlue text-white">
+                  <SelectTrigger className="bg-betting-dark border-betting-tertiaryPurple text-white">
                     <SelectValue placeholder="Select track" />
                   </SelectTrigger>
-                  <SelectContent className="bg-betting-dark border-betting-mediumBlue text-white">
+                  <SelectContent className="bg-betting-darkPurple border-betting-tertiaryPurple text-white">
                     {TRACK_OPTIONS.map(track => (
                       <SelectItem key={track.value} value={track.value}>
                         {track.label}
@@ -220,7 +220,7 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
                 value={raceNumber}
                 onChange={handleRaceNumberChange}
                 min="1"
-                className="bg-betting-dark border-betting-mediumBlue text-white"
+                className="bg-betting-dark border-betting-tertiaryPurple text-white"
               />
             </div>
           </div>
@@ -229,7 +229,7 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
         <Button 
           type="submit" 
           disabled={isImporting || !url}
-          className="w-full"
+          className="w-full bg-orange-500 hover:bg-orange-600"
         >
           {isImporting ? (
             <>
@@ -243,11 +243,11 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
       </form>
       
       {previewData && (
-        <Card className="bg-betting-dark border-betting-mediumBlue">
+        <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple shadow-xl">
           <CardContent className="pt-4">
-            <h3 className="text-lg font-medium mb-3">Preview of Scraped Results</h3>
+            <h3 className="text-lg font-medium mb-3 text-white">Preview of Scraped Results</h3>
             
-            <div className="bg-betting-navyBlue p-4 rounded-md overflow-auto max-h-80 mb-4">
+            <div className="bg-betting-dark/50 p-4 rounded-md overflow-auto max-h-80 mb-4">
               <pre className="text-xs text-gray-300">
                 {JSON.stringify(previewData, null, 2)}
               </pre>
@@ -256,7 +256,7 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
             <Button 
               onClick={handleImportResults} 
               disabled={isImporting}
-              className="w-full"
+              className="w-full bg-orange-500 hover:bg-orange-600"
             >
               Import Results to Database
             </Button>

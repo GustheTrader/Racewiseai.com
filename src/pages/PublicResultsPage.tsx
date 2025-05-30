@@ -51,10 +51,10 @@ const PublicResultsPage: React.FC = () => {
         <header className="mb-6 flex justify-between items-center p-4 bg-betting-darkPurple border-4 border-betting-tertiaryPurple rounded-lg shadow-lg">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-600">
-              5D ODDS PULSE RESULTS
+              RaceWiseAI ToolBox
             </h1>
             <p className="text-gray-400">
-              View the latest race results from major tracks
+              Race Results - View the latest race results from major tracks
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -77,9 +77,9 @@ const PublicResultsPage: React.FC = () => {
         </header>
 
         <div className="mb-6">
-          <Card className="bg-betting-navyBlue border-betting-mediumBlue">
-            <CardHeader>
-              <CardTitle className="flex items-center">
+          <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple shadow-xl">
+            <CardHeader className="bg-purple-header">
+              <CardTitle className="flex items-center text-white">
                 <Trophy className="mr-2 h-5 w-5 text-yellow-300" />
                 Latest Race Results
               </CardTitle>
