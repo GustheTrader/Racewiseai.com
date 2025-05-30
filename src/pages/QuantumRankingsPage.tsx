@@ -25,7 +25,7 @@ const QuantumRankingsPage: React.FC = () => {
     setSelectedTrack(track);
     // Reset to the first available race when track changes
     const firstRace = Object.keys(SAMPLE_RANKING_DATA[track] || {})[0];
-    setSelectedRace(firstRace ? Number(firstRace) : null);
+    setSelectedRace(firstRace ? Number(firstRace) : 1);
   };
 
   const handleRaceChange = (race: number) => {
@@ -34,7 +34,7 @@ const QuantumRankingsPage: React.FC = () => {
 
   return (
     <DashboardLayout 
-      title="QUANTUM 5D RANKINGS"
+      title="RACEWISE AI QUANTUM RANKINGS"
       subtitle="Top ranked horses for each race and track"
       extraButtons={
         <Button
@@ -56,7 +56,7 @@ const QuantumRankingsPage: React.FC = () => {
         />
       </div>
 
-      <Card className="border-4 border-betting-tertiaryPurple bg-betting-darkCard">
+      <Card className="border-4 border-betting-tertiaryPurple bg-betting-darkPurple">
         <CardHeader className="bg-purple-header">
           <CardTitle className="text-lg font-semibold text-white">
             {selectedTrack} - Race {selectedRace} Top Rankings

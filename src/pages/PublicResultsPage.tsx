@@ -51,7 +51,7 @@ const PublicResultsPage: React.FC = () => {
         <header className="mb-6 flex justify-between items-center p-4 bg-betting-darkPurple border-4 border-betting-tertiaryPurple rounded-lg shadow-lg">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-600">
-              5D ODDS PULSE RESULTS
+              RACEWISE AI TOOLBOX RESULTS
             </h1>
             <p className="text-gray-400">
               View the latest race results from major tracks
@@ -70,16 +70,16 @@ const PublicResultsPage: React.FC = () => {
               onClick={() => navigate('/quantum-rankings')}
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-lg transform hover:scale-105 transition-all shadow-lg border-2 border-orange-400"
             >
-              Quantum 5D AI Rankings
+              Quantum AI Rankings
             </Button>
             <UserProfile />
           </div>
         </header>
 
         <div className="mb-6">
-          <Card className="bg-betting-navyBlue border-betting-mediumBlue">
-            <CardHeader>
-              <CardTitle className="flex items-center">
+          <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple">
+            <CardHeader className="bg-purple-header">
+              <CardTitle className="flex items-center text-white">
                 <Trophy className="mr-2 h-5 w-5 text-yellow-300" />
                 Latest Race Results
               </CardTitle>

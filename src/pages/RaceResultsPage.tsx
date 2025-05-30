@@ -80,20 +80,22 @@ const RaceResultsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-radial from-betting-dark to-black p-6 text-white">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-6">
+        <header className="mb-6 p-4 bg-betting-darkPurple border-4 border-betting-tertiaryPurple rounded-lg shadow-lg">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-600">
-              {trackName === 'all' ? 'All Tracks' : trackName} Results
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-600">
+                RACEWISE AI - {trackName === 'all' ? 'All Tracks' : trackName} Results
+              </h1>
+              <p className="text-gray-400 mt-2">
+                View and import race results
+              </p>
+            </div>
             <div className="flex items-center gap-4">
               <Button variant="outline" onClick={() => window.location.href = "/"}>
                 Back to Dashboard
               </Button>
             </div>
           </div>
-          <p className="text-gray-400 mt-2">
-            View and import race results
-          </p>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -103,9 +105,9 @@ const RaceResultsPage: React.FC = () => {
           </TabsList>
           
           <TabsContent value="view">
-            <Card className="bg-betting-navyBlue border-betting-mediumBlue">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple">
+              <CardHeader className="bg-purple-header">
+                <CardTitle className="flex items-center gap-2 text-white">
                   Race Results
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin ml-2" />}
                 </CardTitle>
@@ -123,9 +125,9 @@ const RaceResultsPage: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="import">
-            <Card className="bg-betting-navyBlue border-betting-mediumBlue">
-              <CardHeader>
-                <CardTitle>Import Results from Web</CardTitle>
+            <Card className="bg-betting-darkPurple border-4 border-betting-tertiaryPurple">
+              <CardHeader className="bg-purple-header">
+                <CardTitle className="text-white">Import Results from Web</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResultsImporter 

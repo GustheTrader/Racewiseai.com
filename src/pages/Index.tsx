@@ -38,7 +38,7 @@ const Index = () => {
 
   return (
     <DashboardLayout 
-      title="5D ODDS PULSE"
+      title="RACEWISE AI TOOLBOX"
       subtitle="Live race track odds and pool movement dashboard"
       extraButtons={
         <Button 
