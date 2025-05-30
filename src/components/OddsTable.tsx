@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
@@ -44,12 +45,12 @@ const OddsTable: React.FC<OddsTableProps> = ({
   isLoading = false,
   selectedHorseIds = new Set()
 }) => {
-  const [hiddenHorses, setHiddenHorses] = useState<Set<number>>(new Set());
+  const [collapsedHorses, setCollapsedHorses] = useState<Set<number>>(new Set());
   const [sortField, setSortField] = useState<SortField>('pp');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  const toggleHorseVisibility = (horseId: number) => {
-    setHiddenHorses(prev => {
+  const toggleHorseCollapse = (horseId: number) => {
+    setCollapsedHorses(prev => {
       const newSet = new Set(prev);
       if (newSet.has(horseId)) {
         newSet.delete(horseId);
@@ -100,11 +101,10 @@ const OddsTable: React.FC<OddsTableProps> = ({
     }
   });
 
-  // Separate visible and hidden horses, filter out disqualified
+  // Filter out disqualified horses and separate visible from collapsed
   const availableHorses = sortedHorses.filter(horse => !horse.isDisqualified);
-  const visibleHorses = availableHorses.filter(horse => !hiddenHorses.has(horse.id));
-  const hiddenHorsesData = availableHorses.filter(horse => hiddenHorses.has(horse.id));
-  const orderedHorses = [...visibleHorses, ...hiddenHorsesData];
+  const visibleHorses = availableHorses.filter(horse => !collapsedHorses.has(horse.id));
+  const collapsedHorsesData = availableHorses.filter(horse => collapsedHorses.has(horse.id));
 
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th 
@@ -131,6 +131,36 @@ const OddsTable: React.FC<OddsTableProps> = ({
       </CardHeader>
       
       <CardContent className="p-0">
+        {/* Collapsed horses displayed as PP buttons */}
+        {collapsedHorsesData.length > 0 && (
+          <div className="px-4 py-2 bg-gray-800/30 border-b border-gray-700">
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm text-gray-400 mr-2">Collapsed:</span>
+              {collapsedHorsesData.map((horse) => {
+                const ppColor = getPostPositionColor(horse.pp);
+                const textColor = horse.pp === 2 || horse.pp === 4 || horse.pp === 12 ? "text-black" : "text-white";
+                
+                return (
+                  <button
+                    key={horse.id}
+                    onClick={() => toggleHorseCollapse(horse.id)}
+                    className="flex items-center space-x-1 px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 transition-colors"
+                    title={`Click to expand ${horse.name}`}
+                  >
+                    <div 
+                      className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded"
+                      style={{ backgroundColor: ppColor }}
+                    >
+                      <span className={`text-xs font-bold ${textColor}`}>{horse.pp}</span>
+                    </div>
+                    <span className="text-xs text-white">{horse.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -159,37 +189,33 @@ const OddsTable: React.FC<OddsTableProps> = ({
                     </div>
                   </td>
                 </tr>
-              ) : orderedHorses.length === 0 ? (
+              ) : visibleHorses.length === 0 ? (
                 <tr>
                   <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
                   </td>
                 </tr>
               ) : (
-                orderedHorses.map((horse) => {
+                visibleHorses.map((horse) => {
                   // Get proper color based on post position
                   const ppColor = getPostPositionColor(horse.pp);
                   // Determine text color for legibility
                   const textColor = horse.pp === 2 || horse.pp === 4 || horse.pp === 12 ? "text-black" : "text-white";
-                  const isHidden = hiddenHorses.has(horse.id);
+                  const isCollapsed = collapsedHorses.has(horse.id);
                   const isSelected = selectedHorseIds.has(horse.id);
                   
                   return (
                     <tr 
                       key={horse.id}
-                      className={`${horse.irregularBetting ? 'bg-red-900/20' : ''} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isHidden ? 'opacity-50 bg-gray-800/30' : ''} ${isSelected ? 'bg-yellow-900/30 border-l-4 border-yellow-500' : ''}`}
+                      className={`${horse.irregularBetting ? 'bg-red-900/20' : ''} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isSelected ? 'bg-yellow-900/30 border-l-4 border-yellow-500' : ''}`}
                     >
                       <td className="px-2 py-3 text-center">
                         <button
-                          onClick={() => toggleHorseVisibility(horse.id)}
+                          onClick={() => toggleHorseCollapse(horse.id)}
                           className="text-gray-400 hover:text-white transition-colors"
-                          title={isHidden ? "Show horse" : "Hide horse"}
+                          title={isCollapsed ? "Expand horse" : "Collapse horse"}
                         >
-                          {isHidden ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
+                          <Eye className="h-4 w-4" />
                         </button>
                       </td>
                       <td className="px-4 py-3 text-left">
@@ -204,7 +230,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                         {horse.isFavorite && (
                           <span className="h-2 w-2 rounded-full bg-red-500 inline-block"></span>
                         )}
-                        <span className={isHidden ? 'text-gray-500' : ''}>{horse.name}</span>
+                        <span>{horse.name}</span>
                         {horse.irregularBetting && (
                           <Badge variant="destructive" className="ml-2 bg-red-500 text-white text-xs flex items-center gap-1 px-2 py-0.5">
                             <AlertCircle className="h-3 w-3" />
