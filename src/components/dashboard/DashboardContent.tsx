@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import OddsTable from '../OddsTable';
 import LiveStreamingOdds from '../LiveStreamingOdds';
@@ -103,7 +102,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <LiveStreamingOdds horses={availableHorses} />
-        <PoolsPanel poolData={data.poolData} exoticPools={data.exoticPools} />
+        <PoolsPanel 
+          poolData={data.poolData} 
+          exoticPools={data.exoticPools} 
+          horses={availableHorses}
+        />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">

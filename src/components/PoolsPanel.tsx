@@ -1,21 +1,30 @@
 
 import React, { useState } from 'react';
-import { PoolData, ExoticPool } from '../utils/mockData';
+import { PoolData, ExoticPool, Horse } from '../utils/types';
 import { formatCurrency } from '../utils/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { getRunnerColorByPosition } from './charts/constants/postPositionColors';
 
 interface PoolsPanelProps {
   poolData: PoolData[];
   exoticPools: ExoticPool[];
+  horses?: Horse[];
 }
 
-const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools }) => {
+const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools, horses = [] }) => {
   const [activeTab, setActiveTab] = useState<'POOLS' | 'PROBABLES' | 'WILL PAYS' | 'TOTALS'>('TOTALS');
   
+  // Create a map of horse numbers to horse data
+  const horseMap = horses.reduce((map, horse) => {
+    map[horse.pp] = horse;
+    return map;
+  }, {} as Record<number, Horse>);
+
   const renderTotals = () => (
     <div className="mt-4">
-      <div className="grid grid-cols-5 gap-2 px-3 py-2 bg-gray-800/50 rounded text-gray-300 text-sm">
+      <div className="grid grid-cols-6 gap-2 px-3 py-2 bg-gray-800/50 rounded text-gray-300 text-sm">
         <div>#</div>
+        <div>Horse</div>
         <div className="text-center">ODDS</div>
         <div className="text-center">WIN</div>
         <div className="text-center">PLACE</div>
@@ -23,15 +32,31 @@ const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools }) => {
       </div>
       
       <div className="space-y-1 mt-2">
-        {poolData.map((pool) => (
-          <div key={pool.number} className="grid grid-cols-5 gap-2 px-3 py-2 hover:bg-gray-800/30 rounded">
-            <div>{pool.number}</div>
-            <div className="text-center">{pool.odds}</div>
-            <div className="text-center">{formatCurrency(pool.win)}</div>
-            <div className="text-center">{formatCurrency(pool.place)}</div>
-            <div className="text-center">{formatCurrency(pool.show)}</div>
-          </div>
-        ))}
+        {poolData.map((pool) => {
+          const horse = horseMap[pool.number];
+          const ppColor = getRunnerColorByPosition(pool.number);
+          const textColor = pool.number === 2 || pool.number === 4 || pool.number === 12 ? "text-black" : "text-white";
+          
+          return (
+            <div key={pool.number} className="grid grid-cols-6 gap-2 px-3 py-2 hover:bg-gray-800/30 rounded">
+              <div className="flex items-center">
+                <div 
+                  className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded mr-2"
+                  style={{ backgroundColor: ppColor }}
+                >
+                  <span className={`text-xs font-bold ${textColor}`}>{pool.number}</span>
+                </div>
+              </div>
+              <div className="text-sm">
+                {horse ? horse.name : `Horse ${pool.number}`}
+              </div>
+              <div className="text-center">{pool.odds}</div>
+              <div className="text-center">{formatCurrency(pool.win)}</div>
+              <div className="text-center">{formatCurrency(pool.place)}</div>
+              <div className="text-center">{formatCurrency(pool.show)}</div>
+            </div>
+          );
+        })}
       </div>
       
       <div className="mt-6 space-y-1">
