@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import OddsTable from '../OddsTable';
 import LiveStreamingOdds from '../LiveStreamingOdds';
@@ -82,15 +83,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
       
-      {/* Sharp Bettor Timeline with smaller Sharp Movement card - pass horses data */}
-      <div className="grid grid-cols-6 gap-4 mb-4">
-        <div className="col-span-5">
+      {/* Sharp Bettor Timeline with smaller Sharp Movement card - adjusted grid to make Sharp Movement 15% wider */}
+      <div className="grid grid-cols-12 gap-4 mb-4">
+        <div className="col-span-9">
           <SharpBettorTimeline 
             bettingData={data.bettingTimeline} 
             horses={availableHorses}
           />
         </div>
-        <div className="col-span-1">
+        <div className="col-span-3">
           <SharpMovement movements={data.sharpMovements} />
         </div>
       </div>
