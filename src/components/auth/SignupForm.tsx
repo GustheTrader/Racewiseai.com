@@ -60,7 +60,7 @@ const SignupForm = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="signupEmail" className="text-gray-200">Email</Label>
+            <Label htmlFor="signupEmail" className="text-gray-200">Email Address</Label>
             <Input
               id="signupEmail"
               type="email"
@@ -68,11 +68,12 @@ const SignupForm = () => {
               value={signupEmail}
               onChange={(e) => setSignupEmail(e.target.value)}
               className="bg-white/10 text-white border-white/20 placeholder:text-gray-400"
+              required
             />
           </div>
           
           <div className="text-sm text-gray-300 bg-betting-vividPurple/20 p-3 rounded">
-            <p>🎯 Beta Access: No password needed! We'll create your account automatically.</p>
+            <p>🎯 <strong>Simple Beta Access:</strong> Just enter your email - no password needed! We'll set everything up for you automatically.</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
@@ -127,7 +128,7 @@ const SignupForm = () => {
               Yahoo
             </Button>
           </div>
-        </CardFooter>
+        </CardContent>
       </form>
     </Card>
   );
