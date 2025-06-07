@@ -25,7 +25,10 @@ const LivePaddockComments: React.FC<LivePaddockCommentsProps> = ({ comments }) =
             {comments.map((comment, index) => (
               <div key={index} className="p-3 bg-gray-800/40 rounded-lg hover:bg-gray-800/60 transition-colors">
                 <div className="flex justify-between mb-1">
-                  <h3 className="text-sm font-bold text-yellow-400">{comment.horse}</h3>
+                  <div className="flex items-center">
+                    <span className="text-xs text-gray-400 mr-2">PP{index + 1}</span>
+                    <h3 className="text-sm font-bold text-yellow-400">{comment.horse}</h3>
+                  </div>
                   <span className="text-xs text-gray-400">{comment.timestamp}</span>
                 </div>
                 <p className="text-xs text-gray-200 leading-relaxed">{comment.comment}</p>
