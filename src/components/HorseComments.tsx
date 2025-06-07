@@ -22,7 +22,10 @@ const HorseComments: React.FC<HorseCommentsProps> = ({ comments }) => {
         <div className="space-y-4">
           {comments.map((horse, index) => (
             <div key={index} className="p-3 bg-gray-800/40 rounded-lg hover:bg-gray-800/60 transition-colors">
-              <h3 className="text-sm font-bold text-yellow-400 mb-1">{horse.name}</h3>
+              <div className="flex items-center mb-1">
+                <span className="text-xs text-gray-400 mr-2">PP{index + 1}</span>
+                <h3 className="text-sm font-bold text-yellow-400">{horse.name}</h3>
+              </div>
               <p className="text-xs text-gray-200 leading-relaxed">{horse.comment}</p>
             </div>
           ))}
