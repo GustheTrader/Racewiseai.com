@@ -49,26 +49,26 @@ interface BettingTimelineProps {
   smallText?: boolean;
 }
 
-// Map to convert runner keys (runner1, runner2, etc.) to their corresponding post position colors
+// Enhanced vibrant post position colors
 const getRunnerColorByPosition = (position: number): string => {
   switch (position) {
-    case 1: return "#DC2626"; // red-600
-    case 2: return "#FFFFFF"; // white
-    case 3: return "#2563EB"; // blue-600
-    case 4: return "#FACC15"; // yellow-400
-    case 5: return "#16A34A"; // green-600
-    case 6: return "#000000"; // black
-    case 7: return "#F97316"; // orange-500
-    case 8: return "#EC4899"; // pink-500
-    case 9: return "#10B981"; // emerald-500
-    case 10: return "#9333EA"; // purple-600
-    case 11: return "#84CC16"; // lime-500
-    case 12: return "#9CA3AF"; // gray-400
-    case 13: return "#9F1239"; // rose-800
-    case 14: return "#14B8A6"; // teal-500
-    case 15: return "#4338CA"; // indigo-700
-    case 16: return "#F59E0B"; // amber-500
-    default: return "#3B82F6"; // blue-500 (default)
+    case 1: return "#EF4444"; // bright red
+    case 2: return "#F8FAFC"; // bright white
+    case 3: return "#3B82F6"; // bright blue
+    case 4: return "#FDE047"; // bright yellow
+    case 5: return "#22C55E"; // bright green
+    case 6: return "#1F2937"; // dark black
+    case 7: return "#FB923C"; // bright orange
+    case 8: return "#F472B6"; // bright pink
+    case 9: return "#34D399"; // bright emerald
+    case 10: return "#A855F7"; // bright purple
+    case 11: return "#A3E635"; // bright lime
+    case 12: return "#9CA3AF"; // gray
+    case 13: return "#BE123C"; // dark rose
+    case 14: return "#06B6D4"; // bright cyan
+    case 15: return "#6366F1"; // bright indigo
+    case 16: return "#F59E0B"; // bright amber
+    default: return "#3B82F6"; // bright blue (default)
   }
 };
 
@@ -98,23 +98,23 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
           <YAxis 
             yAxisId="volume"
             orientation="left"
-            stroke="#cbd5e1" 
-            tick={{ fill: '#cbd5e1', fontSize: smallText ? 9 : 12 }}
+            stroke="#3B82F6" 
+            tick={{ fill: '#3B82F6', fontSize: smallText ? 9 : 12 }}
             width={smallText ? 30 : 40}
             domain={[0, maxVolume * 1.2]} 
           />
           <YAxis 
             yAxisId="odds"
             orientation="right"
-            stroke="#f59e0b" 
-            tick={{ fill: '#f59e0b', fontSize: smallText ? 9 : 12 }}
+            stroke="#A855F7" 
+            tick={{ fill: '#A855F7', fontSize: smallText ? 9 : 12 }}
             width={smallText ? 30 : 40}
             domain={[0, maxOdds * 1.2]} 
             label={{ 
               value: 'Odds', 
               angle: -90, 
               position: 'insideRight', 
-              fill: '#f59e0b',
+              fill: '#A855F7',
               fontSize: smallText ? 10 : 12
             }}
           />
@@ -178,7 +178,7 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
                 name={runner}
                 yAxisId="volume"
                 stroke={standardColor}
-                strokeWidth={1.5}
+                strokeWidth={2}
                 dot={(props) => {
                   const { cx, cy, payload } = props;
                   const value = payload[runner as keyof typeof payload];
@@ -187,21 +187,22 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
                   return (
                     <g key={`dot-${runner}-${cx}-${cy}`}>
                       <rect 
-                        x={cx - 8} 
-                        y={cy - 8} 
-                        width={16} 
-                        height={16} 
+                        x={cx - 10} 
+                        y={cy - 10} 
+                        width={20} 
+                        height={20} 
                         fill={standardColor} 
-                        stroke="#999"
-                        strokeWidth={1}
+                        stroke="#FFFFFF"
+                        strokeWidth={2}
+                        rx={2}
                       />
                       <text
                         x={cx}
                         y={cy}
-                        dy={1}
+                        dy={2}
                         textAnchor="middle"
-                        fill={runnerNumber === 2 || runnerNumber === 4 || runnerNumber === 12 ? "#000" : "#fff"}
-                        fontSize={10}
+                        fill={runnerNumber === 2 || runnerNumber === 4 ? "#000000" : "#FFFFFF"}
+                        fontSize={11}
                         fontWeight="bold"
                       >
                         {value}
@@ -227,7 +228,7 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
                 yAxisId="odds"
                 stroke={standardColor}
                 strokeDasharray="5 5"
-                strokeWidth={1.5}
+                strokeWidth={2}
                 dot={false}
               />
             );
