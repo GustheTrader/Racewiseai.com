@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds } from '../utils/formatters';
@@ -37,6 +38,9 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
     const newScores: Record<number, number> = {};
     
     horses.forEach(horse => {
+      // Use Q-Model Score as the base score
+      const baseScore = horse.qModelScore || 50; // Default to 50 if no Q-Model Score
+      
       // Base factors (using mock data for demonstration)
       const factors = {
         speed: Math.random() * 100, // Mock speed rating
@@ -47,22 +51,25 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
         finalTimeRating: Math.random() * 100 // Mock final time rating
       };
 
-      // Calculate weighted score
-      const weightedScore = (
+      // Calculate weighted boost
+      const totalBoost = (
         (factors.speed * weights.speed / 100) +
         (factors.pace * weights.pace / 100) +
         (factors.closer * weights.closer / 100) +
         (factors.classLevel * weights.classLevel / 100) +
         (factors.fireNumber * weights.fireNumber / 100) +
         (factors.finalTimeRating * weights.finalTimeRating / 100)
-      ) / 6; // Average the weighted factors
+      );
 
-      // Convert score to odds (higher score = lower odds)
-      const odds = Math.max(1.1, (100 - weightedScore) / 10 + 1);
-      newOdds[horse.id] = parseFloat(odds.toFixed(2));
+      // Apply boost to base Q-Model Score (cap at 100)
+      const pModelScore = Math.max(1, Math.min(100, Math.round(baseScore + totalBoost)));
       
-      // Calculate PModel Score (1-100 scale)
-      const pModelScore = Math.max(1, Math.min(100, Math.round(weightedScore)));
+      // Convert P-Model Score to odds (higher score = lower odds, based on Q-Model odds as base)
+      const baseOdds = horse.modelOdds;
+      const scoreRatio = pModelScore / (horse.qModelScore || 50);
+      const pModelOdds = Math.max(1.1, baseOdds / scoreRatio);
+      
+      newOdds[horse.id] = parseFloat(pModelOdds.toFixed(2));
       newScores[horse.id] = pModelScore;
     });
 
@@ -107,6 +114,14 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
     }
   };
 
+  // Get odds color based on comparison with ML odds
+  const getOddsColor = (odds: number, mlOdds?: number) => {
+    if (!mlOdds) return '';
+    if (odds < mlOdds) return 'text-red-500';
+    if (odds > mlOdds) return 'text-green-500';
+    return '';
+  };
+
   // Filter out disqualified horses
   const availableHorses = horses.filter(horse => !horse.isDisqualified);
 
@@ -127,8 +142,8 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
                 <th className="px-4 py-3 text-right">ML Odds</th>
                 <th className="px-4 py-3 text-right">Q-Model Odds</th>
                 <th className="px-4 py-3 text-right">Q-Model Score</th>
-                <th className="px-4 py-3 text-right">PModel Odds</th>
-                <th className="px-4 py-3 text-right">PModel Score</th>
+                <th className="px-4 py-3 text-right">P-Model Odds</th>
+                <th className="px-4 py-3 text-right">P-Model Score</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -150,19 +165,27 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
                       <span>{horse.name}</span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono">
-                      {formatOdds(horse.liveOdds)}
+                      <span className={getOddsColor(horse.liveOdds, horse.mlOdds)}>
+                        {formatOdds(horse.liveOdds)}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono">
                       {formatOdds(horse.mlOdds || 0)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono">
-                      {formatOdds(horse.modelOdds)}
+                      <span className={getOddsColor(horse.modelOdds, horse.mlOdds)}>
+                        {formatOdds(horse.modelOdds)}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono">
                       {horse.qModelScore || 'N/A'}
                     </td>
                     <td className="px-4 py-3 text-right font-mono font-bold text-blue-400">
-                      {personalModelOdds[horse.id] ? formatOdds(personalModelOdds[horse.id]) : '-'}
+                      {personalModelOdds[horse.id] ? (
+                        <span className={getOddsColor(personalModelOdds[horse.id], horse.mlOdds)}>
+                          {formatOdds(personalModelOdds[horse.id])}
+                        </span>
+                      ) : '-'}
                     </td>
                     <td className="px-4 py-3 text-right font-mono font-bold text-green-400">
                       {personalModelScores[horse.id] || '-'}
@@ -177,7 +200,7 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
         {/* Weighting Controls */}
         <div className="p-4 border-t border-gray-800">
           <div className="mb-4">
-            <h4 className="text-white font-semibold mb-3">PModel Boost Weighting Percentages</h4>
+            <h4 className="text-white font-semibold mb-3">P-Model Boost Weighting Percentages</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {Object.entries(weights).map(([key, value]) => (
                 <div key={key} className="flex flex-col">

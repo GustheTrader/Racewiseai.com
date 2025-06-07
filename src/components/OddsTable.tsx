@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
@@ -138,6 +137,13 @@ const OddsTable: React.FC<OddsTableProps> = ({
     return <span className="text-gray-500">-</span>;
   };
 
+  const getOddsColor = (odds: number, mlOdds?: number) => {
+    if (!mlOdds) return '';
+    if (odds < mlOdds) return 'text-red-500';
+    if (odds > mlOdds) return 'text-green-500';
+    return '';
+  };
+
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th 
       className="px-4 py-3 text-left cursor-pointer hover:bg-gray-700 transition-colors select-none"
@@ -272,13 +278,17 @@ const OddsTable: React.FC<OddsTableProps> = ({
                         )}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatOdds(horse.liveOdds)}
+                        <span className={getOddsColor(horse.liveOdds, horse.mlOdds)}>
+                          {formatOdds(horse.liveOdds)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {formatOdds(horse.mlOdds || 0)}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatOdds(horse.modelOdds)}
+                        <span className={getOddsColor(horse.modelOdds, horse.mlOdds)}>
+                          {formatOdds(horse.modelOdds)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {horse.qModelWinPct ? `${horse.qModelWinPct}%` : 'N/A'}
