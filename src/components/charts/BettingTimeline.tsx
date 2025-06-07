@@ -11,6 +11,10 @@ import {
   ReferenceLine,
   Legend,
 } from 'recharts';
+import { getRunnerColorByPosition } from './constants/postPositionColors';
+import ChartTooltip from './components/ChartTooltip';
+import RunnerPositionDot from './components/RunnerPositionDot';
+import { createLegendFormatter } from './components/ChartLegendFormatter';
 
 interface BettingDataPoint {
   time: string;
@@ -49,29 +53,6 @@ interface BettingTimelineProps {
   smallText?: boolean;
 }
 
-// Enhanced vibrant post position colors
-const getRunnerColorByPosition = (position: number): string => {
-  switch (position) {
-    case 1: return "#EF4444"; // bright red
-    case 2: return "#F8FAFC"; // bright white
-    case 3: return "#3B82F6"; // bright blue
-    case 4: return "#FDE047"; // bright yellow
-    case 5: return "#22C55E"; // bright green
-    case 6: return "#1F2937"; // dark black
-    case 7: return "#FB923C"; // bright orange
-    case 8: return "#F472B6"; // bright pink
-    case 9: return "#34D399"; // bright emerald
-    case 10: return "#A855F7"; // bright purple
-    case 11: return "#A3E635"; // bright lime
-    case 12: return "#9CA3AF"; // gray
-    case 13: return "#BE123C"; // dark rose
-    case 14: return "#06B6D4"; // bright cyan
-    case 15: return "#6366F1"; // bright indigo
-    case 16: return "#F59E0B"; // bright amber
-    default: return "#3B82F6"; // bright blue (default)
-  }
-};
-
 const BettingTimeline: React.FC<BettingTimelineProps> = ({ 
   bettingData, 
   spikes, 
@@ -81,6 +62,8 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
   maxOdds,
   smallText = false
 }) => {
+  const legendFormatter = createLegendFormatter(runnerNames);
+
   return (
     <div className="h-80">
       <ResponsiveContainer width="100%" height="100%">
@@ -119,34 +102,10 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
             }}
           />
           <Tooltip 
-            contentStyle={{ 
-              backgroundColor: '#1D2133', 
-              borderColor: '#3B82F6',
-              color: '#fff',
-              fontSize: smallText ? 10 : 12
-            }} 
-            labelFormatter={(time) => `Time: ${time}`}
-            formatter={(value, name) => {
-              if (name === 'volume') return [`$${value.toLocaleString()}`, 'Bet Volume'];
-              if (name.toString().includes('Odds')) {
-                const runnerNumber = name.toString().replace('runnerOdds', '');
-                return [`${value}`, `${runnerNames[`runner${runnerNumber}` as keyof typeof runnerNames]} Odds`];
-              }
-              const runnerNumber = name.toString().replace('runner', '');
-              const runnerName = runnerNames[name as keyof typeof runnerNames] || `Runner ${runnerNumber}`;
-              return [`#${value}`, runnerName];
-            }}
+            content={<ChartTooltip runnerNames={runnerNames} smallText={smallText} />}
           />
           <Legend 
-            formatter={(value) => {
-              if (value === 'volume') return 'Bet Volume';
-              if (value.toString().includes('Odds')) {
-                const runnerNumber = value.toString().replace('runnerOdds', '');
-                return `${runnerNames[`runner${runnerNumber}` as keyof typeof runnerNames]} Odds`;
-              }
-              const runnerNumber = value.toString().replace('runner', '');
-              return runnerNames[value as keyof typeof runnerNames] || `Runner ${runnerNumber}`;
-            }}
+            formatter={legendFormatter}
             wrapperStyle={{ 
               fontSize: smallText ? 9 : 12 
             }}
@@ -166,7 +125,6 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
           
           {/* Runner position lines */}
           {Object.entries(runnerColors).map(([runner, color]) => {
-            // Extract runner number to get the correct color
             const runnerNumber = parseInt(runner.replace('runner', ''));
             const standardColor = getRunnerColorByPosition(runnerNumber);
             
@@ -185,29 +143,13 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
                   if (!value) return null;
                   
                   return (
-                    <g key={`dot-${runner}-${cx}-${cy}`}>
-                      <rect 
-                        x={cx - 10} 
-                        y={cy - 10} 
-                        width={20} 
-                        height={20} 
-                        fill={standardColor} 
-                        stroke="#FFFFFF"
-                        strokeWidth={2}
-                        rx={2}
-                      />
-                      <text
-                        x={cx}
-                        y={cy}
-                        dy={2}
-                        textAnchor="middle"
-                        fill={runnerNumber === 2 || runnerNumber === 4 ? "#000000" : "#FFFFFF"}
-                        fontSize={11}
-                        fontWeight="bold"
-                      >
-                        {value}
-                      </text>
-                    </g>
+                    <RunnerPositionDot
+                      key={`dot-${runner}-${cx}-${cy}`}
+                      cx={cx}
+                      cy={cy}
+                      value={value}
+                      runnerNumber={runnerNumber}
+                    />
                   );
                 }}
               />
@@ -239,14 +181,14 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
             <ReferenceLine 
               key={index} 
               x={spike.time} 
-              stroke="#A855F7" 
+              stroke="#C084FC" 
               strokeWidth={2} 
               strokeDasharray="3 3"
               yAxisId="volume"
               label={{
                 value: 'Spike',
                 position: 'top',
-                fill: '#A855F7',
+                fill: '#C084FC',
                 fontSize: smallText ? 9 : 12
               }}
             />
