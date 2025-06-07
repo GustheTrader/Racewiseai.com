@@ -1,4 +1,3 @@
-
 import { PoolData, ExoticPool } from '../types';
 
 // Generate pool data
@@ -10,8 +9,7 @@ export const generatePoolData = (): PoolData[] => {
     { number: 5, odds: '11', win: 33263, place: 31046, show: 22425 },
     { number: 6, odds: '19', win: 32185, place: 31512, show: 21978 },
     { number: 7, odds: '9/2', win: 321136, place: 39419, show: 39211 },
-    { number: 8, odds: '8', win: 131219, place: 89576, show: 68411 },
-    { number: 10, odds: '8', win: 131219, place: 89576, show: 68411 }
+    { number: 8, odds: '8', win: 131219, place: 89576, show: 68411 }
   ];
 };
 
