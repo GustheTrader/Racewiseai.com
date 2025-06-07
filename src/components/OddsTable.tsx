@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
@@ -143,7 +144,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center justify-between">
-        {children}
+        <span className="text-xs">{children}</span>
         {getSortIcon(field)}
       </div>
     </th>
@@ -204,11 +205,11 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <SortableHeader field="modelOdds">Q-Model Odds</SortableHeader>
                 <SortableHeader field="qModelWinPct">Q-Model Win %</SortableHeader>
                 <SortableHeader field="qModelScore">Q-Model Score</SortableHeader>
-                <SortableHeader field="difference">Difference</SortableHeader>
+                <SortableHeader field="difference">Delta</SortableHeader>
                 <SortableHeader field="jockey">Jockey</SortableHeader>
                 <SortableHeader field="trainer">Trainer</SortableHeader>
-                <th className="px-4 py-3 text-center">J/T Stats</th>
-                <th className="px-4 py-3 text-center">HC Factor</th>
+                <th className="px-4 py-3 text-center"><span className="text-xs">J/T Stats</span></th>
+                <th className="px-4 py-3 text-center"><span className="text-xs">HC Factor</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">

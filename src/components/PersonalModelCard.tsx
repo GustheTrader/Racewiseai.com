@@ -127,7 +127,7 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
                 <th className="px-4 py-3 text-right">ML Odds</th>
                 <th className="px-4 py-3 text-right">Q-Model Odds</th>
                 <th className="px-4 py-3 text-right">Q-Model Score</th>
-                <th className="px-4 py-3 text-right">Personal Model Odds</th>
+                <th className="px-4 py-3 text-right">PModel Odds</th>
                 <th className="px-4 py-3 text-right">PModel Score</th>
               </tr>
             </thead>
