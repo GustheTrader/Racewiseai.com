@@ -44,10 +44,30 @@ interface SharpBettorTimelineProps {
   horses?: Horse[];
 }
 
+// Function to create dynamic odds variations
+const createDynamicOdds = (baseOdds: number, timeIndex: number, runnerNumber: number): number => {
+  // Create unique seed for each runner to ensure consistent but different patterns
+  const runnerSeed = runnerNumber * 0.1;
+  const timeSeed = timeIndex * 0.05;
+  
+  // Use sine wave for smooth oscillations with random amplitude
+  const oscillation = Math.sin((timeIndex + runnerSeed) * 0.3) * 0.2;
+  
+  // Add some random walk behavior
+  const randomWalk = (Math.random() - 0.5) * 0.15;
+  
+  // Combine base odds with variations, ensuring minimum odds of 1.1
+  const variation = oscillation + randomWalk + (timeSeed * (Math.random() - 0.5) * 0.1);
+  return Math.max(1.1, baseOdds + variation);
+};
+
 const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, horses = [] }) => {
   // Generate runner colors and names based on actual horses data
   const runnerColors: Record<string, string> = {};
   const runnerNames: Record<string, string> = {};
+
+  // Base odds for each runner - these will be used as starting points for dynamic variations
+  const baseOddsMap: Record<string, number> = {};
 
   // Use actual horse data if available, otherwise fall back to default
   if (horses.length > 0) {
@@ -55,41 +75,46 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
       const runnerKey = `runner${horse.pp}`;
       runnerColors[runnerKey] = getRunnerColorByPosition(horse.pp);
       runnerNames[runnerKey] = horse.name;
+      // Use live odds as base if available, otherwise use a reasonable default
+      baseOddsMap[runnerKey] = horse.liveOdds || (Math.random() * 8 + 2);
     });
   } else {
     // Fallback to default horse names for demo purposes
     const defaultHorses = [
-      { pp: 1, name: "Gold Search" },
-      { pp: 2, name: "Rivalry" },
-      { pp: 3, name: "Beer With Ice" },
-      { pp: 4, name: "Quebrancho" },
-      { pp: 5, name: "Dancing Noah" },
-      { pp: 6, name: "More Than Five" },
-      { pp: 7, name: "Speed Demon" },
-      { pp: 8, name: "Pink Lightning" },
+      { pp: 1, name: "Gold Search", odds: 6.5 },
+      { pp: 2, name: "Rivalry", odds: 4.2 },
+      { pp: 3, name: "Beer With Ice", odds: 8.1 },
+      { pp: 4, name: "Quebrancho", odds: 12.0 },
+      { pp: 5, name: "Dancing Noah", odds: 5.8 },
+      { pp: 6, name: "More Than Five", odds: 3.5 },
+      { pp: 7, name: "Speed Demon", odds: 7.2 },
+      { pp: 8, name: "Pink Lightning", odds: 9.4 },
     ];
     
     defaultHorses.forEach((horse) => {
       const runnerKey = `runner${horse.pp}`;
       runnerColors[runnerKey] = getRunnerColorByPosition(horse.pp);
       runnerNames[runnerKey] = horse.name;
+      baseOddsMap[runnerKey] = horse.odds;
     });
   }
 
   console.log('SharpBettorTimeline - Generated runnerColors:', runnerColors);
   console.log('SharpBettorTimeline - Generated runnerNames:', runnerNames);
+  console.log('SharpBettorTimeline - Base odds map:', baseOddsMap);
 
-  // Enhance betting data to ensure all runners have odds data
-  const enhancedBettingData = bettingData.map(dataPoint => {
+  // Enhance betting data with dynamic odds variations
+  const enhancedBettingData = bettingData.map((dataPoint, timeIndex) => {
     const enhanced: BettingDataPoint = { ...dataPoint };
     
-    // Ensure all runners that have colors also have odds data
+    // Generate dynamic odds for all runners that have colors
     Object.keys(runnerColors).forEach(runnerKey => {
+      const runnerNumber = parseInt(runnerKey.replace('runner', ''));
       const oddsKey = `${runnerKey}Odds`;
-      if (!enhanced[oddsKey]) {
-        // Generate realistic odds data if missing
-        enhanced[oddsKey] = Math.random() * 10 + 2; // Random odds between 2 and 12
-      }
+      const baseOdds = baseOddsMap[runnerKey] || (Math.random() * 8 + 2);
+      
+      // Create dynamic odds that vary over time
+      enhanced[oddsKey] = parseFloat(createDynamicOdds(baseOdds, timeIndex, runnerNumber).toFixed(2));
     });
     
     return enhanced;
