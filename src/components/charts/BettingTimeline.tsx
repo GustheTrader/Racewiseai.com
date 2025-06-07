@@ -27,12 +27,24 @@ interface BettingDataPoint {
   runner4?: number;
   runner5?: number;
   runner6?: number;
+  runner7?: number;
+  runner8?: number;
+  runner9?: number;
+  runner10?: number;
+  runner11?: number;
+  runner12?: number;
   runner1Odds?: number;
   runner2Odds?: number;
   runner3Odds?: number;
   runner4Odds?: number;
   runner5Odds?: number;
   runner6Odds?: number;
+  runner7Odds?: number;
+  runner8Odds?: number;
+  runner9Odds?: number;
+  runner10Odds?: number;
+  runner11Odds?: number;
+  runner12Odds?: number;
 }
 
 interface RunnerNamesMap {
@@ -156,7 +168,7 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
             );
           })}
           
-          {/* Runner odds lines */}
+          {/* Runner odds lines - using consistent post position colors */}
           {Object.entries(runnerColors).map(([runner, color]) => {
             const runnerNumber = parseInt(runner.replace('runner', ''));
             const standardColor = getRunnerColorByPosition(runnerNumber);
