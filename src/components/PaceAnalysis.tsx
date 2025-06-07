@@ -49,9 +49,12 @@ const PaceAnalysis: React.FC<PaceAnalysisProps> = ({ paceData }) => {
         </div>
         
         <div className="space-y-1 mt-2">
-          {paceData.map((horse) => (
+          {paceData.map((horse, index) => (
             <div key={horse.name} className="grid grid-cols-4 gap-2 px-3 py-3 hover:bg-gray-800/30 rounded items-center">
-              <div>{horse.name}</div>
+              <div className="flex items-center">
+                <span className="text-xs text-gray-400 mr-2">PP{index + 1}</span>
+                <span>{horse.name}</span>
+              </div>
               <div className="flex justify-center">{renderPaceBars(horse.early, 'early')}</div>
               <div className="flex justify-center">{renderPaceBars(horse.middle, 'middle')}</div>
               <div className="flex justify-center">{renderPaceBars(horse.late, 'late')}</div>
