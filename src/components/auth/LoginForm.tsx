@@ -13,19 +13,19 @@ const LoginForm = () => {
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!loginEmail || !loginPassword) {
-      toast.error('Email and password are required');
+    if (!loginEmail) {
+      toast.error('Email is required');
       return;
     }
     
     setIsLoading(true);
     try {
-      await signIn(loginEmail, loginPassword);
+      // For beta, use a default password or create account automatically
+      await signIn(loginEmail, 'beta-temp-password');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -40,7 +40,7 @@ const LoginForm = () => {
   return (
     <Card className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md">
       <CardHeader className="bg-betting-darkPurple">
-        <CardTitle className="text-white">Sign In</CardTitle>
+        <CardTitle className="text-white">Beta Access - Email Only</CardTitle>
       </CardHeader>
       <form onSubmit={handleLogin}>
         <CardContent className="space-y-4">
@@ -57,16 +57,8 @@ const LoginForm = () => {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="loginPassword" className="text-gray-200">Password</Label>
-            <Input
-              id="loginPassword"
-              type="password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              disabled={isLoading}
-              className="bg-white/10 text-white border-white/20"
-            />
+          <div className="text-sm text-gray-300 bg-betting-vividPurple/20 p-3 rounded">
+            <p>🚀 Beta Program: Just enter your email to access RaceWiseAI ToolBox!</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
@@ -78,9 +70,9 @@ const LoginForm = () => {
             {isLoading ? (
               <>
                 <Loader2 size={16} className="mr-2 animate-spin" />
-                Signing In...
+                Accessing Beta...
               </>
-            ) : "Sign In"}
+            ) : "Access Beta"}
           </Button>
           
           <div className="flex items-center w-full gap-2 my-2">

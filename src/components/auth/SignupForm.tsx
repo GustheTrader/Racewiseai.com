@@ -13,22 +13,21 @@ const SignupForm = () => {
   const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [signupEmail, setSignupEmail] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
   const [signupFullName, setSignupFullName] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!signupEmail || !signupPassword) {
-      toast.error('Email and password are required');
+    if (!signupEmail) {
+      toast.error('Email is required');
       return;
     }
     
     setIsLoading(true);
     try {
-      await signUp(signupEmail, signupPassword, signupFullName);
+      // For beta, use a default password
+      await signUp(signupEmail, 'beta-temp-password', signupFullName);
       setSignupEmail('');
-      setSignupPassword('');
       setSignupFullName('');
     } catch (error) {
       console.error('Signup error:', error);
@@ -44,12 +43,12 @@ const SignupForm = () => {
   return (
     <Card className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md">
       <CardHeader className="bg-betting-darkPurple">
-        <CardTitle className="text-white">Create Account</CardTitle>
+        <CardTitle className="text-white">Join Beta Program</CardTitle>
       </CardHeader>
       <form onSubmit={handleSignup}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-gray-200">Full Name</Label>
+            <Label htmlFor="fullName" className="text-gray-200">Full Name (Optional)</Label>
             <Input
               id="fullName"
               type="text"
@@ -72,15 +71,8 @@ const SignupForm = () => {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="signupPassword" className="text-gray-200">Password</Label>
-            <Input
-              id="signupPassword"
-              type="password"
-              value={signupPassword}
-              onChange={(e) => setSignupPassword(e.target.value)}
-              className="bg-white/10 text-white border-white/20"
-            />
+          <div className="text-sm text-gray-300 bg-betting-vividPurple/20 p-3 rounded">
+            <p>🎯 Beta Access: No password needed! We'll create your account automatically.</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
@@ -92,9 +84,9 @@ const SignupForm = () => {
             {isLoading ? (
               <>
                 <Loader2 size={16} className="mr-2 animate-spin" />
-                Creating Account...
+                Joining Beta...
               </>
-            ) : "Create Account"}
+            ) : "Join Beta Program"}
           </Button>
           
           <div className="flex items-center w-full gap-2 my-2">

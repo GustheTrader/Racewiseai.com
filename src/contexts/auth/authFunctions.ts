@@ -1,18 +1,43 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
 export const signIn = async (email: string, password: string): Promise<void> => {
   try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // For beta, try to sign in first, if fails, auto-create account
+    let { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
-    if (error) {
+    if (error && error.message.includes('Invalid login credentials')) {
+      // User doesn't exist, create account automatically for beta
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: email.split('@')[0], // Use email prefix as default name
+          },
+        },
+      });
+      
+      if (signUpError) {
+        toast.error(signUpError.message);
+        throw signUpError;
+      }
+      
+      // Try to sign in again after signup
+      const { error: secondSignInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (secondSignInError) {
+        toast.error(secondSignInError.message);
+        throw secondSignInError;
+      }
+      
+      toast.success('Welcome to the beta! Account created and signed in successfully');
+    } else if (error) {
       toast.error(error.message);
       throw error;
+    } else {
+      toast.success('Signed in successfully');
     }
-    
-    toast.success('Signed in successfully');
   } catch (error) {
     console.error('Sign in error:', error);
     throw error;
@@ -26,7 +51,7 @@ export const signUp = async (email: string, password: string, fullName: string):
       password,
       options: {
         data: {
-          full_name: fullName,
+          full_name: fullName || email.split('@')[0],
         },
       },
     });
@@ -36,7 +61,7 @@ export const signUp = async (email: string, password: string, fullName: string):
       throw error;
     }
     
-    toast.success('Signed up successfully. Please check your email for verification.');
+    toast.success('Welcome to the beta! Please check your email for verification.');
   } catch (error) {
     console.error('Sign up error:', error);
     throw error;
