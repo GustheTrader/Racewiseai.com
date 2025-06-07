@@ -128,7 +128,7 @@ const SignupForm = () => {
               Yahoo
             </Button>
           </div>
-        </CardContent>
+        </CardFooter>
       </form>
     </Card>
   );
