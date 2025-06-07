@@ -112,11 +112,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           postPositions={data.trackProfile.postPositions}
           timings={data.trackProfile.timings}
         />
-        <HorseComments comments={data.horseComments} />
+        <HorseComments comments={data.horseComments} horses={availableHorses} />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <PaceAnalysis paceData={data.paceData} />
+        <PaceAnalysis paceData={data.paceData} horses={availableHorses} />
         <TrainingFigures figures={data.trainingFigures} />
       </div>
       
