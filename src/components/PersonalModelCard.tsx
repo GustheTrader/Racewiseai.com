@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds } from '../utils/formatters';
@@ -61,8 +60,8 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
         (factors.finalTimeRating * weights.finalTimeRating / 100)
       );
 
-      // Apply boost to base Q-Model Score (cap at 100)
-      const pModelScore = Math.max(1, Math.min(100, Math.round(baseScore + totalBoost)));
+      // Apply boost to base Q-Model Score (allow up to 199, minimum 1)
+      const pModelScore = Math.max(1, Math.min(199, Math.round(baseScore + totalBoost)));
       
       // Convert P-Model Score to odds (higher score = lower odds, based on Q-Model odds as base)
       const baseOdds = horse.modelOdds;
