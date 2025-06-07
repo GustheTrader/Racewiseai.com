@@ -36,6 +36,7 @@ interface BettingDataPoint {
   runner10Odds?: number;
   runner11Odds?: number;
   runner12Odds?: number;
+  [key: string]: any; // Allow dynamic properties
 }
 
 interface SharpBettorTimelineProps {
@@ -80,15 +81,14 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
 
   // Enhance betting data to ensure all runners have odds data
   const enhancedBettingData = bettingData.map(dataPoint => {
-    const enhanced = { ...dataPoint };
+    const enhanced: BettingDataPoint = { ...dataPoint };
     
     // Ensure all runners that have colors also have odds data
     Object.keys(runnerColors).forEach(runnerKey => {
-      const oddsKey = `${runnerKey}Odds` as keyof typeof dataPoint;
+      const oddsKey = `${runnerKey}Odds`;
       if (!enhanced[oddsKey]) {
         // Generate realistic odds data if missing
-        const runnerNumber = parseInt(runnerKey.replace('runner', ''));
-        enhanced[oddsKey as keyof typeof enhanced] = Math.random() * 10 + 2; // Random odds between 2 and 12
+        enhanced[oddsKey] = Math.random() * 10 + 2; // Random odds between 2 and 12
       }
     });
     
