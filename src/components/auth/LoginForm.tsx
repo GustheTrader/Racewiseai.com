@@ -24,8 +24,9 @@ const LoginForm = () => {
     
     setIsLoading(true);
     try {
-      // For beta, use a default password or create account automatically
+      // For beta, use email-only authentication with default password
       await signIn(loginEmail, 'beta-temp-password');
+      setLoginEmail('');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -54,11 +55,12 @@ const LoginForm = () => {
               onChange={(e) => setLoginEmail(e.target.value)}
               disabled={isLoading}
               className="bg-white/10 text-white border-white/20 placeholder:text-gray-400"
+              required
             />
           </div>
           
           <div className="text-sm text-gray-300 bg-betting-vividPurple/20 p-3 rounded">
-            <p>🚀 Beta Program: Just enter your email to access RaceWiseAI ToolBox!</p>
+            <p>🚀 <strong>Beta Program:</strong> Just enter your email to access RaceWiseAI ToolBox! No password required.</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
