@@ -8,9 +8,11 @@ import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Loader2, Apple, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useNavigate } from 'react-router-dom';
 
 const SignupForm = () => {
   const { signUp } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [signupEmail, setSignupEmail] = useState('');
   const [signupFullName, setSignupFullName] = useState('');
@@ -25,10 +27,12 @@ const SignupForm = () => {
     
     setIsLoading(true);
     try {
-      // For beta, use a default password
+      // For beta, use a default password and auto-redirect to dashboard
       await signUp(signupEmail, 'beta-temp-password', signupFullName);
       setSignupEmail('');
       setSignupFullName('');
+      // Redirect to dashboard after successful signup
+      navigate('/');
     } catch (error) {
       console.error('Signup error:', error);
     } finally {
@@ -73,7 +77,7 @@ const SignupForm = () => {
           </div>
           
           <div className="text-sm text-gray-300 bg-betting-vividPurple/20 p-3 rounded">
-            <p>🎯 <strong>Simple Beta Access:</strong> Just enter your email - no password needed! We'll set everything up for you automatically.</p>
+            <p>🎯 <strong>Instant Access:</strong> Enter your email and get immediate access to RaceWiseAI ToolBox! No password needed.</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
