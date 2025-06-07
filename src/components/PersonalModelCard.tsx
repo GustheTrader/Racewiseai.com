@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds } from '../utils/formatters';
@@ -21,19 +20,21 @@ interface WeightingFactors {
 
 const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
   const [weights, setWeights] = useState<WeightingFactors>({
-    speed: 16.7,
-    pace: 16.7,
-    closer: 16.7,
-    classLevel: 16.7,
-    fireNumber: 16.7,
-    finalTimeRating: 16.5
+    speed: 0,
+    pace: 0,
+    closer: 0,
+    classLevel: 0,
+    fireNumber: 0,
+    finalTimeRating: 0
   });
 
   const [personalModelOdds, setPersonalModelOdds] = useState<Record<number, number>>({});
+  const [personalModelScores, setPersonalModelScores] = useState<Record<number, number>>({});
 
   // Calculate personal model odds based on weights
   const calculatePersonalModelOdds = () => {
     const newOdds: Record<number, number> = {};
+    const newScores: Record<number, number> = {};
     
     horses.forEach(horse => {
       // Base factors (using mock data for demonstration)
@@ -59,9 +60,14 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
       // Convert score to odds (higher score = lower odds)
       const odds = Math.max(1.1, (100 - weightedScore) / 10 + 1);
       newOdds[horse.id] = parseFloat(odds.toFixed(2));
+      
+      // Calculate PModel Score (1-100 scale)
+      const pModelScore = Math.max(1, Math.min(100, Math.round(weightedScore)));
+      newScores[horse.id] = pModelScore;
     });
 
     setPersonalModelOdds(newOdds);
+    setPersonalModelScores(newScores);
   };
 
   const handleWeightChange = (factor: keyof WeightingFactors, value: number) => {
@@ -73,12 +79,12 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
 
   const resetWeights = () => {
     setWeights({
-      speed: 16.7,
-      pace: 16.7,
-      closer: 16.7,
-      classLevel: 16.7,
-      fireNumber: 16.7,
-      finalTimeRating: 16.5
+      speed: 0,
+      pace: 0,
+      closer: 0,
+      classLevel: 0,
+      fireNumber: 0,
+      finalTimeRating: 0
     });
   };
 
@@ -120,7 +126,9 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
                 <th className="px-4 py-3 text-right">Live Odds</th>
                 <th className="px-4 py-3 text-right">ML Odds</th>
                 <th className="px-4 py-3 text-right">Q-Model Odds</th>
+                <th className="px-4 py-3 text-right">Q-Model Score</th>
                 <th className="px-4 py-3 text-right">Personal Model Odds</th>
+                <th className="px-4 py-3 text-right">PModel Score</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -150,8 +158,14 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
                     <td className="px-4 py-3 text-right font-mono">
                       {formatOdds(horse.modelOdds)}
                     </td>
+                    <td className="px-4 py-3 text-right font-mono">
+                      {horse.qModelScore || 'N/A'}
+                    </td>
                     <td className="px-4 py-3 text-right font-mono font-bold text-blue-400">
                       {personalModelOdds[horse.id] ? formatOdds(personalModelOdds[horse.id]) : '-'}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono font-bold text-green-400">
+                      {personalModelScores[horse.id] || '-'}
                     </td>
                   </tr>
                 );
@@ -163,7 +177,7 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
         {/* Weighting Controls */}
         <div className="p-4 border-t border-gray-800">
           <div className="mb-4">
-            <h4 className="text-white font-semibold mb-3">Model Weighting Percentages</h4>
+            <h4 className="text-white font-semibold mb-3">PModel Boost Weighting Percentages</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {Object.entries(weights).map(([key, value]) => (
                 <div key={key} className="flex flex-col">

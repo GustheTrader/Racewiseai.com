@@ -12,7 +12,7 @@ interface OddsTableProps {
   selectedHorseIds?: Set<number>;
 }
 
-type SortField = 'pp' | 'name' | 'liveOdds' | 'mlOdds' | 'modelOdds' | 'qModelWinPct' | 'difference' | 'jockey' | 'trainer';
+type SortField = 'pp' | 'name' | 'liveOdds' | 'mlOdds' | 'modelOdds' | 'qModelWinPct' | 'qModelScore' | 'difference' | 'jockey' | 'trainer';
 type SortDirection = 'asc' | 'desc';
 
 // Map to convert post position to standard colors
@@ -203,6 +203,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <SortableHeader field="mlOdds">ML Odds</SortableHeader>
                 <SortableHeader field="modelOdds">Q-Model Odds</SortableHeader>
                 <SortableHeader field="qModelWinPct">Q-Model Win %</SortableHeader>
+                <SortableHeader field="qModelScore">Q-Model Score</SortableHeader>
                 <SortableHeader field="difference">Difference</SortableHeader>
                 <SortableHeader field="jockey">Jockey</SortableHeader>
                 <SortableHeader field="trainer">Trainer</SortableHeader>
@@ -280,6 +281,9 @@ const OddsTable: React.FC<OddsTableProps> = ({
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {horse.qModelWinPct ? `${horse.qModelWinPct}%` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {horse.qModelScore || 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-right font-mono flex justify-end items-center">
                         <span className={getChangeClass(horse.difference)}>

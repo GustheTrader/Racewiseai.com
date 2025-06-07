@@ -8,6 +8,7 @@ export interface Horse {
   mlOdds?: number;
   modelOdds: number;
   qModelWinPct?: number;
+  qModelScore?: number; // New field for QModel Score (1-100)
   difference: number;
   jockey?: string;
   trainer?: string;
