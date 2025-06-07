@@ -76,6 +76,10 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
 }) => {
   const legendFormatter = createLegendFormatter(runnerNames);
 
+  console.log('BettingTimeline - runnerColors:', runnerColors);
+  console.log('BettingTimeline - runnerNames:', runnerNames);
+  console.log('BettingTimeline - sample data point:', bettingData[0]);
+
   return (
     <div className="h-80">
       <ResponsiveContainer width="100%" height="100%">
@@ -172,18 +176,22 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
           {Object.entries(runnerColors).map(([runner, color]) => {
             const runnerNumber = parseInt(runner.replace('runner', ''));
             const standardColor = getRunnerColorByPosition(runnerNumber);
+            const oddsDataKey = `${runner}Odds`;
+            
+            console.log(`Rendering odds line for ${runner} (PP${runnerNumber}) with color ${standardColor}`);
             
             return (
               <Line
                 key={`${runner}Odds`}
                 type="monotone"
-                dataKey={`${runner}Odds`}
+                dataKey={oddsDataKey}
                 name={`${runner}Odds`}
                 yAxisId="odds"
                 stroke={standardColor}
                 strokeDasharray="5 5"
                 strokeWidth={2}
                 dot={false}
+                connectNulls={false}
               />
             );
           })}

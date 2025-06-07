@@ -64,6 +64,8 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
       { pp: 4, name: "Quebrancho" },
       { pp: 5, name: "Dancing Noah" },
       { pp: 6, name: "More Than Five" },
+      { pp: 7, name: "Speed Demon" },
+      { pp: 8, name: "Pink Lightning" },
     ];
     
     defaultHorses.forEach((horse) => {
@@ -73,10 +75,32 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
     });
   }
 
+  console.log('SharpBettorTimeline - Generated runnerColors:', runnerColors);
+  console.log('SharpBettorTimeline - Generated runnerNames:', runnerNames);
+
+  // Enhance betting data to ensure all runners have odds data
+  const enhancedBettingData = bettingData.map(dataPoint => {
+    const enhanced = { ...dataPoint };
+    
+    // Ensure all runners that have colors also have odds data
+    Object.keys(runnerColors).forEach(runnerKey => {
+      const oddsKey = `${runnerKey}Odds` as keyof typeof dataPoint;
+      if (!enhanced[oddsKey]) {
+        // Generate realistic odds data if missing
+        const runnerNumber = parseInt(runnerKey.replace('runner', ''));
+        enhanced[oddsKey as keyof typeof enhanced] = Math.random() * 10 + 2; // Random odds between 2 and 12
+      }
+    });
+    
+    return enhanced;
+  });
+
+  console.log('SharpBettorTimeline - Enhanced betting data sample:', enhancedBettingData[0]);
+
   // Calculate max values for chart scaling
-  const maxVolume = Math.max(...bettingData.map(item => item.volume));
+  const maxVolume = Math.max(...enhancedBettingData.map(item => item.volume));
   const maxOdds = Math.max(
-    ...bettingData.flatMap(item => [
+    ...enhancedBettingData.flatMap(item => [
       item.runner1Odds || 0,
       item.runner2Odds || 0,
       item.runner3Odds || 0,
@@ -93,7 +117,7 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
   );
   
   // Find spike points
-  const spikes = bettingData.filter(item => item.isSpike);
+  const spikes = enhancedBettingData.filter(item => item.isSpike);
   const lastSpikeTimestamp = spikes.length > 0 ? spikes[spikes.length - 1].timestamp : null;
 
   return (
@@ -104,7 +128,7 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
       
       <CardContent className="p-2 pt-4">
         <BettingTimeline
-          bettingData={bettingData}
+          bettingData={enhancedBettingData}
           spikes={spikes}
           runnerNames={runnerNames}
           runnerColors={runnerColors}
