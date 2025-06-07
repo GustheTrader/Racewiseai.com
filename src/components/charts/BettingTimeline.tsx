@@ -238,14 +238,14 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
             <ReferenceLine 
               key={index} 
               x={spike.time} 
-              stroke="#F87171" 
+              stroke="#A855F7" 
               strokeWidth={2} 
               strokeDasharray="3 3"
               yAxisId="volume"
               label={{
                 value: 'Spike',
                 position: 'top',
-                fill: '#F87171',
+                fill: '#A855F7',
                 fontSize: smallText ? 9 : 12
               }}
             />
