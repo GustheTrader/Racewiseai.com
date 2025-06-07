@@ -20,7 +20,7 @@ const LivePaddockComments: React.FC<LivePaddockCommentsProps> = ({ comments }) =
       </CardHeader>
       
       <CardContent className="p-4">
-        <div className="overflow-y-auto max-h-[300px] scrollbar-on-left pr-2">
+        <div className="overflow-y-auto max-h-[510px] scrollbar-on-left pr-2">
           <div className="space-y-4">
             {comments.map((comment, index) => (
               <div key={index} className="p-3 bg-gray-800/40 rounded-lg hover:bg-gray-800/60 transition-colors">
