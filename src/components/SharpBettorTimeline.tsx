@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import BettingTimeline from './charts/BettingTimeline';
 import ChartInfoPanel from './charts/ChartInfoPanel';
@@ -44,24 +44,47 @@ interface SharpBettorTimelineProps {
   horses?: Horse[];
 }
 
-// Function to create dynamic odds variations
-const createDynamicOdds = (baseOdds: number, timeIndex: number, runnerNumber: number): number => {
+// Enhanced function to create more complex dynamic odds variations with multiple wave patterns
+const createDynamicOdds = (baseOdds: number, timeIndex: number, runnerNumber: number, waveOffset: number = 0): number => {
   // Create unique seed for each runner to ensure consistent but different patterns
-  const runnerSeed = runnerNumber * 0.1;
-  const timeSeed = timeIndex * 0.05;
+  const runnerSeed = runnerNumber * 0.15;
+  const timeSeed = (timeIndex + waveOffset) * 0.08;
   
-  // Use sine wave for smooth oscillations with random amplitude
-  const oscillation = Math.sin((timeIndex + runnerSeed) * 0.3) * 0.2;
+  // Primary sine wave for main oscillation
+  const primaryWave = Math.sin((timeIndex + waveOffset + runnerSeed) * 0.4) * 0.25;
   
-  // Add some random walk behavior
-  const randomWalk = (Math.random() - 0.5) * 0.15;
+  // Secondary cosine wave for complexity
+  const secondaryWave = Math.cos((timeIndex + waveOffset + runnerSeed) * 0.6) * 0.15;
   
-  // Combine base odds with variations, ensuring minimum odds of 1.1
-  const variation = oscillation + randomWalk + (timeSeed * (Math.random() - 0.5) * 0.1);
-  return Math.max(1.1, baseOdds + variation);
+  // Tertiary wave for micro-fluctuations
+  const tertiaryWave = Math.sin((timeIndex + waveOffset + runnerSeed) * 1.2) * 0.08;
+  
+  // Random walk behavior with less volatility
+  const randomWalk = (Math.random() - 0.5) * 0.12;
+  
+  // Market pressure simulation (occasional drift)
+  const marketPressure = Math.sin((timeIndex + waveOffset) * 0.1) * 0.1;
+  
+  // Combine all variations
+  const totalVariation = primaryWave + secondaryWave + tertiaryWave + randomWalk + marketPressure + (timeSeed * (Math.random() - 0.5) * 0.08);
+  
+  // Ensure minimum odds of 1.1 and add some trending behavior
+  return Math.max(1.1, baseOdds + totalVariation);
+};
+
+// Function to generate new time point
+const generateNextTimePoint = (currentTime: string): string => {
+  const [hours, minutes] = currentTime.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes + 1; // Advance by 1 minute
+  const newHours = Math.floor(totalMinutes / 60) % 24;
+  const newMinutes = totalMinutes % 60;
+  return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
 };
 
 const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, horses = [] }) => {
+  const [timeOffset, setTimeOffset] = useState(0);
+  const [enhancedData, setEnhancedData] = useState<BettingDataPoint[]>([]);
+  
   // Generate runner colors and names based on actual horses data
   const runnerColors: Record<string, string> = {};
   const runnerNames: Record<string, string> = {};
@@ -99,33 +122,55 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
     });
   }
 
+  // Update enhanced data with time progression and wave animations
+  useEffect(() => {
+    const updateData = () => {
+      const updatedData = bettingData.map((dataPoint, timeIndex) => {
+        const enhanced: BettingDataPoint = { 
+          ...dataPoint,
+          // Update time to show progression
+          time: timeIndex === bettingData.length - 1 ? 
+            generateNextTimePoint(dataPoint.time) : dataPoint.time,
+          timestamp: dataPoint.timestamp + (timeOffset * 60000) // Add offset in milliseconds
+        };
+        
+        // Generate dynamic odds for all runners that have colors
+        Object.keys(runnerColors).forEach(runnerKey => {
+          const runnerNumber = parseInt(runnerKey.replace('runner', ''));
+          const oddsKey = `${runnerKey}Odds`;
+          const baseOdds = baseOddsMap[runnerKey] || (Math.random() * 8 + 2);
+          
+          // Create dynamic odds that vary over time with wave offset
+          enhanced[oddsKey] = parseFloat(createDynamicOdds(baseOdds, timeIndex, runnerNumber, timeOffset).toFixed(2));
+        });
+        
+        return enhanced;
+      });
+      
+      setEnhancedData(updatedData);
+    };
+
+    updateData();
+  }, [timeOffset, bettingData, runnerColors, baseOddsMap]);
+
+  // Time progression effect - updates every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeOffset(prev => prev + 1);
+    }, 3000); // Update every 3 seconds for slow movement
+
+    return () => clearInterval(interval);
+  }, []);
+
   console.log('SharpBettorTimeline - Generated runnerColors:', runnerColors);
   console.log('SharpBettorTimeline - Generated runnerNames:', runnerNames);
   console.log('SharpBettorTimeline - Base odds map:', baseOddsMap);
-
-  // Enhance betting data with dynamic odds variations
-  const enhancedBettingData = bettingData.map((dataPoint, timeIndex) => {
-    const enhanced: BettingDataPoint = { ...dataPoint };
-    
-    // Generate dynamic odds for all runners that have colors
-    Object.keys(runnerColors).forEach(runnerKey => {
-      const runnerNumber = parseInt(runnerKey.replace('runner', ''));
-      const oddsKey = `${runnerKey}Odds`;
-      const baseOdds = baseOddsMap[runnerKey] || (Math.random() * 8 + 2);
-      
-      // Create dynamic odds that vary over time
-      enhanced[oddsKey] = parseFloat(createDynamicOdds(baseOdds, timeIndex, runnerNumber).toFixed(2));
-    });
-    
-    return enhanced;
-  });
-
-  console.log('SharpBettorTimeline - Enhanced betting data sample:', enhancedBettingData[0]);
+  console.log('SharpBettorTimeline - Enhanced betting data sample:', enhancedData[0]);
 
   // Calculate max values for chart scaling
-  const maxVolume = Math.max(...enhancedBettingData.map(item => item.volume));
+  const maxVolume = Math.max(...enhancedData.map(item => item.volume));
   const maxOdds = Math.max(
-    ...enhancedBettingData.flatMap(item => [
+    ...enhancedData.flatMap(item => [
       item.runner1Odds || 0,
       item.runner2Odds || 0,
       item.runner3Odds || 0,
@@ -142,7 +187,7 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
   );
   
   // Find spike points
-  const spikes = enhancedBettingData.filter(item => item.isSpike);
+  const spikes = enhancedData.filter(item => item.isSpike);
   const lastSpikeTimestamp = spikes.length > 0 ? spikes[spikes.length - 1].timestamp : null;
 
   return (
@@ -153,7 +198,7 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
       
       <CardContent className="p-2 pt-4">
         <BettingTimeline
-          bettingData={enhancedBettingData}
+          bettingData={enhancedData}
           spikes={spikes}
           runnerNames={runnerNames}
           runnerColors={runnerColors}
