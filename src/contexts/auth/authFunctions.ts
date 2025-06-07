@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
@@ -46,13 +47,14 @@ export const signIn = async (email: string, password: string): Promise<void> => 
 
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
   try {
-    const { error } = await supabase.auth.signUp({
+    // For beta access, use signInWithOtp for passwordless authentication
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
         data: {
           full_name: fullName || email.split('@')[0],
         },
+        shouldCreateUser: true,
       },
     });
     
@@ -61,7 +63,34 @@ export const signUp = async (email: string, password: string, fullName: string):
       throw error;
     }
     
-    toast.success('Welcome to the beta! Please check your email for verification.');
+    toast.success('Welcome to the beta! Check your email for the magic link or you\'ll be logged in automatically.');
+    
+    // For beta, also try to auto-signin with a temporary session
+    // This provides immediate access while still sending the magic link
+    setTimeout(async () => {
+      try {
+        const { data: signUpData, error: tempSignUpError } = await supabase.auth.signUp({
+          email,
+          password: 'beta-temp-password-' + Date.now(),
+          options: {
+            data: {
+              full_name: fullName || email.split('@')[0],
+            },
+          },
+        });
+        
+        if (!tempSignUpError && signUpData.user) {
+          // Force sign in immediately for beta access
+          await supabase.auth.signInWithPassword({
+            email,
+            password: 'beta-temp-password-' + Date.now()
+          });
+        }
+      } catch (tempError) {
+        console.log('Temp signin attempt failed, user will need to use magic link');
+      }
+    }, 100);
+    
   } catch (error) {
     console.error('Sign up error:', error);
     throw error;

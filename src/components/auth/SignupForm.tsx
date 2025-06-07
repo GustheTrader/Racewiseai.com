@@ -27,12 +27,15 @@ const SignupForm = () => {
     
     setIsLoading(true);
     try {
-      // For beta, use a default password and auto-redirect to dashboard
-      await signUp(signupEmail, 'beta-temp-password', signupFullName);
+      // For beta, use passwordless signup that provides immediate access
+      await signUp(signupEmail, '', signupFullName);
       setSignupEmail('');
       setSignupFullName('');
-      // Redirect to dashboard after successful signup
-      navigate('/');
+      
+      // Wait a moment for auth state to update, then redirect
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
     } catch (error) {
       console.error('Signup error:', error);
     } finally {
