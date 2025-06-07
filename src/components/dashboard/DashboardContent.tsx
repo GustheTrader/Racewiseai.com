@@ -47,6 +47,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     return <EmptyStatePrompt />;
   }
 
+  // Filter available horses (non-disqualified) to ensure consistency across all components
+  const availableHorses = data.horses.filter((horse: any) => !horse.isDisqualified);
+
   return (
     <>
       <RaceNavBar 
@@ -80,23 +83,26 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
       
-      {/* Sharp Bettor Timeline with smaller Sharp Movement card */}
+      {/* Sharp Bettor Timeline with smaller Sharp Movement card - pass horses data */}
       <div className="grid grid-cols-6 gap-4 mb-4">
         <div className="col-span-5">
-          <SharpBettorTimeline bettingData={data.bettingTimeline} />
+          <SharpBettorTimeline 
+            bettingData={data.bettingTimeline} 
+            horses={availableHorses}
+          />
         </div>
         <div className="col-span-1">
           <SharpMovement movements={data.sharpMovements} />
         </div>
       </div>
 
-      {/* Ticket Bet Generator - moved below Sharp Bettor Timeline */}
+      {/* Ticket Bet Generator - moved below Sharp Bettor Timeline - use available horses */}
       <div className="grid grid-cols-1 gap-4 mb-4">
-        <TicketBetGenerator horses={data.horses} />
+        <TicketBetGenerator horses={availableHorses} />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <LiveStreamingOdds horses={data.horses} />
+        <LiveStreamingOdds horses={availableHorses} />
         <PoolsPanel poolData={data.poolData} exoticPools={data.exoticPools} />
       </div>
       

@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import BettingTimeline from './charts/BettingTimeline';
 import ChartInfoPanel from './charts/ChartInfoPanel';
 import RunnerLegend from './charts/RunnerLegend';
+import { Horse } from '../utils/types';
+import { getRunnerColorByPosition } from './charts/constants/postPositionColors';
 
 interface BettingDataPoint {
   time: string;
@@ -16,38 +18,60 @@ interface BettingDataPoint {
   runner4?: number;
   runner5?: number;
   runner6?: number;
+  runner7?: number;
+  runner8?: number;
+  runner9?: number;
+  runner10?: number;
+  runner11?: number;
+  runner12?: number;
   runner1Odds?: number;
   runner2Odds?: number;
   runner3Odds?: number;
   runner4Odds?: number;
   runner5Odds?: number;
   runner6Odds?: number;
+  runner7Odds?: number;
+  runner8Odds?: number;
+  runner9Odds?: number;
+  runner10Odds?: number;
+  runner11Odds?: number;
+  runner12Odds?: number;
 }
 
 interface SharpBettorTimelineProps {
   bettingData: BettingDataPoint[];
+  horses?: Horse[];
 }
 
-const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData }) => {
-  // Post position colors (industry standard)
-  const runnerColors = {
-    runner1: "#DC2626", // red-600
-    runner2: "#FFFFFF", // white
-    runner3: "#2563EB", // blue-600
-    runner4: "#FACC15", // yellow-400
-    runner5: "#16A34A", // green-600
-    runner6: "#000000", // black
-  };
+const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, horses = [] }) => {
+  // Generate runner colors and names based on actual horses data
+  const runnerColors: Record<string, string> = {};
+  const runnerNames: Record<string, string> = {};
 
-  // Runner names
-  const runnerNames = {
-    runner1: "Gold Search",
-    runner2: "Rivalry",
-    runner3: "Beer With Ice",
-    runner4: "Quebrancho",
-    runner5: "Dancing Noah",
-    runner6: "More Than Five",
-  };
+  // Use actual horse data if available, otherwise fall back to default
+  if (horses.length > 0) {
+    horses.forEach((horse) => {
+      const runnerKey = `runner${horse.pp}`;
+      runnerColors[runnerKey] = getRunnerColorByPosition(horse.pp);
+      runnerNames[runnerKey] = horse.name;
+    });
+  } else {
+    // Fallback to default horse names for demo purposes
+    const defaultHorses = [
+      { pp: 1, name: "Gold Search" },
+      { pp: 2, name: "Rivalry" },
+      { pp: 3, name: "Beer With Ice" },
+      { pp: 4, name: "Quebrancho" },
+      { pp: 5, name: "Dancing Noah" },
+      { pp: 6, name: "More Than Five" },
+    ];
+    
+    defaultHorses.forEach((horse) => {
+      const runnerKey = `runner${horse.pp}`;
+      runnerColors[runnerKey] = getRunnerColorByPosition(horse.pp);
+      runnerNames[runnerKey] = horse.name;
+    });
+  }
 
   // Calculate max values for chart scaling
   const maxVolume = Math.max(...bettingData.map(item => item.volume));
@@ -59,6 +83,12 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData }
       item.runner4Odds || 0,
       item.runner5Odds || 0,
       item.runner6Odds || 0,
+      item.runner7Odds || 0,
+      item.runner8Odds || 0,
+      item.runner9Odds || 0,
+      item.runner10Odds || 0,
+      item.runner11Odds || 0,
+      item.runner12Odds || 0,
     ])
   );
   
