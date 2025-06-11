@@ -131,13 +131,13 @@ const AuthPage = () => {
               Professional Horse Racing Analytics Platform
             </p>
             <p className="text-lg text-orange-300">
-              Join thousands of successful handicappers using our advanced AI-powered toolbox
+              Join hundreds of professional and recreational handicappers using our advanced AI-Tools
             </p>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Tools 1-3 */}
+          {/* Left Column - Tools 1-3 and #10 */}
           <div className="space-y-4">
             {tools.slice(0, 3).map((tool) => (
               <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
@@ -158,25 +158,23 @@ const AuthPage = () => {
               </Card>
             ))}
 
-            {/* Tools 8-10 */}
-            {tools.slice(7, 10).map((tool) => (
-              <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <Badge variant="secondary" className="bg-orange-500 text-white shrink-0">
-                      #{tool.id}
-                    </Badge>
-                    <div className="text-orange-400 shrink-0 mt-1">
-                      {tool.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
-                      <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
-                    </div>
+            {/* Tool #10 moved to left column */}
+            <Card className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
+              <CardContent className="p-4">
+                <div className="flex items-start space-x-3">
+                  <Badge variant="secondary" className="bg-orange-500 text-white shrink-0">
+                    #10
+                  </Badge>
+                  <div className="text-orange-400 shrink-0 mt-1">
+                    <Star className="h-6 w-6" />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <div>
+                    <h3 className="font-semibold text-white mb-2">Quantum Rankings</h3>
+                    <p className="text-sm text-gray-300 leading-relaxed">AI-powered horse rankings across multiple tracks and races using quantum computing algorithms for superior predictive accuracy.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Center Column - Signup Form */}
@@ -186,9 +184,9 @@ const AuthPage = () => {
             </div>
           </div>
 
-          {/* Right Column - Tools 4-7 */}
+          {/* Right Column - Tools 4-9 */}
           <div className="space-y-4">
-            {tools.slice(3, 7).map((tool) => (
+            {tools.slice(3, 9).map((tool) => (
               <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-3">
