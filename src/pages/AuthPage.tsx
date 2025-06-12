@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -112,51 +113,6 @@ const AuthPage = () => {
         <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-gradient-to-r from-orange-400/30 to-purple-400/30 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-gradient-to-r from-purple-400/30 to-blue-400/30 rounded-full blur-xl animate-bounce"></div>
         
-        {/* Horse and Jockey Silhouettes */}
-        <div className="absolute top-20 left-1/4 opacity-20">
-          <svg width="120" height="80" viewBox="0 0 120 80" className="stroke-white stroke-2 fill-transparent">
-            {/* Horse silhouette */}
-            <path d="M10 70 Q5 65 8 60 Q12 55 18 58 Q25 50 35 52 Q45 48 55 52 Q65 45 75 50 Q85 45 95 48 Q100 40 110 45 Q115 50 110 55 Q105 60 100 65 L95 70 Q90 72 85 70 Q80 68 75 70 Q70 72 65 70 Q60 68 55 70 Q50 72 45 70 Q40 68 35 70 Q30 72 25 70 Q20 68 15 70 Q10 58 5 60 Z" />
-            {/* Jockey silhouette */}
-            <circle cx="70" cy="35" r="8" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M70 43 Q65 45 68 50 Q72 48 75 50 Q78 45 73 43" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M65 50 L60 65 M75 50 L80 65" className="stroke-white stroke-2" />
-          </svg>
-        </div>
-
-        <div className="absolute top-32 right-1/4 opacity-15 animate-pulse">
-          <svg width="100" height="70" viewBox="0 0 100 70" className="stroke-white stroke-2 fill-transparent">
-            {/* Horse silhouette running */}
-            <path d="M5 60 Q2 55 5 50 Q10 45 15 48 Q20 40 30 42 Q40 38 50 42 Q60 35 70 40 Q80 35 90 38 Q95 30 100 35 Q102 40 98 45 Q94 50 90 55 L85 60 Q80 62 75 60 Q70 58 65 60 Q60 62 55 60 Q50 58 45 60 Q40 62 35 60 Q30 58 25 60 Q20 62 15 60 Q10 58 5 60 Z" />
-            {/* Jockey silhouette in racing position */}
-            <circle cx="60" cy="25" r="6" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M60 31 Q55 33 58 38 Q62 36 65 38 Q68 33 63 31" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M55 38 L50 50 M65 38 L70 50" className="stroke-white stroke-2" />
-          </svg>
-        </div>
-
-        <div className="absolute bottom-32 left-1/6 opacity-10 animate-bounce">
-          <svg width="140" height="90" viewBox="0 0 140 90" className="stroke-white stroke-2 fill-transparent">
-            {/* Larger horse silhouette */}
-            <path d="M15 80 Q10 75 13 70 Q17 65 23 68 Q30 60 40 62 Q50 58 60 62 Q70 55 80 60 Q90 55 100 58 Q110 50 120 55 Q125 60 120 65 Q115 70 110 75 L105 80 Q100 82 95 80 Q90 78 85 80 Q80 82 75 80 Q70 78 65 80 Q60 82 55 80 Q50 78 45 80 Q40 82 35 80 Q30 78 25 80 Q20 82 15 80 Z" />
-            {/* Jockey silhouette */}
-            <circle cx="80" cy="45" r="10" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M80 55 Q75 57 78 62 Q82 60 85 62 Q88 57 83 55" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M75 62 L70 75 M85 62 L90 75" className="stroke-white stroke-2" />
-          </svg>
-        </div>
-
-        <div className="absolute top-1/2 right-1/6 opacity-20 animate-pulse delay-1000">
-          <svg width="110" height="75" viewBox="0 0 110 75" className="stroke-white stroke-2 fill-transparent">
-            {/* Horse galloping silhouette */}
-            <path d="M8 65 Q3 60 6 55 Q11 50 17 53 Q24 45 34 47 Q44 43 54 47 Q64 40 74 45 Q84 40 94 43 Q99 35 109 40 Q114 45 109 50 Q104 55 99 60 L94 65 Q89 67 84 65 Q79 63 74 65 Q69 67 64 65 Q59 63 54 65 Q49 67 44 65 Q39 63 34 65 Q29 67 24 65 Q19 63 14 65 Q9 67 8 65 Z" />
-            {/* Jockey in racing stance */}
-            <circle cx="69" cy="30" r="7" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M69 37 Q64 39 67 44 Q71 42 74 44 Q77 39 72 37" className="stroke-white stroke-2 fill-transparent" />
-            <path d="M64 44 L59 57 M74 44 L79 57" className="stroke-white stroke-2" />
-          </svg>
-        </div>
-
         {/* Floating particles */}
         {[...Array(15)].map((_, i) => (
           <div
