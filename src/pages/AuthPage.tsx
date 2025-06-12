@@ -133,10 +133,7 @@ const AuthPage = () => {
           <AuthHeader />
           
           <div className="mt-6 max-w-4xl mx-auto">
-            <p className="text-2xl text-orange-300 mb-4">
-              Professional Horse Racing Analytics Platform
-            </p>
-            <p className="text-2xl text-orange-300">
+            <p className="text-4xl text-orange-300">
               Join hundreds of professional and recreational handicappers using our advanced AI-Tools
             </p>
           </div>
