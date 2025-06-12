@@ -16,7 +16,8 @@ import {
   Users, 
   MessageSquare, 
   Database, 
-  Star 
+  Star,
+  Bot
 } from 'lucide-react';
 
 const AuthPage = () => {
@@ -90,6 +91,12 @@ const AuthPage = () => {
       icon: <Star className="h-6 w-6" />,
       title: "Quantum Rankings",
       description: "AI-powered horse rankings across multiple tracks and races using quantum computing algorithms for superior predictive accuracy."
+    },
+    {
+      id: 11,
+      icon: <Bot className="h-6 w-6" />,
+      title: "ML Ensemble & AI Analyst",
+      description: "4-weighted ensemble model: CatBoost (40%), LightGBM (30%), RNN (20%), XGBoost (10%) with RL optimization. AI Race Agent provides real-time analysis with up-to-the-minute odds data and strategic insights."
     }
   ];
 
@@ -137,7 +144,7 @@ const AuthPage = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Tools 1-3 and #10 */}
+          {/* Left Column - Tools 1-3, #10, and #11 */}
           <div className="space-y-4">
             {tools.slice(0, 3).map((tool) => (
               <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
@@ -158,7 +165,7 @@ const AuthPage = () => {
               </Card>
             ))}
 
-            {/* Tool #10 moved to left column */}
+            {/* Tool #10 */}
             <Card className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
@@ -171,6 +178,24 @@ const AuthPage = () => {
                   <div>
                     <h3 className="font-semibold text-white mb-2">Quantum Rankings</h3>
                     <p className="text-sm text-gray-300 leading-relaxed">AI-powered horse rankings across multiple tracks and races using quantum computing algorithms for superior predictive accuracy.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tool #11 */}
+            <Card className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
+              <CardContent className="p-4">
+                <div className="flex items-start space-x-3">
+                  <Badge variant="secondary" className="bg-orange-500 text-white shrink-0">
+                    #11
+                  </Badge>
+                  <div className="text-orange-400 shrink-0 mt-1">
+                    <Bot className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white mb-2">ML Ensemble & AI Analyst</h3>
+                    <p className="text-sm text-gray-300 leading-relaxed">4-weighted ensemble model: CatBoost (40%), LightGBM (30%), RNN (20%), XGBoost (10%) with RL optimization. AI Race Agent provides real-time analysis with up-to-the-minute odds data and strategic insights.</p>
                   </div>
                 </div>
               </CardContent>

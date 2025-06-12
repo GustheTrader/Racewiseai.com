@@ -48,12 +48,12 @@ const SignupForm = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-orange-400/20 to-yellow-500/20 border-orange-400/60 backdrop-blur-md shadow-2xl transform hover:scale-105 transition-all duration-300">
+    <Card className="bg-betting-darkPurple/80 border-4 border-orange-400 backdrop-blur-md shadow-2xl transform hover:scale-105 transition-all duration-300">
       <CardHeader className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-t-lg">
         <CardTitle className="text-white text-center text-xl font-bold">Join Beta Program</CardTitle>
       </CardHeader>
       <form onSubmit={handleSignup}>
-        <CardContent className="space-y-4 bg-white/10 backdrop-blur-sm">
+        <CardContent className="space-y-4 bg-betting-darkPurple/90 backdrop-blur-sm">
           <div className="space-y-2">
             <Label htmlFor="fullName" className="text-gray-100 font-semibold">Full Name (Optional)</Label>
             <Input
@@ -83,7 +83,7 @@ const SignupForm = () => {
             <p>🎯 <strong>Instant Access:</strong> Enter your email and get immediate access to RaceWiseAI ToolBox! No password needed.</p>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col gap-4 bg-white/5 backdrop-blur-sm rounded-b-lg">
+        <CardFooter className="flex flex-col gap-4 bg-betting-darkPurple/90 backdrop-blur-sm rounded-b-lg">
           <Button 
             type="submit"
             disabled={isLoading}
