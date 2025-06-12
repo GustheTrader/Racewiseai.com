@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -134,10 +133,10 @@ const AuthPage = () => {
           <AuthHeader />
           
           <div className="mt-6 max-w-4xl mx-auto">
-            <p className="text-xl text-gray-200 mb-4">
+            <p className="text-2xl text-orange-300 mb-4">
               Professional Horse Racing Analytics Platform
             </p>
-            <p className="text-lg text-orange-300">
+            <p className="text-2xl text-orange-300">
               Join hundreds of professional and recreational handicappers using our advanced AI-Tools
             </p>
           </div>
