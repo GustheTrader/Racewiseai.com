@@ -134,7 +134,7 @@ const AuthPage = () => {
           <AuthHeader />
           
           <div className="mt-6 max-w-4xl mx-auto">
-            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-betting-tertiaryPurple via-betting-darkPurple via-yellow-400 to-orange-500 bg-clip-text drop-shadow-lg">
+            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-blue-900 via-betting-tertiaryPurple via-yellow-400 to-orange-500 bg-clip-text drop-shadow-lg">
               Join hundreds of professional and recreational handicappers using our advanced AI-Tools
             </p>
           </div>
