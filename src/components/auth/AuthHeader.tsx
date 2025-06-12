@@ -11,12 +11,6 @@ const AuthHeader = () => {
           className="h-28 object-contain"
         />
       </div>
-      <h1 className="text-3xl font-bold text-white">
-        Racewise 5D-Odds-Pulse with AI Quantum Rankings
-      </h1>
-      <p className="text-orange-500 mt-2 font-bold">
-        and RaceWise Agent Analyst
-      </p>
     </header>
   );
 };
