@@ -34,23 +34,19 @@ export const generatePick3Combos = (): PickCombination[] => {
   return [
     {
       combination: "3-5-2",
-      probability: 23.4,
-      payout: "$87.60"
+      races: "1-3"
     },
     {
       combination: "3-5-7",
-      probability: 18.2,
-      payout: "$126.40"
+      races: "2-4"
     },
     {
       combination: "3-1-2",
-      probability: 15.7,
-      payout: "$154.20"
+      races: "3-5"
     },
     {
       combination: "5-1-2",
-      probability: 12.1,
-      payout: "$211.80"
+      races: "1-3"
     }
   ];
 };

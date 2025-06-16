@@ -132,8 +132,7 @@ export interface ValuePick {
 
 export interface PickCombination {
   combination: string;
-  probability: number;
-  payout: string;
+  races: string;
 }
 
 // Updated type for PDF extraction data to match our database schema
