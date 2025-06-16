@@ -76,6 +76,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
+      {/* AI Agents Card - moved above Odds Table */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <AIAgentsCard />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 mb-4">
         <OddsTable 
           horses={data.horses} 
@@ -85,14 +90,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
-      {/* Personal Model Card - Added below Odds Table */}
+      {/* Personal Model Card - moved below Odds Table */}
       <div className="grid grid-cols-1 gap-4 mb-4">
         <PersonalModelCard horses={data.horses} />
-      </div>
-
-      {/* AI Agents Card - Added below Personal Model Card */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        <AIAgentsCard />
       </div>
       
       {/* Sharp Bettor Timeline with smaller Sharp Movement card - adjusted grid to make Sharp Movement 15% wider */}
