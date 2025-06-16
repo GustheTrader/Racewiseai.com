@@ -206,6 +206,47 @@
   .pp-16 {
     @apply bg-amber-500; /* Amber */
   }
+
+  /* Futuristic effects */
+  .futuristic-glow {
+    @apply shadow-lg shadow-purple-500/25;
+  }
+  
+  .cyber-border {
+    position: relative;
+  }
+  
+  .cyber-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(45deg, #8B5CF6, #3B82F6, #8B5CF6);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask-composite: xor;
+  }
+  
+  .holographic {
+    background: linear-gradient(
+      45deg,
+      rgba(139, 92, 246, 0.1),
+      rgba(59, 130, 246, 0.1),
+      rgba(139, 92, 246, 0.1)
+    );
+    background-size: 200% 200%;
+    animation: holographic-shift 3s ease-in-out infinite;
+  }
+  
+  @keyframes holographic-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }
 
 @layer components {
@@ -232,5 +273,35 @@
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(30, 64, 175, 0.6) rgba(0, 0, 0, 0.2);
+  }
+
+  /* Futuristic card animations */
+  .futuristic-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .futuristic-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.8), transparent);
+    transition: left 0.5s;
+  }
+  
+  .futuristic-card:hover::before {
+    left: 100%;
+  }
+  
+  .futuristic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.4);
   }
 }
