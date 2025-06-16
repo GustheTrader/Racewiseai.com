@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import OddsTable from '../OddsTable';
 import LiveStreamingOdds from '../LiveStreamingOdds';
@@ -15,6 +16,7 @@ import AIThorianValue from '../AIThorianValue';
 import TicketBetGenerator from '../TicketBetGenerator';
 import EmptyStatePrompt from './EmptyStatePrompt';
 import PersonalModelCard from '../PersonalModelCard';
+import AIAgentsCard from '../ai-agents/AIAgentsCard';
 
 interface DashboardContentProps {
   data: any;
@@ -86,6 +88,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       {/* Personal Model Card - Added below Odds Table */}
       <div className="grid grid-cols-1 gap-4 mb-4">
         <PersonalModelCard horses={data.horses} />
+      </div>
+
+      {/* AI Agents Card - Added below Personal Model Card */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <AIAgentsCard />
       </div>
       
       {/* Sharp Bettor Timeline with smaller Sharp Movement card - adjusted grid to make Sharp Movement 15% wider */}
