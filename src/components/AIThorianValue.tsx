@@ -8,6 +8,8 @@ interface PickCombination {
 }
 
 interface ValuePick {
+  race: number;
+  pp: number;
   horse: string;
   odds: string;
   value: number;
@@ -29,7 +31,9 @@ const AIThorianValue: React.FC<AIThorianValueProps> = ({ valuePicks, pick3Combos
       <CardContent className="p-4">
         <div className="mb-6">
           <h3 className="text-md font-bold text-betting-skyBlue mb-2">Live EV Longshots</h3>
-          <div className="grid grid-cols-4 text-xs font-semibold text-gray-400 mb-1 px-2">
+          <div className="grid grid-cols-6 text-xs font-semibold text-gray-400 mb-1 px-2">
+            <div>Race</div>
+            <div>PP</div>
             <div>Horse</div>
             <div>Odds</div>
             <div>Value %</div>
@@ -37,7 +41,9 @@ const AIThorianValue: React.FC<AIThorianValueProps> = ({ valuePicks, pick3Combos
           </div>
           <div className="space-y-2">
             {valuePicks.map((pick, index) => (
-              <div key={index} className="grid grid-cols-4 bg-gray-800/40 p-2 rounded-md text-sm">
+              <div key={index} className="grid grid-cols-6 bg-gray-800/40 p-2 rounded-md text-sm">
+                <div className="font-medium">{pick.race}</div>
+                <div className="font-medium">{pick.pp}</div>
                 <div className="font-medium">{pick.horse}</div>
                 <div className="font-mono">{pick.odds}</div>
                 <div className={`${pick.value > 15 ? 'text-betting-positive' : pick.value > 5 ? 'text-yellow-400' : 'text-gray-200'}`}>
@@ -59,14 +65,14 @@ const AIThorianValue: React.FC<AIThorianValueProps> = ({ valuePicks, pick3Combos
         <div>
           <h3 className="text-md font-bold text-betting-skyBlue mb-2">Pick 3 Rolling Combinations</h3>
           <div className="grid grid-cols-2 text-xs font-semibold text-gray-400 mb-1 px-2">
-            <div>Combination</div>
             <div>Races</div>
+            <div>Combination</div>
           </div>
           <div className="space-y-2">
             {pick3Combos.map((combo, index) => (
               <div key={index} className="grid grid-cols-2 bg-gray-800/40 p-2 rounded-md text-sm">
-                <div className="font-medium">{combo.combination}</div>
                 <div className="font-mono">{combo.races}</div>
+                <div className="font-medium">{combo.combination}</div>
               </div>
             ))}
           </div>

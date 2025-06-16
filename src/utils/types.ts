@@ -124,6 +124,8 @@ export interface PaddockComment {
 }
 
 export interface ValuePick {
+  race: number;
+  pp: number;
   horse: string;
   odds: string;
   value: number;
