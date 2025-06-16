@@ -4,6 +4,7 @@ import { PoolData, ExoticPool, Horse } from '../utils/types';
 import { formatCurrency } from '../utils/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { getRunnerColorByPosition } from './charts/constants/postPositionColors';
+import { Coins } from 'lucide-react';
 
 interface PoolsPanelProps {
   poolData: PoolData[];
@@ -22,13 +23,13 @@ const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools, horses =
 
   const renderTotals = () => (
     <div className="mt-4">
-      <div className="grid grid-cols-6 gap-2 px-3 py-2 bg-gray-800/50 rounded text-gray-300 text-sm">
-        <div>#</div>
-        <div>Horse</div>
-        <div className="text-center">ODDS</div>
-        <div className="text-center">WIN</div>
-        <div className="text-center">PLACE</div>
-        <div className="text-center">SHOW</div>
+      <div className="grid grid-cols-6 gap-2 px-3 py-2 bg-gradient-to-r from-gray-800/80 to-gray-900/60 backdrop-blur-sm rounded-lg text-gray-300 text-sm border border-white/10">
+        <div className="font-medium">#</div>
+        <div className="font-medium">Horse</div>
+        <div className="text-center font-medium">ODDS</div>
+        <div className="text-center font-medium">WIN</div>
+        <div className="text-center font-medium">PLACE</div>
+        <div className="text-center font-medium">SHOW</div>
       </div>
       
       <div className="space-y-1 mt-2">
@@ -38,22 +39,24 @@ const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools, horses =
           const textColor = pool.number === 2 || pool.number === 4 || pool.number === 12 ? "text-black" : "text-white";
           
           return (
-            <div key={pool.number} className="grid grid-cols-6 gap-2 px-3 py-2 hover:bg-gray-800/30 rounded">
-              <div className="flex items-center">
+            <div key={pool.number} className="grid grid-cols-6 gap-2 px-3 py-2 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10 rounded-xl transition-all duration-300 group border border-transparent hover:border-purple-500/20 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="flex items-center relative z-10">
                 <div 
-                  className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded mr-2"
+                  className="w-6 h-6 flex items-center justify-center border border-gray-500/50 rounded mr-2 backdrop-blur-sm shadow-lg"
                   style={{ backgroundColor: ppColor }}
                 >
                   <span className={`text-xs font-bold ${textColor}`}>{pool.number}</span>
                 </div>
               </div>
-              <div className="text-sm">
+              <div className="text-sm relative z-10 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent font-medium">
                 {horse ? horse.name : `Horse ${pool.number}`}
               </div>
-              <div className="text-center">{pool.odds}</div>
-              <div className="text-center">{formatCurrency(pool.win)}</div>
-              <div className="text-center">{formatCurrency(pool.place)}</div>
-              <div className="text-center">{formatCurrency(pool.show)}</div>
+              <div className="text-center relative z-10 font-mono">{pool.odds}</div>
+              <div className="text-center relative z-10 font-mono">{formatCurrency(pool.win)}</div>
+              <div className="text-center relative z-10 font-mono">{formatCurrency(pool.place)}</div>
+              <div className="text-center relative z-10 font-mono">{formatCurrency(pool.show)}</div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
             </div>
           );
         })}
@@ -61,9 +64,11 @@ const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools, horses =
       
       <div className="mt-6 space-y-1">
         {exoticPools.map((exotic) => (
-          <div key={exotic.name} className="flex justify-between px-3 py-2 hover:bg-gray-800/30 rounded">
-            <div className="text-blue-400">{exotic.name}</div>
-            <div>{formatCurrency(exotic.amount)}</div>
+          <div key={exotic.name} className="flex justify-between px-3 py-2 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10 rounded-xl transition-all duration-300 group border border-transparent hover:border-purple-500/20 backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="text-blue-400 relative z-10 font-medium bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{exotic.name}</div>
+            <div className="relative z-10 font-mono">{formatCurrency(exotic.amount)}</div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
           </div>
         ))}
       </div>
@@ -77,20 +82,26 @@ const PoolsPanel: React.FC<PoolsPanelProps> = ({ poolData, exoticPools, horses =
   );
   
   return (
-    <Card className="border-4 border-betting-tertiaryPurple shadow-xl bg-betting-darkPurple overflow-hidden">
-      <CardHeader className="bg-purple-header px-4 py-3">
-        <CardTitle className="text-lg font-semibold text-white">Pool Data</CardTitle>
+    <Card className="group overflow-hidden h-full transform transition-all duration-500 hover:scale-[1.02] animate-fade-in">
+      <CardHeader className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 backdrop-blur-sm px-4 py-3 border-b border-purple-500/30">
+        <CardTitle className="text-lg font-bold text-white flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl backdrop-blur-sm border border-white/10">
+            <Coins className="h-5 w-5 text-purple-300" />
+          </div>
+          Pool Data
+          <div className="ml-auto w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-400/50"></div>
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="p-0">
-        <div className="flex border-b border-gray-800">
+        <div className="flex border-b border-gray-800/50">
           {(['POOLS', 'PROBABLES', 'WILL PAYS', 'TOTALS'] as const).map((tab) => (
             <button
               key={tab}
-              className={`flex-1 px-4 py-3 text-center ${
+              className={`flex-1 px-4 py-3 text-center transition-all duration-300 ${
                 activeTab === tab 
-                  ? 'bg-blue-600 text-white font-medium' 
-                  : 'text-gray-400 hover:bg-gray-800/50'
+                  ? 'bg-gradient-to-r from-blue-600/80 to-purple-600/80 text-white font-medium backdrop-blur-sm shadow-lg border-b-2 border-blue-400' 
+                  : 'text-gray-400 hover:bg-gradient-to-r hover:from-gray-800/50 hover:to-gray-900/30 hover:text-white backdrop-blur-sm'
               }`}
               onClick={() => setActiveTab(tab)}
             >
