@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { TrendingDown, TrendingUp, AlertCircle, Loader2, Eye, EyeOff, ChevronUp, ChevronDown } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertCircle, Loader2, Eye, EyeOff, ChevronUp, ChevronDown, BarChart3 } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 interface OddsTableProps {
@@ -157,21 +157,27 @@ const OddsTable: React.FC<OddsTableProps> = ({
   );
 
   return (
-    <Card className="border-4 border-betting-tertiaryPurple shadow-xl bg-betting-darkPurple overflow-hidden w-full">
-      <CardHeader className="bg-purple-header px-4 py-3 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg font-semibold text-white">Odds Table</CardTitle>
-        {isLoading && (
-          <div className="flex items-center text-white">
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <span className="text-sm">Loading data...</span>
+    <Card className="group overflow-hidden h-full transform transition-all duration-500 hover:scale-[1.01] animate-fade-in">
+      <CardHeader className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 backdrop-blur-sm px-4 py-3 border-b border-purple-500/30">
+        <CardTitle className="text-lg font-bold text-white flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl backdrop-blur-sm border border-white/10">
+            <BarChart3 className="h-5 w-5 text-purple-300" />
           </div>
-        )}
+          Odds Table
+          <div className="ml-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse shadow-lg shadow-purple-400/50"></div>
+          {isLoading && (
+            <div className="flex items-center text-white ml-2">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <span className="text-sm">Loading data...</span>
+            </div>
+          )}
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="p-0">
         {/* Collapsed horses displayed as PP buttons */}
         {collapsedHorsesData.length > 0 && (
-          <div className="px-4 py-2 bg-gray-800/30 border-b border-gray-700">
+          <div className="px-4 py-2 bg-gradient-to-r from-gray-800/40 to-gray-900/30 border-b border-gray-700/50 backdrop-blur-sm">
             <div className="flex flex-wrap gap-2">
               <span className="text-sm text-gray-400 mr-2">Collapsed:</span>
               {collapsedHorsesData.map((horse) => {
@@ -182,11 +188,11 @@ const OddsTable: React.FC<OddsTableProps> = ({
                   <button
                     key={horse.id}
                     onClick={() => toggleHorseCollapse(horse.id)}
-                    className="flex items-center space-x-1 px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 transition-colors"
+                    className="flex items-center space-x-1 px-2 py-1 rounded bg-gradient-to-r from-gray-700/60 to-gray-600/60 hover:from-gray-600/60 hover:to-gray-500/60 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-purple-500/30"
                     title={`Click to expand ${horse.name}`}
                   >
                     <div 
-                      className="w-5 h-5 flex items-center justify-center border border-gray-500 rounded"
+                      className="w-5 h-5 flex items-center justify-center border border-gray-500/50 rounded backdrop-blur-sm shadow-lg"
                       style={{ backgroundColor: ppColor }}
                     >
                       <span className={`text-xs font-bold ${textColor}`}>{horse.pp}</span>
@@ -202,7 +208,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-gray-800 to-gray-900 text-gray-200">
+              <tr className="bg-gradient-to-r from-gray-800/80 to-gray-900/60 text-gray-200 backdrop-blur-sm">
                 <th className="px-4 py-3 text-left w-8"></th>
                 <SortableHeader field="pp">PP</SortableHeader>
                 <SortableHeader field="name">Horse</SortableHeader>
@@ -218,7 +224,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <th className="px-4 py-3 text-center"><span className="text-xs">HC Factor</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-gray-800/30">
               {isLoading ? (
                 <tr>
                   <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
@@ -246,32 +252,33 @@ const OddsTable: React.FC<OddsTableProps> = ({
                   return (
                     <tr 
                       key={horse.id}
-                      className={`${horse.irregularBetting ? 'bg-red-900/20' : ''} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isSelected ? 'bg-yellow-900/30 border-l-4 border-yellow-500' : ''}`}
+                      className={`${horse.irregularBetting ? 'bg-gradient-to-r from-red-900/20 to-red-800/10' : 'hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10'} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isSelected ? 'bg-gradient-to-r from-yellow-900/30 to-amber-900/20 border-l-4 border-yellow-500' : ''} group/row relative overflow-hidden`}
                     >
-                      <td className="px-2 py-3 text-center">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"></div>
+                      <td className="px-2 py-3 text-center relative z-10">
                         <button
                           onClick={() => toggleHorseCollapse(horse.id)}
-                          className="text-gray-400 hover:text-white transition-colors"
+                          className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-gray-700/30"
                           title={isCollapsed ? "Expand horse" : "Collapse horse"}
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-3 text-left relative z-10">
                         <div 
-                          className="w-6 h-6 flex items-center justify-center border border-gray-500"
+                          className="w-6 h-6 flex items-center justify-center border border-gray-500/50 backdrop-blur-sm shadow-lg"
                           style={{ backgroundColor: ppColor }}
                         >
                           <span className={`text-xs font-bold ${textColor}`}>{horse.pp}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-left flex items-center space-x-2">
+                      <td className="px-4 py-3 text-left flex items-center space-x-2 relative z-10">
                         {horse.isFavorite && (
-                          <span className="h-2 w-2 rounded-full bg-red-500 inline-block"></span>
+                          <span className="h-2 w-2 rounded-full bg-gradient-to-r from-red-500 to-red-400 inline-block animate-pulse shadow-lg shadow-red-500/50"></span>
                         )}
-                        <span>{horse.name}</span>
+                        <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent font-medium">{horse.name}</span>
                         {horse.irregularBetting && (
-                          <Badge variant="destructive" className="ml-2 bg-red-500 text-white text-xs flex items-center gap-1 px-2 py-0.5">
+                          <Badge variant="destructive" className="ml-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs flex items-center gap-1 px-2 py-0.5 border border-red-400/30">
                             <AlertCircle className="h-3 w-3" />
                             <span>Irregular</span>
                           </Badge>
@@ -325,6 +332,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                       <td className="px-4 py-3 text-center">
                         {getHandicappingFactorDisplay(horse.handicappingFactor)}
                       </td>
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400/50 to-transparent transform scale-x-0 group-hover/row:scale-x-100 transition-transform duration-500"></div>
                     </tr>
                   );
                 })
