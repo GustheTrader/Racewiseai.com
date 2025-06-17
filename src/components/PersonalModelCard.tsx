@@ -128,7 +128,7 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
   return (
     <Card className="group overflow-hidden h-full transform transition-all duration-500 hover:scale-[1.01] animate-fade-in">
       <CardHeader className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 backdrop-blur-sm px-4 py-3 border-b border-purple-500/30">
-        <CardTitle className="text-lg font-bold text-white flex items-center gap-3">
+        <CardTitle className="text-base font-bold text-white flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl backdrop-blur-sm border border-white/10">
             <Bot className="h-5 w-5 text-purple-300" />
           </div>
@@ -144,14 +144,14 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-gray-800/80 to-gray-900/60 text-gray-200 backdrop-blur-sm">
-                  <th className="px-4 py-3 text-left">PP</th>
-                  <th className="px-4 py-3 text-left">Horse</th>
-                  <th className="px-4 py-3 text-right">Live Odds</th>
-                  <th className="px-4 py-3 text-right">ML Odds</th>
-                  <th className="px-4 py-3 text-right">Q-Model Odds</th>
-                  <th className="px-4 py-3 text-right">Q-Model Score</th>
-                  <th className="px-4 py-3 text-right">P-Model Odds</th>
-                  <th className="px-4 py-3 text-right">P-Model Score</th>
+                  <th className="px-4 py-3 text-left text-xs">PP</th>
+                  <th className="px-4 py-3 text-left text-xs">Horse</th>
+                  <th className="px-4 py-3 text-right text-xs">Live Odds</th>
+                  <th className="px-4 py-3 text-right text-xs">ML Odds</th>
+                  <th className="px-4 py-3 text-right text-xs">Q-Model Odds</th>
+                  <th className="px-4 py-3 text-right text-xs">Q-Model Score</th>
+                  <th className="px-4 py-3 text-right text-xs">P-Model Odds</th>
+                  <th className="px-4 py-3 text-right text-xs">P-Model Score</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/30">

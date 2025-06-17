@@ -210,7 +210,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-gray-800/80 to-gray-900/60 text-gray-200 backdrop-blur-sm">
-                <th className="px-4 py-3 text-center w-8"><span className="text-xs">View</span></th>
+                <th className="px-4 py-3 text-center w-16"><span className="text-xs">View</span></th>
                 <SortableHeader field="pp">PP</SortableHeader>
                 <SortableHeader field="name">Horse</SortableHeader>
                 <SortableHeader field="liveOdds">Live Odds</SortableHeader>
@@ -256,7 +256,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                       className={`${horse.irregularBetting ? 'bg-gradient-to-r from-red-900/20 to-red-800/10' : 'hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10'} ${highlightUpdates ? 'transition-all duration-500' : ''} ${isSelected ? 'bg-gradient-to-r from-yellow-900/30 to-amber-900/20 border-l-4 border-yellow-500' : ''} group/row relative overflow-hidden`}
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"></div>
-                      <td className="px-2 py-3 text-center relative z-10">
+                      <td className="px-4 py-3 text-center relative z-10">
                         <button
                           onClick={() => toggleHorseCollapse(horse.id)}
                           className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-gray-700/30"
