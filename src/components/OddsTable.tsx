@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -125,6 +124,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                   horse={horse}
                   highlightUpdates={highlightUpdates}
                   isSelected={selectedHorseIds.has(horse.id)}
+                  isCollapsed={collapsedHorses.has(horse.id)}
                   onToggleCollapse={toggleHorseCollapse}
                 />
               ))}
