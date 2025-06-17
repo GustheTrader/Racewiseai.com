@@ -228,7 +228,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
             <tbody className="divide-y divide-gray-800/30">
               {isLoading ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="h-8 w-8 animate-spin mb-2" />
                       <span>Fetching latest odds data...</span>
@@ -237,7 +237,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 </tr>
               ) : visibleHorses.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
                   </td>
                 </tr>
