@@ -76,11 +76,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
-      {/* AI Agents Card - moved above Odds Table */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        <AIAgentsCard />
-      </div>
-
       <div className="grid grid-cols-1 gap-4 mb-4">
         <OddsTable 
           horses={data.horses} 
@@ -90,7 +85,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
-      {/* Personal Model Card - moved below Odds Table */}
+      {/* AI Agents Card - moved to position 2 below Odds Table */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <AIAgentsCard />
+      </div>
+
+      {/* Personal Model Card - moved below AI Agents */}
       <div className="grid grid-cols-1 gap-4 mb-4">
         <PersonalModelCard horses={data.horses} />
       </div>

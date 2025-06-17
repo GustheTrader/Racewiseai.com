@@ -4,7 +4,7 @@ import { Horse } from '../utils/types';
 import { formatOdds } from '../utils/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calculator, Bot } from 'lucide-react';
+import { Calculator, Bot, Eye, EyeOff } from 'lucide-react';
 
 interface PersonalModelCardProps {
   horses: Horse[];
@@ -31,6 +31,19 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
 
   const [personalModelOdds, setPersonalModelOdds] = useState<Record<number, number>>({});
   const [personalModelScores, setPersonalModelScores] = useState<Record<number, number>>({});
+  const [collapsedHorses, setCollapsedHorses] = useState<Set<number>>(new Set());
+
+  const toggleHorseCollapse = (horseId: number) => {
+    setCollapsedHorses(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(horseId)) {
+        newSet.delete(horseId);
+      } else {
+        newSet.add(horseId);
+      }
+      return newSet;
+    });
+  };
 
   // Calculate personal model odds based on weights
   const calculatePersonalModelOdds = () => {
@@ -122,8 +135,10 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
     return '';
   };
 
-  // Filter out disqualified horses
+  // Filter out disqualified horses and separate visible from collapsed
   const availableHorses = horses.filter(horse => !horse.isDisqualified);
+  const visibleHorses = availableHorses.filter(horse => !collapsedHorses.has(horse.id));
+  const collapsedHorsesData = availableHorses.filter(horse => collapsedHorses.has(horse.id));
 
   return (
     <Card className="group overflow-hidden h-full transform transition-all duration-500 hover:scale-[1.01] animate-fade-in">
@@ -140,10 +155,29 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
       <CardContent className="p-0 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="relative z-10">
+          {/* Collapsed horses bar */}
+          {collapsedHorsesData.length > 0 && (
+            <div className="px-4 py-2 bg-gray-800/50 border-b border-gray-700/50">
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs text-gray-400">Collapsed horses:</span>
+                {collapsedHorsesData.map((horse) => (
+                  <button
+                    key={horse.id}
+                    onClick={() => toggleHorseCollapse(horse.id)}
+                    className="text-xs px-2 py-1 bg-gray-700/50 hover:bg-gray-600/50 rounded transition-colors"
+                  >
+                    {horse.pp} - {horse.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-gray-800/80 to-gray-900/60 text-gray-200 backdrop-blur-sm">
+                  <th className="px-4 py-3 text-center w-16"><span className="text-xs">View</span></th>
                   <th className="px-4 py-3 text-left text-xs">PP</th>
                   <th className="px-4 py-3 text-left text-xs">Horse</th>
                   <th className="px-4 py-3 text-right text-xs">Live Odds</th>
@@ -155,13 +189,23 @@ const PersonalModelCard: React.FC<PersonalModelCardProps> = ({ horses }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/30">
-                {availableHorses.map((horse) => {
+                {visibleHorses.map((horse) => {
                   const ppColor = getPostPositionColor(horse.pp);
                   const textColor = horse.pp === 2 || horse.pp === 4 || horse.pp === 12 ? "text-black" : "text-white";
+                  const isCollapsed = collapsedHorses.has(horse.id);
                   
                   return (
                     <tr key={horse.id} className="hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10 transition-all duration-300 group/row relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"></div>
+                      <td className="px-4 py-3 text-center relative z-10">
+                        <button onClick={() => toggleHorseCollapse(horse.id)} className="rounded-full p-1 bg-gray-800/50 group-hover:bg-gray-600/50 transition-colors duration-300">
+                          {isCollapsed ? (
+                            <EyeOff className="h-4 w-4 text-gray-400 group-hover:text-gray-300 transition-colors duration-300" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400 group-hover:text-gray-300 transition-colors duration-300" />
+                          )}
+                        </button>
+                      </td>
                       <td className="px-4 py-3 text-left relative z-10">
                         <div 
                           className="w-6 h-6 flex items-center justify-center border border-gray-500/50 backdrop-blur-sm shadow-lg"
