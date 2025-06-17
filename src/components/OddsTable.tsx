@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Horse } from '../utils/types';
 import { formatOdds, getChangeClass, formatDifference } from '../utils/formatters';
@@ -209,7 +210,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-gray-800/80 to-gray-900/60 text-gray-200 backdrop-blur-sm">
-                <th className="px-4 py-3 text-left w-8"></th>
+                <th className="px-4 py-3 text-center w-8"><span className="text-xs">View</span></th>
                 <SortableHeader field="pp">PP</SortableHeader>
                 <SortableHeader field="name">Horse</SortableHeader>
                 <SortableHeader field="liveOdds">Live Odds</SortableHeader>
@@ -227,7 +228,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
             <tbody className="divide-y divide-gray-800/30">
               {isLoading ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="h-8 w-8 animate-spin mb-2" />
                       <span>Fetching latest odds data...</span>
@@ -236,7 +237,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 </tr>
               ) : visibleHorses.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={13} className="px-4 py-8 text-center text-gray-400">
                     No odds data available for this race
                   </td>
                 </tr>
@@ -284,26 +285,26 @@ const OddsTable: React.FC<OddsTableProps> = ({
                           </Badge>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-mono relative z-10">
                         <span className={getOddsColor(horse.liveOdds, horse.mlOdds)}>
                           {formatOdds(horse.liveOdds)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-mono relative z-10">
                         {formatOdds(horse.mlOdds || 0)}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-mono relative z-10">
                         <span className={getOddsColor(horse.modelOdds, horse.mlOdds)}>
                           {formatOdds(horse.modelOdds)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-mono relative z-10">
                         {horse.qModelWinPct ? `${horse.qModelWinPct}%` : 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="px-4 py-3 text-right font-mono relative z-10">
                         {horse.qModelScore || 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono flex justify-end items-center">
+                      <td className="px-4 py-3 text-right font-mono flex justify-end items-center relative z-10">
                         <span className={getChangeClass(horse.difference)}>
                           {formatDifference(horse.difference)}
                         </span>
@@ -313,13 +314,13 @@ const OddsTable: React.FC<OddsTableProps> = ({
                           <TrendingUp className="h-4 w-4 ml-1 text-betting-negative" />
                         ) : null}
                       </td>
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-3 text-left relative z-10">
                         {horse.jockey || 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-left">
+                      <td className="px-4 py-3 text-left relative z-10">
                         {horse.trainer || 'N/A'}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-center relative z-10">
                         <div className="flex items-center justify-center space-x-2">
                           <span className="text-xs">{horse.jockeyWinPct || '0'}%</span>
                           <span className="text-gray-400">/</span>
@@ -329,7 +330,7 @@ const OddsTable: React.FC<OddsTableProps> = ({
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-center relative z-10">
                         {getHandicappingFactorDisplay(horse.handicappingFactor)}
                       </td>
                       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400/50 to-transparent transform scale-x-0 group-hover/row:scale-x-100 transition-transform duration-500"></div>
