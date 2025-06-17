@@ -1,3 +1,4 @@
+import React from 'react';
 
 export const getOddsColor = (odds: number, mlOdds?: number) => {
   if (!mlOdds) return '';
