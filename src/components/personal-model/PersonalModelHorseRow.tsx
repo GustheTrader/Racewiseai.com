@@ -25,7 +25,6 @@ const PersonalModelHorseRow: React.FC<PersonalModelHorseRowProps> = ({
 
   return (
     <tr className="hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10 transition-all duration-300 group/row relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"></div>
       <td className="px-4 py-3 text-center relative z-10">
         <button onClick={() => onToggleCollapse(horse.id)} className="rounded-full p-1 bg-gray-800/50 group-hover:bg-gray-600/50 transition-colors duration-300">
           {isCollapsed ? (
@@ -72,7 +71,6 @@ const PersonalModelHorseRow: React.FC<PersonalModelHorseRowProps> = ({
       <td className="px-4 py-3 text-right font-mono font-bold text-green-400 relative z-10">
         {personalModelScores[horse.id] || '-'}
       </td>
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400/50 to-transparent transform scale-x-0 group-hover/row:scale-x-100 transition-transform duration-500"></div>
     </tr>
   );
 };
