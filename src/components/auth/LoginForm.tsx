@@ -24,7 +24,7 @@ const LoginForm = () => {
     
     setIsLoading(true);
     try {
-      // For beta, use email-only authentication with default password
+      // For beta, use email-only authentication with magic link
       await signIn(loginEmail, 'beta-temp-password');
       setLoginEmail('');
     } catch (error) {
@@ -41,7 +41,7 @@ const LoginForm = () => {
   return (
     <Card className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md">
       <CardHeader className="bg-betting-darkPurple">
-        <CardTitle className="text-white">Beta Access - Email Only</CardTitle>
+        <CardTitle className="text-white">Login to Beta</CardTitle>
       </CardHeader>
       <form onSubmit={handleLogin}>
         <CardContent className="space-y-4">
@@ -60,7 +60,7 @@ const LoginForm = () => {
           </div>
           
           <div className="text-sm text-gray-300 bg-betting-vividPurple/20 p-3 rounded">
-            <p>🚀 <strong>Beta Program:</strong> Just enter your email to access RaceWiseAI ToolBox! No password required.</p>
+            <p>🔗 <strong>Magic Link Login:</strong> Enter your email to receive a secure login link from RaceWiseAI.com!</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
@@ -72,9 +72,9 @@ const LoginForm = () => {
             {isLoading ? (
               <>
                 <Loader2 size={16} className="mr-2 animate-spin" />
-                Accessing Beta...
+                Sending Magic Link...
               </>
-            ) : "Access Beta"}
+            ) : "Send Magic Link"}
           </Button>
           
           <div className="flex items-center w-full gap-2 my-2">

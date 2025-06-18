@@ -4,8 +4,10 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import AuthHeader from '@/components/auth/AuthHeader';
 import SignupForm from '@/components/auth/SignupForm';
+import LoginForm from '@/components/auth/LoginForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   TrendingUp, 
   Brain, 
@@ -199,10 +201,31 @@ const AuthPage = () => {
             </Card>
           </div>
 
-          {/* Center Column - Signup Form */}
+          {/* Center Column - Auth Forms with Tabs */}
           <div className="flex items-center justify-center">
             <div className="w-full max-w-md">
-              <SignupForm />
+              <Tabs defaultValue="signup" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6 bg-betting-darkPurple/50 border border-orange-400/30">
+                  <TabsTrigger 
+                    value="signup" 
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white font-semibold"
+                  >
+                    Join Beta
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="login" 
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-purple-900 data-[state=active]:text-white font-semibold"
+                  >
+                    Login
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="signup">
+                  <SignupForm />
+                </TabsContent>
+                <TabsContent value="login">
+                  <LoginForm />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
 

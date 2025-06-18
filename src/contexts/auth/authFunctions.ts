@@ -5,39 +5,58 @@ import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
 export const signIn = async (email: string, password: string): Promise<void> => {
   try {
-    // For beta, try to sign in first, if fails, auto-create account
-    let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    // For beta, try magic link first for better user experience
+    const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          app_name: 'RaceWiseAI',
+          company: 'RaceWiseAI.com'
+        }
+      }
+    });
     
-    if (error && error.message.includes('Invalid login credentials')) {
-      // User doesn't exist, create account automatically for beta
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: email.split('@')[0], // Use email prefix as default name
+    if (magicLinkError) {
+      // Fallback to password-based login if magic link fails
+      let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error && error.message.includes('Invalid login credentials')) {
+        // User doesn't exist, create account automatically for beta
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: email.split('@')[0], // Use email prefix as default name
+              app_name: 'RaceWiseAI',
+              company: 'RaceWiseAI.com'
+            },
           },
-        },
-      });
-      
-      if (signUpError) {
-        toast.error(signUpError.message);
-        throw signUpError;
+        });
+        
+        if (signUpError) {
+          toast.error(signUpError.message);
+          throw signUpError;
+        }
+        
+        // Try to sign in again after signup
+        const { error: secondSignInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (secondSignInError) {
+          toast.error(secondSignInError.message);
+          throw secondSignInError;
+        }
+        
+        toast.success('Welcome to RaceWiseAI beta! Account created and signed in successfully');
+      } else if (error) {
+        toast.error(error.message);
+        throw error;
+      } else {
+        toast.success('Signed in successfully');
       }
-      
-      // Try to sign in again after signup
-      const { error: secondSignInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (secondSignInError) {
-        toast.error(secondSignInError.message);
-        throw secondSignInError;
-      }
-      
-      toast.success('Welcome to the beta! Account created and signed in successfully');
-    } else if (error) {
-      toast.error(error.message);
-      throw error;
     } else {
-      toast.success('Signed in successfully');
+      toast.success('Magic link sent! Check your email from RaceWiseAI.com to login instantly.');
     }
   } catch (error) {
     console.error('Sign in error:', error);
@@ -51,8 +70,11 @@ export const signUp = async (email: string, password: string, fullName: string):
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
+        emailRedirectTo: `${window.location.origin}/`,
         data: {
           full_name: fullName || email.split('@')[0],
+          app_name: 'RaceWiseAI',
+          company: 'RaceWiseAI.com'
         },
         shouldCreateUser: true,
       },
@@ -63,7 +85,7 @@ export const signUp = async (email: string, password: string, fullName: string):
       throw error;
     }
     
-    toast.success('Welcome to the beta! Check your email for the magic link or you\'ll be logged in automatically.');
+    toast.success('Welcome to RaceWiseAI beta! Check your email for the magic link from RaceWiseAI.com or you\'ll be logged in automatically.');
     
     // For beta, also try to auto-signin with a temporary session
     // This provides immediate access while still sending the magic link
@@ -73,8 +95,11 @@ export const signUp = async (email: string, password: string, fullName: string):
           email,
           password: 'beta-temp-password-' + Date.now(),
           options: {
+            emailRedirectTo: `${window.location.origin}/`,
             data: {
               full_name: fullName || email.split('@')[0],
+              app_name: 'RaceWiseAI',
+              company: 'RaceWiseAI.com'
             },
           },
         });
