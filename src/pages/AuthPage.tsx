@@ -104,13 +104,13 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-500 via-betting-navyBlue to-betting-darkPurple p-6 text-white relative overflow-hidden">
-      {/* Horse Background Image */}
+      {/* Horse Racing Silhouette Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center 30%'
+          backgroundPosition: 'center'
         }}
       />
       
