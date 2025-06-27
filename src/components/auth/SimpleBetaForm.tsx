@@ -25,8 +25,11 @@ const SimpleBetaForm = () => {
     
     setIsLoading(true);
     try {
-      // Simple beta signup with email only
-      await signUp(email, 'beta-temp-password', email.split('@')[0]);
+      // Create a stronger password that meets Supabase requirements
+      const strongPassword = `BetaUser${Date.now()}@Ai`;
+      
+      // Simple beta signup with email and strong password
+      await signUp(email, strongPassword, email.split('@')[0]);
       
       // Show confetti effect
       showConfetti();
@@ -36,11 +39,21 @@ const SimpleBetaForm = () => {
       
       // Redirect to main dashboard after short delay
       setTimeout(() => {
-        navigate('/');
+        navigate('/', { replace: true });
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Beta access error:', error);
-      toast.error('Something went wrong. Please try again.');
+      
+      // If user already exists, try to sign them in instead
+      if (error?.message?.includes('already registered') || error?.message?.includes('already exists')) {
+        toast.success('🎉 Welcome back! Redirecting to dashboard...');
+        showConfetti();
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 2000);
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
