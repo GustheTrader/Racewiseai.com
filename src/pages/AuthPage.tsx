@@ -12,7 +12,9 @@ import {
   Calculator, 
   DollarSign, 
   BarChart3, 
-  Bot
+  Bot,
+  Eye,
+  Target
 } from 'lucide-react';
 
 const AuthPage = () => {
@@ -72,6 +74,18 @@ const AuthPage = () => {
       icon: <Bot className="h-6 w-6" />,
       title: "AI Race Agent",
       description: "Real-time race analysis with up-to-the-minute strategic insights."
+    },
+    {
+      id: 7,
+      icon: <Eye className="h-6 w-6" />,
+      title: "Live Paddock Comments with OpenCV Analysis",
+      description: "AI-powered visual analysis of horse behavior and condition with real-time expert commentary."
+    },
+    {
+      id: 8,
+      icon: <Target className="h-6 w-6" />,
+      title: "Rolling Pick 3, Trifecta & Superfecta Bets",
+      description: "Advanced exotic betting strategies with automated ticket construction and optimization."
     }
   ];
 
@@ -126,9 +140,9 @@ const AuthPage = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Tools 1-3 */}
+          {/* Left Column - Tools 1-4 */}
           <div className="space-y-4">
-            {tools.slice(0, 3).map((tool) => (
+            {tools.slice(0, 4).map((tool) => (
               <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-3">
@@ -162,9 +176,9 @@ const AuthPage = () => {
             </div>
           </div>
 
-          {/* Right Column - Tools 4-6 */}
+          {/* Right Column - Tools 5-8 */}
           <div className="space-y-4">
-            {tools.slice(3, 6).map((tool) => (
+            {tools.slice(4, 8).map((tool) => (
               <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-3">
