@@ -1,62 +1,33 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
 export const signIn = async (email: string, password: string): Promise<void> => {
   try {
-    // For beta, try magic link first for better user experience
-    const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: {
-          app_name: 'RaceWiseAI',
-          company: 'RaceWiseAI.com'
-        }
-      }
-    });
+    // Try to sign in with password
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
-    if (magicLinkError) {
-      // Fallback to password-based login if magic link fails
-      let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      // If password login fails, send magic link
+      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            app_name: 'RaceWiseAI',
+            company: 'RaceWiseAI.com'
+          }
+        }
+      });
       
-      if (error && error.message.includes('Invalid login credentials')) {
-        // User doesn't exist, create account automatically for beta
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: email.split('@')[0], // Use email prefix as default name
-              app_name: 'RaceWiseAI',
-              company: 'RaceWiseAI.com'
-            },
-          },
-        });
-        
-        if (signUpError) {
-          toast.error(signUpError.message);
-          throw signUpError;
-        }
-        
-        // Try to sign in again after signup
-        const { error: secondSignInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (secondSignInError) {
-          toast.error(secondSignInError.message);
-          throw secondSignInError;
-        }
-        
-        toast.success('Welcome to RaceWiseAI beta! Account created and signed in successfully');
-      } else if (error) {
-        toast.error(error.message);
-        throw error;
+      if (magicLinkError) {
+        toast.error(magicLinkError.message);
+        throw magicLinkError;
       } else {
-        toast.success('Signed in successfully');
+        toast.success('Magic link sent! Check your email from RaceWiseAI.com to login instantly.');
       }
     } else {
-      toast.success('Magic link sent! Check your email from RaceWiseAI.com to login instantly.');
+      toast.success('Signed in successfully');
     }
   } catch (error) {
     console.error('Sign in error:', error);
@@ -66,7 +37,7 @@ export const signIn = async (email: string, password: string): Promise<void> => 
 
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
   try {
-    // For beta access, create account immediately with email confirmation bypass
+    // Create account with email confirmation required
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -82,59 +53,16 @@ export const signUp = async (email: string, password: string, fullName: string):
     
     if (error) {
       console.error('Signup error:', error);
-      
-      // If user already exists, try to sign them in instead
-      if (error.message.includes('already registered') || error.message.includes('already exists')) {
-        console.log('User already exists, attempting signin...');
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        
-        if (signInError) {
-          // If password signin fails, send magic link
-          const { error: magicError } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`,
-              data: {
-                full_name: fullName || email.split('@')[0],
-                app_name: 'RaceWiseAI',
-                company: 'RaceWiseAI.com'
-              }
-            }
-          });
-          
-          if (magicError) {
-            toast.error('Unable to access account. Please try again.');
-            throw magicError;
-          } else {
-            toast.success('Magic link sent! Check your email to continue.');
-          }
-        } else {
-          toast.success('Welcome back to RaceWiseAI beta!');
-        }
-      } else {
-        toast.error(error.message);
-        throw error;
-      }
-    } else if (data.user) {
-      // For beta, if user is created but not confirmed, try to sign them in anyway
-      if (!data.user.email_confirmed_at) {
-        const { error: immediateSignInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        
-        if (immediateSignInError) {
-          console.log('Immediate signin failed, user will get magic link');
-          toast.success('Account created! Check your email for the magic link or try signing in.');
-        } else {
-          toast.success('Welcome to RaceWiseAI beta! Account created and you\'re signed in.');
-        }
-      } else {
-        toast.success('Welcome to RaceWiseAI beta!');
-      }
+      toast.error(error.message);
+      throw error;
+    }
+    
+    if (data.user && !data.user.email_confirmed_at) {
+      // User created but needs email confirmation
+      toast.success('Account created! Please check your email for the confirmation link.');
+    } else if (data.user && data.user.email_confirmed_at) {
+      // User created and already confirmed (shouldn't happen normally)
+      toast.success('Welcome to RaceWiseAI beta!');
     }
     
   } catch (error) {

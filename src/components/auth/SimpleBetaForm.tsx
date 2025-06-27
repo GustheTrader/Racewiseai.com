@@ -7,15 +7,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const SimpleBetaForm = () => {
   const { signUp } = useAuth();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
-  const handleBetaAccess = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email) {
@@ -25,32 +24,19 @@ const SimpleBetaForm = () => {
     
     setIsLoading(true);
     try {
-      // Create a stronger password that meets Supabase requirements
+      // Create account with email confirmation required
       const strongPassword = `BetaUser${Date.now()}@Ai`;
-      
-      // Simple beta signup with email and strong password
       await signUp(email, strongPassword, email.split('@')[0]);
       
-      // Show confetti effect
-      showConfetti();
+      setEmailSent(true);
+      toast.success('📧 Confirmation email sent! Please check your inbox and click the link to verify your email.');
       
-      // Show success message
-      toast.success('🎉 Welcome to RaceWiseAI Beta! Redirecting to dashboard...');
-      
-      // Redirect to main dashboard after short delay
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 2000);
     } catch (error: any) {
-      console.error('Beta access error:', error);
+      console.error('Email submission error:', error);
       
-      // If user already exists, try to sign them in instead
       if (error?.message?.includes('already registered') || error?.message?.includes('already exists')) {
-        toast.success('🎉 Welcome back! Redirecting to dashboard...');
-        showConfetti();
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 2000);
+        setEmailSent(true);
+        toast.success('📧 Account exists! Please check your email for the confirmation link.');
       } else {
         toast.error('Something went wrong. Please try again.');
       }
@@ -59,40 +45,46 @@ const SimpleBetaForm = () => {
     }
   };
 
-  const showConfetti = () => {
-    // Create confetti effect
-    const colors = ['#FF6B35', '#F7931E', '#FFD23F', '#06FFA5', '#B19CD9'];
-    const confettiCount = 50;
-    
-    for (let i = 0; i < confettiCount; i++) {
-      createConfettiPiece(colors[Math.floor(Math.random() * colors.length)]);
-    }
-  };
-
-  const createConfettiPiece = (color: string) => {
-    const confetti = document.createElement('div');
-    confetti.style.position = 'fixed';
-    confetti.style.left = Math.random() * 100 + '%';
-    confetti.style.top = '-10px';
-    confetti.style.width = '10px';
-    confetti.style.height = '10px';
-    confetti.style.backgroundColor = color;
-    confetti.style.zIndex = '9999';
-    confetti.style.pointerEvents = 'none';
-    confetti.style.borderRadius = '50%';
-    
-    document.body.appendChild(confetti);
-    
-    const fall = confetti.animate([
-      { transform: 'translateY(-10px) rotate(0deg)', opacity: 1 },
-      { transform: `translateY(${window.innerHeight + 10}px) rotate(360deg)`, opacity: 0 }
-    ], {
-      duration: 3000 + Math.random() * 2000,
-      easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
-    });
-    
-    fall.onfinish = () => confetti.remove();
-  };
+  if (emailSent) {
+    return (
+      <Card className="bg-betting-darkPurple/80 border-4 border-green-400 backdrop-blur-md shadow-2xl">
+        <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
+          <CardTitle className="text-white text-center text-2xl font-bold">
+            📧 Check Your Email
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6 bg-betting-darkPurple/90 backdrop-blur-sm text-center">
+          <div className="space-y-4">
+            <div className="text-6xl">📬</div>
+            <h3 className="text-xl font-semibold text-white">Email Sent!</h3>
+            <p className="text-gray-300">
+              We've sent a confirmation email to <strong className="text-orange-400">{email}</strong>
+            </p>
+            <p className="text-gray-300">
+              Please check your inbox and click the confirmation link to verify your email and access the platform.
+            </p>
+          </div>
+          
+          <div className="text-sm text-white bg-gradient-to-r from-green-500/30 to-blue-500/30 p-4 rounded border border-green-400/50">
+            <p className="text-center">
+              ✅ <strong>Next Step:</strong> Click the link in your email to confirm your account and start using RaceWiseAI!
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter className="bg-betting-darkPurple/90 backdrop-blur-sm rounded-b-lg">
+          <Button 
+            onClick={() => {
+              setEmailSent(false);
+              setEmail('');
+            }}
+            className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold text-lg py-3"
+          >
+            Use Different Email
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-betting-darkPurple/80 border-4 border-orange-400 backdrop-blur-md shadow-2xl transform hover:scale-105 transition-all duration-300">
@@ -101,11 +93,11 @@ const SimpleBetaForm = () => {
           🚀 Join RaceWiseAI Beta
         </CardTitle>
       </CardHeader>
-      <form onSubmit={handleBetaAccess}>
+      <form onSubmit={handleEmailSubmit}>
         <CardContent className="space-y-6 bg-betting-darkPurple/90 backdrop-blur-sm">
           <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold text-white">Get Instant Access</h3>
-            <p className="text-gray-300">Enter your email and jump straight into the platform!</p>
+            <h3 className="text-xl font-semibold text-white">Get Beta Access</h3>
+            <p className="text-gray-300">Enter your email to receive a confirmation link and join the platform!</p>
           </div>
           
           <div className="space-y-2">
@@ -123,7 +115,7 @@ const SimpleBetaForm = () => {
           
           <div className="text-sm text-white bg-gradient-to-r from-orange-500/30 to-yellow-500/30 p-4 rounded border border-orange-400/50">
             <p className="text-center">
-              🎯 <strong>Instant Access:</strong> No passwords, no waiting - just enter your email and start using all our AI-powered horse racing tools immediately!
+              📧 <strong>Email Confirmation:</strong> We'll send you a secure link to verify your email and access all our AI-powered horse racing tools!
             </p>
           </div>
         </CardContent>
@@ -136,9 +128,9 @@ const SimpleBetaForm = () => {
             {isLoading ? (
               <>
                 <Loader2 size={20} className="mr-2 animate-spin" />
-                Getting Access...
+                Sending Confirmation...
               </>
-            ) : "🚀 Get Instant Access"}
+            ) : "📧 Send Confirmation Email"}
           </Button>
         </CardFooter>
       </form>

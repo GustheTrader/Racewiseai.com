@@ -1,9 +1,10 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthHeader from '@/components/auth/AuthHeader';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
+import LoginAfterConfirmation from '@/components/auth/LoginAfterConfirmation';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   TrendingUp, 
@@ -11,17 +12,22 @@ import {
   Calculator, 
   DollarSign, 
   BarChart3, 
-  Zap, 
-  Users, 
-  MessageSquare, 
-  Database, 
-  Star,
   Bot
 } from 'lucide-react';
 
 const AuthPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Check if user came from email confirmation
+  useEffect(() => {
+    const confirmed = searchParams.get('confirmed');
+    if (confirmed === 'true') {
+      setShowLogin(true);
+    }
+  }, [searchParams]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -114,7 +120,7 @@ const AuthPage = () => {
           
           <div className="mt-6 max-w-4xl mx-auto">
             <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-blue-900 via-betting-tertiaryPurple via-yellow-400 to-orange-500 bg-clip-text drop-shadow-lg">
-              Join hundreds of professional and recreational handicappers using our advanced AI-Tools
+              {showLogin ? 'Welcome Back to RaceWiseAI!' : 'Join hundreds of professional and recreational handicappers using our advanced AI-Tools'}
             </p>
           </div>
         </div>
@@ -139,10 +145,20 @@ const AuthPage = () => {
             ))}
           </div>
 
-          {/* Center Column - Simplified Beta Form */}
+          {/* Center Column - Form */}
           <div className="flex items-center justify-center">
             <div className="w-full max-w-md">
-              <SimpleBetaForm />
+              {showLogin ? <LoginAfterConfirmation /> : <SimpleBetaForm />}
+              
+              {/* Toggle between forms */}
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowLogin(!showLogin)}
+                  className="text-sm text-gray-300 hover:text-white underline"
+                >
+                  {showLogin ? 'Need to sign up?' : 'Already have an account?'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -171,7 +187,7 @@ const AuthPage = () => {
           <Card className="bg-gradient-to-r from-orange-500/20 to-purple-900/20 border-orange-500/30 backdrop-blur-md">
             <CardContent className="p-6">
               <h2 className="text-2xl font-bold text-white mb-4">
-                🚀 Beta Access Features
+                {showLogin ? '🔐 Secure Login' : '🚀 Beta Access Features'}
               </h2>
               <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-200">
                 <div>
