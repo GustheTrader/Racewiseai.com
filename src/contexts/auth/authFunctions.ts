@@ -66,9 +66,10 @@ export const signIn = async (email: string, password: string): Promise<void> => 
 
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
   try {
-    // For beta access, use signInWithOtp for passwordless authentication
-    const { error } = await supabase.auth.signInWithOtp({
+    // For beta access, create account immediately with email confirmation bypass
+    const { data, error } = await supabase.auth.signUp({
       email,
+      password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
@@ -76,45 +77,65 @@ export const signUp = async (email: string, password: string, fullName: string):
           app_name: 'RaceWiseAI',
           company: 'RaceWiseAI.com'
         },
-        shouldCreateUser: true,
       },
     });
     
     if (error) {
-      toast.error(error.message);
-      throw error;
-    }
-    
-    toast.success('Welcome to RaceWiseAI beta! Check your email for the magic link from RaceWiseAI.com or you\'ll be logged in automatically.');
-    
-    // For beta, also try to auto-signin with a temporary session
-    // This provides immediate access while still sending the magic link
-    setTimeout(async () => {
-      try {
-        const { data: signUpData, error: tempSignUpError } = await supabase.auth.signUp({
+      console.error('Signup error:', error);
+      
+      // If user already exists, try to sign them in instead
+      if (error.message.includes('already registered') || error.message.includes('already exists')) {
+        console.log('User already exists, attempting signin...');
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
-          password: 'beta-temp-password-' + Date.now(),
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: fullName || email.split('@')[0],
-              app_name: 'RaceWiseAI',
-              company: 'RaceWiseAI.com'
-            },
-          },
+          password
         });
         
-        if (!tempSignUpError && signUpData.user) {
-          // Force sign in immediately for beta access
-          await supabase.auth.signInWithPassword({
+        if (signInError) {
+          // If password signin fails, send magic link
+          const { error: magicError } = await supabase.auth.signInWithOtp({
             email,
-            password: 'beta-temp-password-' + Date.now()
+            options: {
+              emailRedirectTo: `${window.location.origin}/`,
+              data: {
+                full_name: fullName || email.split('@')[0],
+                app_name: 'RaceWiseAI',
+                company: 'RaceWiseAI.com'
+              }
+            }
           });
+          
+          if (magicError) {
+            toast.error('Unable to access account. Please try again.');
+            throw magicError;
+          } else {
+            toast.success('Magic link sent! Check your email to continue.');
+          }
+        } else {
+          toast.success('Welcome back to RaceWiseAI beta!');
         }
-      } catch (tempError) {
-        console.log('Temp signin attempt failed, user will need to use magic link');
+      } else {
+        toast.error(error.message);
+        throw error;
       }
-    }, 100);
+    } else if (data.user) {
+      // For beta, if user is created but not confirmed, try to sign them in anyway
+      if (!data.user.email_confirmed_at) {
+        const { error: immediateSignInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (immediateSignInError) {
+          console.log('Immediate signin failed, user will get magic link');
+          toast.success('Account created! Check your email for the magic link or try signing in.');
+        } else {
+          toast.success('Welcome to RaceWiseAI beta! Account created and you\'re signed in.');
+        }
+      } else {
+        toast.success('Welcome to RaceWiseAI beta!');
+      }
+    }
     
   } catch (error) {
     console.error('Sign up error:', error);
