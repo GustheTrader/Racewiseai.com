@@ -4,9 +4,10 @@ import { getMockData } from '../utils/mockData';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import useDataUpdateManager from '../components/dashboard/DataUpdateManager';
 import DashboardContent from '../components/dashboard/DashboardContent';
+import RealtimeStatusIndicator from '../components/dashboard/RealtimeStatusIndicator';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Database } from 'lucide-react';
+import { Database, Globe } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -39,16 +40,31 @@ const Index = () => {
   return (
     <DashboardLayout 
       title="RACEWISE AI TOOLBOX"
-      subtitle="Live race track odds and pool movement dashboard"
+      subtitle={
+        <div className="flex items-center gap-4">
+          <span>Live race track odds and pool movement dashboard</span>
+          <RealtimeStatusIndicator />
+        </div>
+      }
       extraButtons={
-        <Button 
-          variant="outline" 
-          onClick={() => navigate("/results")}
-          className="flex items-center gap-2 border-betting-tertiaryPurple bg-betting-darkPurple hover:bg-betting-tertiaryPurple/20"
-        >
-          <Database className="h-4 w-4" />
-          Race Results
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/statpal")}
+            className="flex items-center gap-2 border-betting-tertiaryPurple bg-betting-darkPurple hover:bg-betting-tertiaryPurple/20"
+          >
+            <Globe className="h-4 w-4" />
+            Statpal Live Data
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/results")}
+            className="flex items-center gap-2 border-betting-tertiaryPurple bg-betting-darkPurple hover:bg-betting-tertiaryPurple/20"
+          >
+            <Database className="h-4 w-4" />
+            Race Results
+          </Button>
+        </div>
       }
     >
       <DashboardContent 
