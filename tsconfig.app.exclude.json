@@ -1,0 +1,8 @@
+// TypeScript configuration to exclude Supabase functions from main compilation
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "supabase/**/*",
+    "types/deno/**/*"
+  ]
+}
