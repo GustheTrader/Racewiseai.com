@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
-import { getMockData } from '../utils/mockData';
+import React, { useState, useEffect } from 'react';
+import { useRaceData } from '../hooks/useRaceData';
+import { createMockDataStructure, getCurrentRaceData } from '../utils/dataHelpers';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import useDataUpdateManager from '../components/dashboard/DataUpdateManager';
 import DashboardContent from '../components/dashboard/DashboardContent';
@@ -11,11 +12,19 @@ import { Database, Globe } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState(getMockData());
+  const { horses, races, tracks, isLoading: dataLoading } = useRaceData();
+  const [data, setData] = useState(createMockDataStructure([], [], []));
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleTimeString());
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [currentTrack, setCurrentTrack] = useState("CHURCHILL DOWNS");
   const [currentRace, setCurrentRace] = useState(7);
+
+  // Update data when Supabase data loads
+  useEffect(() => {
+    if (!dataLoading && horses.length > 0) {
+      setData(createMockDataStructure(horses, races, tracks));
+    }
+  }, [horses, races, tracks, dataLoading]);
   
   // Use our custom hook for data updates
   const { nextUpdateIn, isLoading, refreshData } = useDataUpdateManager({
