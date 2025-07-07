@@ -1,55 +1,86 @@
-// Utility functions for scraper operations
+
+import { TRACK_OPTIONS } from '@/types/ScraperTypes';
 
 /**
- * Formats an Off Track Betting URL for a specific track and race number
+ * Formats a URL for offtrackbetting.com based on track name and optional race number
+ * @param trackName The name of the track
+ * @param raceNumber Optional race number
+ * @returns Formatted URL
  */
-export const formatOTBUrl = (trackName: string, raceNumber: number): string => {
-  // Convert track name to format expected by OTB
-  const formattedTrack = trackName.toUpperCase().replace(/\s+/g, '-');
+export function formatOTBUrl(trackName: string, raceNumber?: number): string {
+  // Normalize track name to match the format used by OTB
+  const normalizedTrackName = trackName.toLowerCase().replace(/\s+/g, '-');
   
-  // Base OTB URL structure - this is a placeholder that might need adjustment
-  // based on the actual OTB URL structure
-  const baseUrl = 'https://app.offtrackbetting.com';
+  // Base URL for OTB's live racing section
+  let url = `https://app.offtrackbetting.com/#/lobby/live-racing?programName=${normalizedTrackName}`;
   
-  // Format the URL with track and race parameters
-  return `${baseUrl}/#/lobby/live-racing/${formattedTrack}/race/${raceNumber}`;
-};
-
-/**
- * Validates if a URL is a valid OTB results URL
- */
-export const isValidOTBUrl = (url: string): boolean => {
-  try {
-    const urlObj = new URL(url);
-    return urlObj.hostname.includes('offtrackbetting.com');
-  } catch {
-    return false;
+  // Add race number if provided
+  if (raceNumber) {
+    url += `&raceNumber=${raceNumber}`;
   }
-};
+  
+  return url;
+}
 
 /**
- * Extracts track name and race number from an OTB URL if possible
+ * Gets a readable name for a track based on its code
+ * @param trackCode The track code (e.g., "CHURCHILL DOWNS")
+ * @returns The readable track name
  */
-export const parseOTBUrl = (url: string): { trackName?: string; raceNumber?: number } => {
-  try {
-    const urlObj = new URL(url);
-    const pathParts = urlObj.hash.split('/');
-    
-    // Try to extract track and race info from URL structure
-    const trackIndex = pathParts.findIndex(part => part === 'live-racing');
-    if (trackIndex >= 0 && pathParts.length > trackIndex + 2) {
-      const trackName = pathParts[trackIndex + 1]?.replace(/-/g, ' ');
-      const raceIndex = pathParts.findIndex(part => part === 'race');
-      const raceNumber = raceIndex >= 0 ? parseInt(pathParts[raceIndex + 1]) : undefined;
-      
-      return {
-        trackName: trackName ? trackName.toUpperCase() : undefined,
-        raceNumber: !isNaN(raceNumber!) ? raceNumber : undefined
-      };
+export function getTrackReadableName(trackCode: string): string {
+  const track = TRACK_OPTIONS.find(t => t.value === trackCode);
+  return track ? track.label : trackCode;
+}
+
+/**
+ * Formats a timestamp into a readable time string
+ * @param timestamp ISO timestamp string
+ * @returns Formatted time string
+ */
+export function formatTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit',
+    hour12: true 
+  });
+}
+
+/**
+ * Checks if a track is running today based on a weekly schedule
+ * @param trackName The name of the track
+ * @param schedule The weekly schedule for tracks
+ * @returns Boolean indicating if the track is running today
+ */
+export function isTrackRunningToday(trackName: string, schedule: Record<string, string[]>): boolean {
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  const trackDays = schedule[trackName] || [];
+  return trackDays.includes(today);
+}
+
+/**
+ * Gets the next race day for a track
+ * @param trackName The name of the track
+ * @param schedule The weekly schedule for tracks
+ * @returns The next day the track is running, or null if not found
+ */
+export function getNextRaceDay(trackName: string, schedule: Record<string, string[]>): string | null {
+  const trackDays = schedule[trackName] || [];
+  if (trackDays.length === 0) return null;
+  
+  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const today = new Date().getDay(); // 0 = Sunday, 6 = Saturday
+  
+  // Convert track days to day indices
+  const trackDayIndices = trackDays.map(day => weekdays.indexOf(day));
+  
+  // Find the next day that has racing
+  for (let i = 1; i <= 7; i++) {
+    const checkDay = (today + i) % 7;
+    if (trackDayIndices.includes(checkDay)) {
+      return weekdays[checkDay];
     }
-  } catch {
-    // Invalid URL
   }
   
-  return {};
-};
+  return trackDays[0]; // Fallback to first scheduled day
+}

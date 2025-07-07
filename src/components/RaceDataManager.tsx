@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { RaceData, RaceHorse } from '@/utils/types';
-import { createMockDataStructure } from '@/utils/dataHelpers';
+import { updateMockData } from '@/utils/mockData';
 import RacesList from './races/RacesList';
 import HorseDetails from './races/HorseDetails';
 
@@ -141,13 +141,37 @@ const RaceDataManager: React.FC = () => {
 
       if (horseError) throw horseError;
 
-      // In a real implementation, this would update the global app state
-      // For now, we'll just show a success message since we can't update the mock data structure
-      // The createMockDataStructure function is designed to work with the existing data system
-      
+      // Update the application state with this data
+      updateMockData({
+        horses: horseData.map((horse, index) => ({
+          id: index + 1,
+          pp: horse.pp,
+          name: horse.name,
+          isFavorite: index === 0,
+          liveOdds: horse.ml_odds || 3.5 + (Math.random() * 3),
+          mlOdds: horse.ml_odds,
+          modelOdds: (horse.ml_odds || 3.5) + (Math.random() * 0.5 - 0.25),
+          difference: parseFloat((Math.random() * 0.6 - 0.3).toFixed(2)),
+          jockey: horse.jockey || '',
+          trainer: horse.trainer || '',
+          jockeyWinPct: Math.floor(10 + Math.random() * 20),
+          trainerWinPct: Math.floor(10 + Math.random() * 20),
+          hFactors: {
+            speed: Math.random() > 0.5,
+            pace: Math.random() > 0.5,
+            form: Math.random() > 0.5,
+            class: Math.random() > 0.5,
+          },
+          irregularBetting: Math.random() > 0.9,
+        })),
+        lastUpdated: new Date().toLocaleTimeString(),
+        trackName: raceData.track_name,
+        raceNumber: raceData.race_number,
+      });
+
       toast({
         title: 'Success',
-        description: `${raceData.track_name} Race ${raceData.race_number} data loaded successfully.`,
+        description: `Loaded ${raceData.track_name} Race ${raceData.race_number} into the application.`,
       });
     } catch (error) {
       console.error('Error loading race data:', error);

@@ -4,17 +4,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./src/pages/Index";
-import AdminPage from "./src/pages/AdminPage";
-import AuthPage from "./src/pages/AuthPage";
-import NotFound from "./src/pages/NotFound";
-import RaceResultsPage from "./src/pages/RaceResultsPage";
-import PublicResultsPage from "./src/pages/PublicResultsPage";
-import RequireAuth from "./src/components/RequireAuth";
-import { AuthProvider } from "./src/contexts/auth/AuthContext";
-import DataDashboardPage from "./src/pages/DataDashboardPage";
-import QuantumRankingsPage from "./src/pages/QuantumRankingsPage";
-import ModelProcessPage from "./src/pages/ModelProcessPage";
+import Index from "./pages/Index";
+import AdminPage from "./pages/AdminPage";
+import AuthPage from "./pages/AuthPage";
+import NotFound from "./pages/NotFound";
+import RaceResultsPage from "./pages/RaceResultsPage";
+import PublicResultsPage from "./pages/PublicResultsPage";
+import RequireAuth from "./components/RequireAuth";
+import { AuthProvider } from "./contexts/auth/AuthContext";
+import DataDashboardPage from "./pages/DataDashboardPage";
+import QuantumRankingsPage from "./pages/QuantumRankingsPage";
+import ModelProcessPage from "./pages/ModelProcessPage";
 
 const queryClient = new QueryClient();
 

@@ -1,39 +1,51 @@
-import { supabase } from '../../integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
-export const checkAdminStatus = async (userId: string, email?: string): Promise<boolean> => {
+// List of admin emails that should always have admin privileges
+export const ADMIN_EMAILS = [
+  'nft.king137@gmail.com',
+  'jeffgus@gmail.com'
+];
+
+export const checkAdminStatus = async (userId: string, email?: string | null): Promise<boolean> => {
   try {
-    // Check if user is admin based on email domain or specific emails
-    const adminEmails = ['dev@racewiseai.com', 'admin@racewiseai.com'];
-    const adminDomains = ['racewiseai.com'];
-    
-    if (email) {
-      // Check specific admin emails
-      if (adminEmails.includes(email.toLowerCase())) {
-        return true;
-      }
-      
-      // Check admin domains
-      const emailDomain = email.split('@')[1]?.toLowerCase();
-      if (emailDomain && adminDomains.includes(emailDomain)) {
-        return true;
-      }
+    // First check if email is in the ADMIN_EMAILS list
+    if (email && ADMIN_EMAILS.includes(email)) {
+      // Update the database to ensure the profile has admin privileges
+      await ensureAdminPrivileges(userId);
+      return true;
     }
 
-    // Check database for admin status
+    // Otherwise check the database as before
     const { data, error } = await supabase
       .from('profiles')
       .select('is_admin')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+    if (error) {
       console.error('Error checking admin status:', error);
       return false;
     }
 
-    return data?.is_admin === true;
+    return data?.is_admin || false;
   } catch (error) {
-    console.error('Error in checkAdminStatus:', error);
+    console.error('Error in admin check:', error);
     return false;
+  }
+};
+
+// Helper function to ensure the user has admin privileges in the database
+export const ensureAdminPrivileges = async (userId: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_admin: true })
+      .eq('id', userId);
+    
+    if (error) {
+      console.error('Error updating admin privileges:', error);
+    }
+  } catch (error) {
+    console.error('Error ensuring admin privileges:', error);
   }
 };

@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { createMockDataStructure } from '@/utils/dataHelpers';
-import { useRaceData } from '@/hooks/useRaceData';
+import { updateMockData, getMockData } from '@/utils/mockData';
 
 interface DataImportTabProps {
   apiUrl: string;
@@ -19,7 +18,6 @@ const DataImportTab: React.FC<DataImportTabProps> = ({
 }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const { horses, races, tracks } = useRaceData();
 
   const handleImportData = async () => {
     setIsLoading(true);
@@ -29,13 +27,19 @@ const DataImportTab: React.FC<DataImportTabProps> = ({
       // For now, simulate data import with a delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Create updated data structure with current Supabase data
-      // In a real implementation, this would trigger a refresh of the data
-      const currentData = createMockDataStructure(horses, races, tracks);
+      // Update mock data with "imported" data
+      const importedData = {
+        horses: getMockData().horses.map(horse => ({
+          ...horse,
+          liveOdds: parseFloat((horse.liveOdds * (0.9 + Math.random() * 0.3)).toFixed(2))
+        }))
+      };
+      
+      updateMockData(importedData);
       
       toast({
         title: "Data Imported",
-        description: "Race data has been successfully imported from the database.",
+        description: "Race data has been successfully imported.",
       });
     } catch (error) {
       toast({
