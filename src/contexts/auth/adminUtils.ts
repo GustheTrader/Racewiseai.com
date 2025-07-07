@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 
 // List of admin emails that should always have admin privileges
 export const ADMIN_EMAILS = [

@@ -1,5 +1,5 @@
 
-import { TRACK_OPTIONS } from '@/types/ScraperTypes';
+import { TRACK_OPTIONS } from '../../../types/ScraperTypes';
 
 /**
  * Formats a URL for offtrackbetting.com based on track name and optional race number

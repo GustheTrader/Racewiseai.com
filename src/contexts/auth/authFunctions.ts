@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/sonner';
+import { supabase } from '../../integrations/supabase/client';
+import { toast } from '../../components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
 export const signIn = async (email: string, password: string): Promise<void> => {
