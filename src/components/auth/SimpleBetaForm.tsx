@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/auth/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
 const SimpleBetaForm = () => {
@@ -28,6 +29,22 @@ const SimpleBetaForm = () => {
       const strongPassword = `BetaUser${Date.now()}@Ai`;
       await signUp(email, strongPassword, email.split('@')[0]);
       
+      // Directly sign in the user after signup (no email confirmation needed)
+      try {
+        const { data } = await supabase.auth.signInWithPassword({
+          email,
+          password: strongPassword,
+        });
+        
+        if (data.user) {
+          toast.success('🎉 Welcome to RaceWiseAI! Taking you to the dashboard...');
+          // Let the auth context handle navigation
+          return;
+        }
+      } catch (signInError) {
+        console.error('Auto sign-in failed, showing email sent message:', signInError);
+      }
+      
       setEmailSent(true);
       toast.success('📧 Confirmation email sent! Please check your inbox and click the link to verify your email.');
       
@@ -35,8 +52,23 @@ const SimpleBetaForm = () => {
       console.error('Email submission error:', error);
       
       if (error?.message?.includes('already registered') || error?.message?.includes('already exists')) {
-        setEmailSent(true);
-        toast.success('📧 Account exists! Please check your email for the confirmation link.');
+        // Try to sign in existing user
+        try {
+          const tempPassword = `BetaUser${Date.now()}@Ai`;
+          const { data } = await supabase.auth.signInWithPassword({
+            email,
+            password: tempPassword,
+          });
+          
+          if (data.user) {
+            toast.success('🎉 Welcome back! Taking you to the dashboard...');
+            return;
+          }
+        } catch {
+          // If auto sign-in fails, show the message
+          setEmailSent(true);
+          toast.success('📧 Account exists! You can now access the dashboard.');
+        }
       } else {
         toast.error('Something went wrong. Please try again.');
       }
