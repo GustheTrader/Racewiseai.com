@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
-import { getOddsPulseConfig, setOddsPulseConfig } from '@/utils/oddsPulseUtils';
+// Note: OddsPulse utilities removed - using local config for now
 import { Loader2 } from 'lucide-react';
 import useOddsPulseManager from '@/hooks/useOddsPulseManager';
 
@@ -16,7 +16,7 @@ interface OddsPulseConfigTabProps {
 
 const OddsPulseConfigTab: React.FC<OddsPulseConfigTabProps> = ({ trackName, raceNumber }) => {
   const { toast } = useToast();
-  const [config, setConfig] = useState(getOddsPulseConfig());
+  const [config, setConfig] = useState({ enabled: false, pollingInterval: 60 }); // Local config
   const [isSaving, setIsSaving] = useState(false);
   const [logData, setLogData] = useState<string[]>([]);
   const [isManualTesting, setIsManualTesting] = useState(false);
@@ -60,7 +60,7 @@ const OddsPulseConfigTab: React.FC<OddsPulseConfigTabProps> = ({ trackName, race
     setIsSaving(true);
     // Simulate a short delay for UI feedback
     setTimeout(() => {
-      setOddsPulseConfig(config);
+      // setOddsPulseConfig(config); // Function removed - config saved locally
       addLog(`Configuration updated: enabled=${config.enabled}, interval=${config.pollingInterval}s`);
       setIsSaving(false);
     }, 500);
