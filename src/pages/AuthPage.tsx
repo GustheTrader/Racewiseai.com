@@ -91,11 +91,11 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-500 via-betting-navyBlue to-betting-darkPurple p-6 text-white relative overflow-hidden">
-      {/* Horse Racing Background Image */}
+      {/* Horse Racing Action Silhouette Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
         style={{
-          backgroundImage: `url('/lovable-uploads/af4522a6-318c-483c-b620-eefeeb7d2160.png')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1544966503-7cc5ac882d5d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -134,7 +134,7 @@ const AuthPage = () => {
           
           <div className="mt-6 max-w-4xl mx-auto">
             <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-blue-900 via-betting-tertiaryPurple via-yellow-400 to-orange-500 bg-clip-text drop-shadow-lg">
-              {showLogin ? 'Welcome Back to RaceWiseAI!' : 'Get instant access to advanced AI-powered horse racing tools'}
+              {showLogin ? 'Welcome Back to RaceWiseAI!' : 'Join hundreds of professional and recreational handicappers using our advanced AI-Tools'}
             </p>
           </div>
         </div>
