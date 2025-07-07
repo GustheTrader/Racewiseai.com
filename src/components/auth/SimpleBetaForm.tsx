@@ -6,10 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 const SimpleBetaForm = () => {
   const { signUp } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -24,22 +26,27 @@ const SimpleBetaForm = () => {
     
     setIsLoading(true);
     try {
-      // Create account with email confirmation required
-      const strongPassword = `BetaUser${Date.now()}@Ai`;
-      await signUp(email, strongPassword, email.split('@')[0]);
+      // For beta access, just validate email format and go directly to dashboard
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        toast.error('Please enter a valid email address');
+        setIsLoading(false);
+        return;
+      }
       
-      setEmailSent(true);
-      toast.success('📧 Confirmation email sent! Please check your inbox and click the link to verify your email.');
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('🎉 Welcome to RaceWiseAI Beta! Redirecting to dashboard...');
+      
+      // Redirect to dashboard after short delay
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
       
     } catch (error: any) {
       console.error('Email submission error:', error);
-      
-      if (error?.message?.includes('already registered') || error?.message?.includes('already exists')) {
-        setEmailSent(true);
-        toast.success('📧 Account exists! Please check your email for the confirmation link.');
-      } else {
-        toast.error('Something went wrong. Please try again.');
-      }
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +122,7 @@ const SimpleBetaForm = () => {
           
           <div className="text-sm text-white bg-gradient-to-r from-orange-500/30 to-yellow-500/30 p-4 rounded border border-orange-400/50">
             <p className="text-center">
-              📧 <strong>Email Confirmation:</strong> We'll send you a secure link to verify your email and access all our AI-powered horse racing tools!
+              🚀 <strong>Beta Access:</strong> Enter your email to instantly access all our AI-powered horse racing tools!
             </p>
           </div>
         </CardContent>
@@ -130,7 +137,7 @@ const SimpleBetaForm = () => {
                 <Loader2 size={20} className="mr-2 animate-spin" />
                 Sending Confirmation...
               </>
-            ) : "📧 Send Confirmation Email"}
+            ) : "🚀 Access Beta Dashboard"}
           </Button>
         </CardFooter>
       </form>
