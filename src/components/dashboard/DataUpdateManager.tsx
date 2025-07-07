@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { getMockData } from '../../utils/mockData';
+import { createMockDataStructure } from '../../utils/dataHelpers';
+import { useRaceData } from '../../hooks/useRaceData';
 
 interface DataUpdateManagerProps {
   currentTrack: string;
@@ -8,7 +9,6 @@ interface DataUpdateManagerProps {
   onDataUpdate: (data: any, time: string) => void;
 }
 
-// This is a custom hook, not a React component
 const useDataUpdateManager = ({ 
   currentTrack, 
   currentRace, 
@@ -16,12 +16,13 @@ const useDataUpdateManager = ({
 }: DataUpdateManagerProps) => {
   const [nextUpdateIn, setNextUpdateIn] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
+  const { horses, races, tracks } = useRaceData();
 
   const refreshData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // In a real app, this would be an API call
-      const newData = getMockData();
+      // Create updated data structure with current Supabase data
+      const newData = createMockDataStructure(horses, races, tracks);
       const updatedTime = new Date().toLocaleTimeString();
       onDataUpdate(newData, updatedTime);
       setNextUpdateIn(30);
@@ -30,7 +31,7 @@ const useDataUpdateManager = ({
     } finally {
       setIsLoading(false);
     }
-  }, [onDataUpdate]);
+  }, [onDataUpdate, horses, races, tracks]);
 
   useEffect(() => {
     // Reset the timer when track or race changes
