@@ -54,6 +54,20 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
   return (
     <>
+      <div className="mb-4">
+        <StatusBar 
+          lastUpdated={lastUpdated} 
+          onRefresh={onRefreshData}
+          nextUpdateIn={nextUpdateIn}
+        />
+      </div>
+
+      {/* AI Agents Card - position 2 below header */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <AIAgentsCard />
+      </div>
+
+      {/* Race Navigation Bar - moved below AI agents */}
       <RaceNavBar 
         currentTrack={currentTrack}
         currentRace={currentRace}
@@ -67,19 +81,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         onTrackChange={onTrackChange}
         onRaceChange={onRaceChange}
       />
-      
-      <div className="mb-4">
-        <StatusBar 
-          lastUpdated={lastUpdated} 
-          onRefresh={onRefreshData}
-          nextUpdateIn={nextUpdateIn}
-        />
-      </div>
-
-      {/* AI Agents Card - moved to position 2 below header */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        <AIAgentsCard />
-      </div>
 
       <div className="grid grid-cols-1 gap-4 mb-4">
         <OddsTable 
