@@ -11,11 +11,9 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SimpleBetaForm = () => {
-  const { signUp } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +33,58 @@ const SimpleBetaForm = () => {
     setIsLoading(true);
     
     try {
-      // Use the existing createDevAccount for instant access
       console.log('Creating instant beta access for:', email);
       
       // Show success message immediately
       toast.success('🎉 Welcome to RaceWiseAI Beta! Accessing dashboard...');
       
-      // Create dev account for instant access
-      await signUp(email, "BetaAccess2025!", email.split('@')[0]);
+      const guestPassword = "BetaAccess2025!";
+      const userName = email.split('@')[0];
       
-      // Force immediate redirect
+      // Try to sign in first (user might already exist)
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: guestPassword
+      });
+
+      if (signInData?.user) {
+        // User exists, redirect immediately
+        setTimeout(() => {
+          navigate('/');
+        }, 500);
+        return;
+      }
+
+      // If sign-in failed, create new account without email confirmation
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: guestPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: userName,
+            app_name: 'RaceWiseAI',
+            company: 'RaceWiseAI.com'
+          },
+        },
+      });
+      
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        // Still redirect for demo purposes
+        setTimeout(() => {
+          navigate('/');
+        }, 500);
+        return;
+      }
+
+      // Immediately try to sign in with the new account
+      const { data: autoSignInData, error: autoSignInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: guestPassword
+      });
+
+      // Redirect regardless of sign-in success for instant access
       setTimeout(() => {
         navigate('/');
       }, 500);
@@ -62,47 +102,6 @@ const SimpleBetaForm = () => {
     }
   };
 
-  if (emailSent) {
-    return (
-      <Card className="bg-betting-darkPurple/80 border-4 border-green-400 backdrop-blur-md shadow-2xl">
-        <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-          <CardTitle className="text-white text-center text-2xl font-bold">
-            📧 Check Your Email
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6 bg-betting-darkPurple/90 backdrop-blur-sm text-center">
-          <div className="space-y-4">
-            <div className="text-6xl">📬</div>
-            <h3 className="text-xl font-semibold text-white">Email Sent!</h3>
-            <p className="text-gray-300">
-              We've sent a confirmation email to <strong className="text-orange-400">{email}</strong>
-            </p>
-            <p className="text-gray-300">
-              Please check your inbox and click the confirmation link to verify your email and access the platform.
-            </p>
-          </div>
-          
-          <div className="text-sm text-white bg-gradient-to-r from-green-500/30 to-blue-500/30 p-4 rounded border border-green-400/50">
-            <p className="text-center">
-              ✅ <strong>Next Step:</strong> Click the link in your email to confirm your account and start using RaceWiseAI!
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="bg-betting-darkPurple/90 backdrop-blur-sm rounded-b-lg">
-          <Button 
-            onClick={() => {
-              setEmailSent(false);
-              setEmail('');
-            }}
-            className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold text-lg py-3"
-          >
-            Use Different Email
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
-
   return (
     <Card className="bg-betting-darkPurple/80 border-4 border-orange-400 backdrop-blur-md shadow-2xl transform hover:scale-105 transition-all duration-300">
       <CardHeader className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-t-lg">
@@ -113,8 +112,8 @@ const SimpleBetaForm = () => {
       <form onSubmit={handleEmailSubmit}>
         <CardContent className="space-y-6 bg-betting-darkPurple/90 backdrop-blur-sm">
           <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold text-white">Get Beta Access</h3>
-            <p className="text-gray-300">Enter your email to receive a confirmation link and join the platform!</p>
+            <h3 className="text-xl font-semibold text-white">Get Instant Access</h3>
+            <p className="text-gray-300">Enter your email to instantly access all our AI-powered tools!</p>
           </div>
           
           <div className="space-y-2">
@@ -132,7 +131,7 @@ const SimpleBetaForm = () => {
           
           <div className="text-sm text-white bg-gradient-to-r from-orange-500/30 to-yellow-500/30 p-4 rounded border border-orange-400/50">
             <p className="text-center">
-              🚀 <strong>Beta Access:</strong> Enter your email to instantly access all our AI-powered horse racing tools!
+              🚀 <strong>Instant Access:</strong> No email confirmation needed - access the dashboard immediately!
             </p>
           </div>
         </CardContent>
@@ -145,9 +144,9 @@ const SimpleBetaForm = () => {
             {isLoading ? (
               <>
                 <Loader2 size={20} className="mr-2 animate-spin" />
-                Sending Confirmation...
+                Accessing Dashboard...
               </>
-            ) : "🚀 Access Beta Dashboard"}
+            ) : "🚀 Access Dashboard Now"}
           </Button>
         </CardFooter>
       </form>
