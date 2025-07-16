@@ -46,11 +46,14 @@ const HorseRow: React.FC<HorseRowProps> = ({ horse, highlightUpdates = false, is
           </div>
         </div>
       </td>
+      <td className="px-4 py-3">
+        {horse.mlOdds}
+      </td>
       <td className={`px-4 py-3 ${liveOddsColor}`}>
         {horse.liveOdds}
       </td>
       <td className="px-4 py-3">
-        {horse.mlOdds}
+        {horse.difference}
       </td>
       <td className={`px-4 py-3 ${modelOddsColor}`}>
         {horse.modelOdds}
@@ -60,9 +63,6 @@ const HorseRow: React.FC<HorseRowProps> = ({ horse, highlightUpdates = false, is
       </td>
       <td className="px-4 py-3">
         {horse.qModelScore}
-      </td>
-       <td className="px-4 py-3">
-        {horse.difference}
       </td>
       <td className="px-4 py-3">
         {horse.jockey}

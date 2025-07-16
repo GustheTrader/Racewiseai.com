@@ -104,12 +104,12 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <th className="px-4 py-3 text-center w-16"><span className="text-xs">View</span></th>
                 <SortableHeader field="pp" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>PP</SortableHeader>
                 <SortableHeader field="name" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Horse</SortableHeader>
-                <SortableHeader field="liveOdds" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Live Odds</SortableHeader>
                 <SortableHeader field="mlOdds" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>ML Odds</SortableHeader>
+                <SortableHeader field="liveOdds" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Live Odds</SortableHeader>
+                <SortableHeader field="difference" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Delta</SortableHeader>
                 <SortableHeader field="modelOdds" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Q-Model Odds</SortableHeader>
                 <SortableHeader field="qModelWinPct" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Q-Model Win %</SortableHeader>
                 <SortableHeader field="qModelScore" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Q-Model Score</SortableHeader>
-                <SortableHeader field="difference" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Delta</SortableHeader>
                 <SortableHeader field="jockey" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Jockey</SortableHeader>
                 <SortableHeader field="trainer" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Trainer</SortableHeader>
                 <th className="px-4 py-3 text-center"><span className="text-xs">J/T Stats</span></th>
