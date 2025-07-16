@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const SimpleBetaForm = () => {
   const { signUp } = useAuth();
@@ -26,7 +27,7 @@ const SimpleBetaForm = () => {
     
     setIsLoading(true);
     try {
-      // For beta access, just validate email format and go directly to dashboard
+      // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         toast.error('Please enter a valid email address');
@@ -34,15 +35,62 @@ const SimpleBetaForm = () => {
         return;
       }
       
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create guest account with the provided email
+      const guestPassword = "GuestAccess2025!";
       
-      toast.success('🎉 Welcome to RaceWiseAI Beta! Redirecting to dashboard...');
+      toast.info('Setting up your beta access...');
       
-      // Redirect to dashboard after short delay
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
+      // Try to sign in first (in case account already exists)
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: guestPassword
+      });
+
+      if (signInData?.user) {
+        toast.success('🎉 Welcome back to RaceWiseAI! Redirecting to dashboard...');
+        setTimeout(() => navigate('/'), 1500);
+        return;
+      }
+
+      // If sign-in failed, create new account
+      if (signInError) {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: guestPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: email.split('@')[0],
+              app_name: 'RaceWiseAI',
+              company: 'RaceWiseAI.com'
+            },
+          },
+        });
+        
+        if (signUpError) {
+          console.error('Signup error:', signUpError);
+          toast.error('Unable to create account. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+
+        // If account created but needs confirmation, automatically sign in
+        if (signUpData.user) {
+          const { data: autoSignInData, error: autoSignInError } = await supabase.auth.signInWithPassword({
+            email,
+            password: guestPassword
+          });
+
+          if (autoSignInData?.user) {
+            toast.success('🎉 Welcome to RaceWiseAI Beta! Redirecting to dashboard...');
+            setTimeout(() => navigate('/'), 1500);
+          } else {
+            // Fallback: just redirect to dashboard after showing success message
+            toast.success('🎉 Welcome to RaceWiseAI Beta! Redirecting to dashboard...');
+            setTimeout(() => navigate('/'), 1500);
+          }
+        }
+      }
       
     } catch (error: any) {
       console.error('Email submission error:', error);
