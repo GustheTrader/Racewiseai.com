@@ -96,7 +96,7 @@ const VideoPerformanceCard = () => {
 
   return (
     <Card className="w-full h-full">
-      <CardHeader className="bg-gradient-to-r from-betting-primaryPurple to-betting-secondaryPurple text-white">
+      <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
         <CardTitle className="text-center text-3xl">Video Performance Summary Grade</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
