@@ -17,6 +17,7 @@ import TicketBetGenerator from '../TicketBetGenerator';
 import EmptyStatePrompt from './EmptyStatePrompt';
 import PersonalModelCard from '../PersonalModelCard';
 import AIAgentsCard from '../ai-agents/AIAgentsCard';
+import VideoPerformanceCard from '../VideoPerformanceCard';
 
 interface DashboardContentProps {
   data: any;
@@ -137,10 +138,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <TrainingFigures figures={data.trainingFigures} />
       </div>
       
-      {/* Live Paddock Comments and AI-Thorian Value at the bottom */}
+      {/* Live Paddock Comments and AI-Thorian Value */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <LivePaddockComments comments={data.paddockComments} />
         <AIThorianValue valuePicks={data.valuePicks} pick3Combos={data.pick3Combos} />
+      </div>
+      
+      {/* Video Performance Summary Grade at the bottom */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <VideoPerformanceCard />
       </div>
     </>
   );
