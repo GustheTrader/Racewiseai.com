@@ -15,6 +15,7 @@ import { AuthProvider } from "./contexts/auth/AuthContext";
 import DataDashboardPage from "./pages/DataDashboardPage";
 import QuantumRankingsPage from "./pages/QuantumRankingsPage";
 import ModelProcessPage from "./pages/ModelProcessPage";
+import VideoPerformancePage from "./pages/VideoPerformancePage";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,14 @@ const App = () => (
               element={
                 <RequireAuth>
                   <QuantumRankingsPage />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/video-performance" 
+              element={
+                <RequireAuth>
+                  <VideoPerformancePage />
                 </RequireAuth>
               } 
             />
