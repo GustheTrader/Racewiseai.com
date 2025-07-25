@@ -33,32 +33,16 @@ const SimpleBetaForm = () => {
     setIsLoading(true);
     
     try {
-      console.log('Creating instant beta access for:', email);
+      console.log('Sending magic link for:', email);
       
-      // Show success message immediately
-      toast.success('🎉 Welcome to RaceWiseAI Beta! Accessing dashboard...');
-      
-      const guestPassword = "BetaAccess2025!";
       const userName = email.split('@')[0];
       
-      // Try to sign in first (user might already exist)
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      // Show initial success message
+      toast.success('🚀 Magic link sent! Check your email to access the dashboard.');
+      
+      // Send magic link for both signup and signin
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password: guestPassword
-      });
-
-      if (signInData?.user) {
-        // User exists, redirect immediately
-        setTimeout(() => {
-          navigate('/');
-        }, 500);
-        return;
-      }
-
-      // If sign-in failed, create new account without email confirmation
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: guestPassword,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
@@ -69,34 +53,18 @@ const SimpleBetaForm = () => {
         },
       });
       
-      if (signUpError) {
-        console.error('Signup error:', signUpError);
-        // Still redirect for demo purposes
-        setTimeout(() => {
-          navigate('/');
-        }, 500);
+      if (error) {
+        console.error('Magic link error:', error);
+        toast.error('Failed to send magic link. Please try again.');
         return;
       }
 
-      // Immediately try to sign in with the new account
-      const { data: autoSignInData, error: autoSignInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: guestPassword
-      });
-
-      // Redirect regardless of sign-in success for instant access
-      setTimeout(() => {
-        navigate('/');
-      }, 500);
+      // Show success message with instructions
+      toast.success('📧 Check your email! Click the magic link to instantly access your dashboard.');
       
     } catch (error: any) {
-      console.error('Beta access error:', error);
-      
-      // Fallback: just redirect anyway for demo purposes
-      toast.success('🎉 Welcome to RaceWiseAI Beta! Accessing dashboard...');
-      setTimeout(() => {
-        navigate('/');
-      }, 500);
+      console.error('Magic link error:', error);
+      toast.error('Failed to send magic link. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +99,7 @@ const SimpleBetaForm = () => {
           
           <div className="text-sm text-white bg-gradient-to-r from-orange-500/30 to-yellow-500/30 p-4 rounded border border-orange-400/50">
             <p className="text-center">
-              🚀 <strong>Instant Access:</strong> No email confirmation needed - access the dashboard immediately!
+              📧 <strong>Magic Link Access:</strong> We'll send you a secure link to access the dashboard instantly!
             </p>
           </div>
         </CardContent>
@@ -144,9 +112,9 @@ const SimpleBetaForm = () => {
             {isLoading ? (
               <>
                 <Loader2 size={20} className="mr-2 animate-spin" />
-                Accessing Dashboard...
+                Sending Magic Link...
               </>
-            ) : "🚀 Access Dashboard Now"}
+            ) : "📧 Send Magic Link"}
           </Button>
         </CardFooter>
       </form>
