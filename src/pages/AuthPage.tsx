@@ -187,13 +187,13 @@ const AuthPage = () => {
               </h2>
               <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-200">
                 <div>
-                  <span className="font-semibold text-orange-400">✓ Real-Time Data:</span> Live odds from all major tracks
+                  <span className="font-semibold text-orange-400">✓ ML Algo Modeling:</span> Clean data with advanced algorithms
                 </div>
                 <div>
-                  <span className="font-semibold text-orange-400">✓ AI-Powered:</span> Quantum computing analytics
+                  <span className="font-semibold text-orange-400">✓ AI Video Performance:</span> Grades with run-out notes
                 </div>
                 <div>
-                  <span className="font-semibold text-orange-400">✓ Professional Tools:</span> Used by successful handicappers
+                  <span className="font-semibold text-orange-400">✓ AI Agent Cosmic Bombs:</span> EV live longshots with deep research RL
                 </div>
               </div>
             </CardContent>
