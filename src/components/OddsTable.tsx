@@ -74,10 +74,10 @@ const OddsTable: React.FC<OddsTableProps> = ({
   const collapsedHorsesData = availableHorses.filter(horse => collapsedHorses.has(horse.id));
 
   return (
-    <Card className="group overflow-hidden h-full transform transition-all duration-500 hover:scale-[1.01] animate-fade-in">
-      <CardHeader className="bg-gradient-to-r from-purple-600/80 to-blue-600/80 backdrop-blur-sm px-4 py-3 border-b border-purple-500/30">
+    <Card className="group overflow-hidden h-full transform transition-all duration-500 hover:scale-[1.01] animate-fade-in rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm">
+      <CardHeader className="bg-betting-darkPurple/50 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.3),inset_-2px_-2px_4px_rgba(139,92,246,0.05)] px-4 py-3 border-b border-purple-500/20">
         <CardTitle className="text-lg font-bold text-white flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl backdrop-blur-sm border border-white/10">
+          <div className="p-2 bg-betting-darkPurple/50 rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-white/10">
             <BarChart3 className="h-5 w-5 text-purple-300" />
           </div>
           Odds Table

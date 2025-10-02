@@ -21,9 +21,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const navigate = useNavigate();
   
   return (
-    <div className="min-h-screen bg-gradient-radial from-betting-dark to-black p-4 text-white">
+    <div className="min-h-screen bg-betting-dark p-4 text-white">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-6 flex justify-between items-center p-4 bg-betting-darkPurple border-4 border-betting-tertiaryPurple rounded-lg shadow-lg">
+        <header className="mb-6 flex justify-between items-center p-6 bg-betting-darkPurple/50 border border-betting-tertiaryPurple/30 rounded-3xl shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] backdrop-blur-sm">
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-600">
               {title}
@@ -36,7 +36,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             {extraButtons}
             <Button
               onClick={() => navigate('/quantum-rankings')}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-lg transform hover:scale-105 transition-all shadow-lg border-2 border-orange-400"
+              className="bg-betting-darkPurple/50 hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] text-white font-bold px-6 py-2 rounded-2xl transition-all shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-orange-500/50"
             >
               Quantum AI Rankings
             </Button>

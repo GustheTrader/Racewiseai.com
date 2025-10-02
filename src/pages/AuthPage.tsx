@@ -82,22 +82,22 @@ const AuthPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#e0e0e0] p-6 text-gray-800 relative overflow-hidden">
-      {/* Subtle background texture */}
-      <div className="absolute inset-0 overflow-hidden opacity-5">
-        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-gray-400"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 rounded-full bg-gray-400"></div>
+    <div className="min-h-screen bg-betting-dark p-6 text-white relative overflow-hidden">
+      {/* Neumorphic background elements */}
+      <div className="absolute inset-0 overflow-hidden opacity-10">
+        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-purple-600/30"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 rounded-full bg-blue-600/30"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <div className="inline-block px-8 py-4 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff] mb-6">
-            <h1 className="text-5xl font-bold text-gray-700">RaceEdge AI</h1>
+          <div className="inline-block px-8 py-4 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm mb-6">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-500 to-blue-600 bg-clip-text text-transparent">RaceEdge AI</h1>
           </div>
           
-          <div className="mt-6 max-w-4xl mx-auto px-8 py-6 rounded-3xl bg-[#e0e0e0] shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff]">
-            <p className="text-2xl font-semibold text-gray-600">
+          <div className="mt-6 max-w-4xl mx-auto px-8 py-6 rounded-3xl bg-betting-darkPurple/50 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm">
+            <p className="text-2xl font-semibold text-gray-300">
               Join hundreds of professional and recreational handicappers using our advanced AI-Tools
             </p>
           </div>
@@ -109,15 +109,15 @@ const AuthPage = () => {
             {tools.slice(0, 4).map((tool) => (
               <div 
                 key={tool.id} 
-                className="p-6 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff] hover:shadow-[inset_2px_2px_4px_#bebebe,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 cursor-pointer active:shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff]"
+                className="p-6 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all duration-300 cursor-pointer border border-betting-tertiaryPurple/30 backdrop-blur-sm"
               >
                 <div className="flex items-start space-x-3">
-                  <div className="text-gray-500 shrink-0 mt-1 p-3 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                  <div className="text-orange-400 shrink-0 mt-1 p-3 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
                     {tool.icon}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">{tool.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{tool.description}</p>
+                    <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
+                    <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
                   </div>
                 </div>
               </div>
@@ -136,15 +136,15 @@ const AuthPage = () => {
             {tools.slice(4, 8).map((tool) => (
               <div 
                 key={tool.id} 
-                className="p-6 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff] hover:shadow-[inset_2px_2px_4px_#bebebe,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 cursor-pointer active:shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff]"
+                className="p-6 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all duration-300 cursor-pointer border border-betting-tertiaryPurple/30 backdrop-blur-sm"
               >
                 <div className="flex items-start space-x-3">
-                  <div className="text-gray-500 shrink-0 mt-1 p-3 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                  <div className="text-blue-400 shrink-0 mt-1 p-3 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
                     {tool.icon}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">{tool.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{tool.description}</p>
+                    <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
+                    <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
                   </div>
                 </div>
               </div>
@@ -154,24 +154,24 @@ const AuthPage = () => {
 
         {/* Bottom Features Banner */}
         <div className="mt-12 text-center">
-          <div className="p-8 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff]">
-            <div className="inline-block px-6 py-3 rounded-2xl bg-[#e0e0e0] shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff] mb-6">
-              <h2 className="text-2xl font-bold text-gray-700">
+          <div className="p-8 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm">
+            <div className="inline-block px-6 py-3 rounded-2xl bg-betting-darkPurple/50 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20 mb-6">
+              <h2 className="text-2xl font-bold text-white">
                 🚀 Beta Access Features
               </h2>
             </div>
             <div className="grid md:grid-cols-3 gap-6 text-sm">
-              <div className="p-4 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
-                <span className="font-semibold text-gray-700">✓ ML Algo Modeling:</span>
-                <p className="text-gray-600 mt-1">Clean data with advanced algorithms</p>
+              <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
+                <span className="font-semibold text-orange-400">✓ ML Algo Modeling:</span>
+                <p className="text-gray-300 mt-1">Clean data with advanced algorithms</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
-                <span className="font-semibold text-gray-700">✓ AI Video Performance:</span>
-                <p className="text-gray-600 mt-1">Grades with run-out notes</p>
+              <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
+                <span className="font-semibold text-blue-400">✓ AI Video Performance:</span>
+                <p className="text-gray-300 mt-1">Grades with run-out notes</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
-                <span className="font-semibold text-gray-700">✓ AI Agent Cosmic Bombs:</span>
-                <p className="text-gray-600 mt-1">EV live longshots with deep research RL</p>
+              <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
+                <span className="font-semibold text-purple-400">✓ AI Agent Cosmic Bombs:</span>
+                <p className="text-gray-300 mt-1">EV live longshots with deep research RL</p>
               </div>
             </div>
           </div>
