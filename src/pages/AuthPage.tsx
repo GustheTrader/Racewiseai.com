@@ -82,50 +82,22 @@ const AuthPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-500 via-betting-navyBlue to-betting-darkPurple p-6 text-white relative overflow-hidden">
-      {/* Horse Racing Action Silhouette Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-        style={{
-          backgroundImage: `url('/lovable-uploads/d4bb60c1-df96-4cd0-bde8-52f90f4e8a98.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      />
-      
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-orange-400/20 rounded-full animate-bounce"></div>
-        <div className="absolute top-20 right-20 w-16 h-16 bg-purple-400/20 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-blue-400/20 rounded-full animate-bounce delay-1000"></div>
-        <div className="absolute bottom-10 right-10 w-18 h-18 bg-orange-300/20 rounded-full animate-pulse delay-500"></div>
-        
-        {/* Moving gradient orbs */}
-        <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-gradient-to-r from-orange-400/30 to-purple-400/30 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-gradient-to-r from-purple-400/30 to-blue-400/30 rounded-full blur-xl animate-bounce"></div>
-        
-        {/* Floating particles */}
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute w-2 h-2 bg-white/20 rounded-full animate-pulse`}
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          ></div>
-        ))}
+    <div className="min-h-screen bg-[#e0e0e0] p-6 text-gray-800 relative overflow-hidden">
+      {/* Subtle background texture */}
+      <div className="absolute inset-0 overflow-hidden opacity-5">
+        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-gray-400"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 rounded-full bg-gray-400"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <AuthHeader />
+          <div className="inline-block px-8 py-4 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff] mb-6">
+            <h1 className="text-5xl font-bold text-gray-700">RaceEdge AI</h1>
+          </div>
           
-          <div className="mt-6 max-w-4xl mx-auto">
-            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-blue-900 via-betting-tertiaryPurple via-yellow-400 to-orange-500 bg-clip-text drop-shadow-lg">
+          <div className="mt-6 max-w-4xl mx-auto px-8 py-6 rounded-3xl bg-[#e0e0e0] shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff]">
+            <p className="text-2xl font-semibold text-gray-600">
               Join hundreds of professional and recreational handicappers using our advanced AI-Tools
             </p>
           </div>
@@ -135,19 +107,20 @@ const AuthPage = () => {
           {/* Left Column - Tools 1-4 */}
           <div className="space-y-4">
             {tools.slice(0, 4).map((tool) => (
-              <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-orange-400 shrink-0 mt-1">
-                      {tool.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
-                      <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
-                    </div>
+              <div 
+                key={tool.id} 
+                className="p-6 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff] hover:shadow-[inset_2px_2px_4px_#bebebe,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 cursor-pointer active:shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff]"
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="text-gray-500 shrink-0 mt-1 p-3 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                    {tool.icon}
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h3 className="font-semibold text-gray-700 mb-2">{tool.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{tool.description}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -161,43 +134,47 @@ const AuthPage = () => {
           {/* Right Column - Tools 5-8 */}
           <div className="space-y-4">
             {tools.slice(4, 8).map((tool) => (
-              <Card key={tool.id} className="bg-betting-darkPurple/70 border-betting-secondaryPurple/50 backdrop-blur-md hover:bg-betting-darkPurple/80 transition-all duration-300 transform hover:scale-105">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-orange-400 shrink-0 mt-1">
-                      {tool.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
-                      <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
-                    </div>
+              <div 
+                key={tool.id} 
+                className="p-6 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff] hover:shadow-[inset_2px_2px_4px_#bebebe,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 cursor-pointer active:shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff]"
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="text-gray-500 shrink-0 mt-1 p-3 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                    {tool.icon}
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h3 className="font-semibold text-gray-700 mb-2">{tool.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{tool.description}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Bottom Features Banner */}
         <div className="mt-12 text-center">
-          <Card className="bg-gradient-to-r from-orange-500/20 to-purple-900/20 border-orange-500/30 backdrop-blur-md">
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="p-8 rounded-3xl bg-[#e0e0e0] shadow-[8px_8px_16px_#bebebe,-8px_-8px_16px_#ffffff]">
+            <div className="inline-block px-6 py-3 rounded-2xl bg-[#e0e0e0] shadow-[inset_4px_4px_8px_#bebebe,inset_-4px_-4px_8px_#ffffff] mb-6">
+              <h2 className="text-2xl font-bold text-gray-700">
                 🚀 Beta Access Features
               </h2>
-              <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-200">
-                <div>
-                  <span className="font-semibold text-orange-400">✓ ML Algo Modeling:</span> Clean data with advanced algorithms
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-400">✓ AI Video Performance:</span> Grades with run-out notes
-                </div>
-                <div>
-                  <span className="font-semibold text-orange-400">✓ AI Agent Cosmic Bombs:</span> EV live longshots with deep research RL
-                </div>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 text-sm">
+              <div className="p-4 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                <span className="font-semibold text-gray-700">✓ ML Algo Modeling:</span>
+                <p className="text-gray-600 mt-1">Clean data with advanced algorithms</p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="p-4 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                <span className="font-semibold text-gray-700">✓ AI Video Performance:</span>
+                <p className="text-gray-600 mt-1">Grades with run-out notes</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#e0e0e0] shadow-[4px_4px_8px_#bebebe,-4px_-4px_8px_#ffffff]">
+                <span className="font-semibold text-gray-700">✓ AI Agent Cosmic Bombs:</span>
+                <p className="text-gray-600 mt-1">EV live longshots with deep research RL</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
