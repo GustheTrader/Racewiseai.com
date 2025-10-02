@@ -93,7 +93,7 @@ const AuthPage = () => {
         {/* Header Section */}
         <div className="text-center mb-8">
           <div className="inline-block px-8 py-4 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm mb-6">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-500 to-blue-600 bg-clip-text text-transparent">RaceEdge AI</h1>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-500 to-blue-600 bg-clip-text text-transparent">Racewise AI</h1>
           </div>
           
           <div className="mt-6 max-w-4xl mx-auto px-8 py-6 rounded-3xl bg-betting-darkPurple/50 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm">
