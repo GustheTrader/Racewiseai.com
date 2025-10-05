@@ -1,6 +1,7 @@
-import { Home, TrendingUp, Video, Settings, Database, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { Home, TrendingUp, Video, Settings, Database, ChevronLeft, ChevronRight, Trophy, Sun, Moon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/auth/AuthContext";
+import { useTheme } from "next-themes";
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +12,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarTrigger,
+  SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
@@ -29,6 +32,7 @@ const adminItems = [
 export function AppSidebar() {
   const { collapsed } = useSidebar();
   const { isAdmin } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive 
@@ -37,9 +41,30 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-16" : "w-64"} bg-betting-dark border-r border-betting-tertiaryPurple/30 transition-all duration-300 shadow-[4px_0_8px_rgba(0,0,0,0.4)]`}
-      collapsible
+      className="bg-betting-dark border-r border-betting-tertiaryPurple/30 shadow-[4px_0_8px_rgba(0,0,0,0.4)]"
+      collapsible="icon"
     >
+      {/* Toggle and Theme at Top */}
+      <SidebarHeader className="p-4 border-b border-betting-tertiaryPurple/30 flex flex-row items-center justify-between gap-2">
+        <SidebarTrigger className="bg-betting-darkPurple/50 hover:bg-betting-darkPurple/70 text-white rounded-xl p-2 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all">
+          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+        </SidebarTrigger>
+        {!collapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-xl hover:bg-betting-darkPurple/50"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5 text-yellow-400" />
+            ) : (
+              <Moon className="h-5 w-5 text-purple-400" />
+            )}
+          </Button>
+        )}
+      </SidebarHeader>
+
       <SidebarContent className="bg-betting-dark">
         {/* Main Navigation */}
         <SidebarGroup defaultOpen>
@@ -96,13 +121,6 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
       </SidebarContent>
-
-      {/* Toggle Button at Bottom */}
-      <div className="mt-auto p-4 border-t border-betting-tertiaryPurple/30">
-        <SidebarTrigger className="w-full bg-betting-darkPurple/50 hover:bg-betting-darkPurple/70 text-white rounded-xl p-2 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all">
-          {collapsed ? <ChevronRight className="h-5 w-5 mx-auto" /> : <ChevronLeft className="h-5 w-5 mx-auto" />}
-        </SidebarTrigger>
-      </div>
     </Sidebar>
   );
 }

@@ -1,5 +1,5 @@
-
 import { createRoot } from 'react-dom/client'
+import { ThemeProvider } from 'next-themes'
 import App from './App.tsx'
 import './index.css'
 
@@ -9,4 +9,8 @@ if (localStorage.getItem('ODDS_PULSE_ENABLED') === null) {
   localStorage.setItem('ODDS_PULSE_POLLING_INTERVAL', '60'); // 60 seconds default
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <ThemeProvider attribute="class" defaultTheme="dark">
+    <App />
+  </ThemeProvider>
+);
