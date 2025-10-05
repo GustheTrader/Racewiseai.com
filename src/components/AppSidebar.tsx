@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Video, Settings, Database, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, TrendingUp, Video, Settings, Database, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import {
@@ -16,6 +16,7 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
+  { title: "Race Results", url: "/results", icon: Trophy },
   { title: "Quantum Rankings", url: "/quantum-rankings", icon: TrendingUp },
   { title: "Video Performance", url: "/video-performance", icon: Video },
 ];

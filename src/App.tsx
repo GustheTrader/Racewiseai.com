@@ -10,6 +10,7 @@ import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import RaceResultsPage from "./pages/RaceResultsPage";
 import PublicResultsPage from "./pages/PublicResultsPage";
+import ResultsPage from "./pages/ResultsPage";
 import RequireAuth from "./components/RequireAuth";
 import { AuthProvider } from "./contexts/auth/AuthContext";
 import DataDashboardPage from "./pages/DataDashboardPage";
@@ -30,7 +31,7 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/auth" element={<AuthPage />} />
             <Route 
-              path="/results" 
+              path="/public-results" 
               element={<PublicResultsPage />} 
             />
             <Route 
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <RequireAuth>
                   <Index />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/results" 
+              element={
+                <RequireAuth>
+                  <ResultsPage />
                 </RequireAuth>
               } 
             />
