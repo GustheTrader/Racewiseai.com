@@ -170,8 +170,8 @@ const AuthPage = () => {
                 <p className="text-gray-300 mt-1">Grades with run-out notes</p>
               </div>
               <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
-                <span className="font-semibold text-purple-400">✓ AI Agent Cosmic Bombs:</span>
-                <p className="text-gray-300 mt-1">EV live longshots with deep research RL</p>
+                <span className="font-semibold text-purple-400">✓ AI Agent Cosmic Bombs - LS Agent:</span>
+                <p className="text-gray-300 mt-1">EV live longshots with deep research RL • Text & Voice agents now available</p>
               </div>
             </div>
           </div>

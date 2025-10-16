@@ -12,18 +12,18 @@ const AIAgentsCard: React.FC = () => {
     {
       id: 'race-analyst',
       name: 'Agent RW Race Analyst',
-      description: 'Expert race analysis and handicapping insights',
+      description: 'Expert race analysis and handicapping insights • Text & Voice agents now available',
       icon: <Cpu className="h-5 w-5" />,
       color: 'bg-gradient-to-br from-blue-500/80 to-blue-600/90 hover:from-blue-400/90 hover:to-blue-500/95',
-      fullDescription: 'your expert AI assistant for comprehensive race analysis, handicapping strategies, and performance insights'
+      fullDescription: 'your expert AI assistant for comprehensive race analysis, handicapping strategies, and performance insights. Now with text and voice interaction capabilities!'
     },
     {
       id: 'cosmic-bombs',
-      name: 'Agent RW Cosmic Bombs',
-      description: 'High-value longshot and overlay detection',
+      name: 'Agent RW Cosmic Bombs - LS Agent',
+      description: 'High-value longshot and overlay detection • Text & Voice agents now available',
       icon: <Sparkles className="h-5 w-5" />,
       color: 'bg-gradient-to-br from-purple-500/80 to-purple-600/90 hover:from-purple-400/90 hover:to-purple-500/95',
-      fullDescription: 'your AI specialist for identifying explosive betting opportunities and high-value longshots'
+      fullDescription: 'your AI specialist for identifying explosive betting opportunities and high-value longshots. Now with text and voice interaction capabilities!'
     }
   ];
 
