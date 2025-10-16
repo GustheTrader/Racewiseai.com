@@ -40,8 +40,8 @@ const AuthPage = () => {
     {
       id: 2,
       icon: <Brain className="h-6 w-6" />,
-      title: "Q-Model Analytics",
-      description: "Quantum-powered predictive model with AI-driven probability assessments."
+      title: "Quantum kPCA Analytics",
+      description: "Quantum-inspired predictive model using Classic Kernel PCA to reduce dimensionality."
     },
     {
       id: 3,
