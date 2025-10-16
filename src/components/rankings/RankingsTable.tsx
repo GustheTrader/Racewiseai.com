@@ -9,7 +9,7 @@ interface Horse {
   pp: number;
   horseName: string;
   mlOdds: string;
-  qModelOdds: string;
+  quantumKpcaOdds: string;
   score: number;
   jockey: string;
   trainer: string;
@@ -30,7 +30,7 @@ const RankingsTable: React.FC<RankingsTableProps> = ({ rankings }) => {
             <TableHead className="text-white">PP</TableHead>
             <TableHead className="text-white">Horse</TableHead>
             <TableHead className="text-white">ML Odds</TableHead>
-            <TableHead className="text-white">QModel Odds</TableHead>
+            <TableHead className="text-white">Quantum kPCA Odds</TableHead>
             <TableHead className="text-white">Delta</TableHead>
             <TableHead className="text-white">Quantum Score</TableHead>
             <TableHead className="text-white">Jockey</TableHead>
@@ -40,14 +40,14 @@ const RankingsTable: React.FC<RankingsTableProps> = ({ rankings }) => {
         </TableHeader>
         <TableBody>
           {rankings.map((horse) => {
-            const { delta, hasValue } = compareOdds(horse.mlOdds, horse.qModelOdds);
+            const { delta, hasValue } = compareOdds(horse.mlOdds, horse.quantumKpcaOdds);
             return (
               <TableRow key={horse.rank} className="hover:bg-betting-darkPurple/20">
                 <TableCell className="font-medium">{horse.rank}</TableCell>
                 <TableCell>{horse.pp}</TableCell>
                 <TableCell>{horse.horseName}</TableCell>
                 <TableCell>{horse.mlOdds}</TableCell>
-                <TableCell>{horse.qModelOdds}</TableCell>
+                <TableCell>{horse.quantumKpcaOdds}</TableCell>
                 <TableCell>
                   <span className={`font-mono px-2 py-1 rounded ${hasValue ? 'text-betting-positive bg-betting-positive/10' : 'text-betting-negative bg-betting-negative/10'}`}>
                     {formatDifference(delta)}

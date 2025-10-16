@@ -108,8 +108,8 @@ const OddsTable: React.FC<OddsTableProps> = ({
                 <SortableHeader field="liveOdds" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Live Odds</SortableHeader>
                 <SortableHeader field="difference" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Delta</SortableHeader>
                 <SortableHeader field="modelOdds" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Q-Model Odds</SortableHeader>
-                <SortableHeader field="qModelWinPct" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Q-Model Win %</SortableHeader>
-                <SortableHeader field="qModelScore" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Q-Model Score</SortableHeader>
+                <SortableHeader field="qModelWinPct" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Quantum kPCA Win %</SortableHeader>
+                <SortableHeader field="qModelScore" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Quantum kPCA Score</SortableHeader>
                 <SortableHeader field="jockey" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Jockey</SortableHeader>
                 <SortableHeader field="trainer" sortField={sortField} sortDirection={sortDirection} onSort={handleSort}>Trainer</SortableHeader>
                 <th className="px-4 py-3 text-center"><span className="text-xs">J/T Stats</span></th>

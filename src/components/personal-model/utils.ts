@@ -8,7 +8,7 @@ export const calculatePersonalModelResults = (horses: Horse[], weights: Weightin
   
   horses.forEach(horse => {
     // Use Q-Model Score as the base score
-    const baseScore = horse.qModelScore || 50; // Default to 50 if no Q-Model Score
+    const baseScore = horse.qModelScore || 50; // Default to 50 if no Quantum kPCA Score
     
     // Base factors (using mock data for demonstration)
     const factors = {
