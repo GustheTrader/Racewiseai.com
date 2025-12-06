@@ -1,11 +1,7 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import AuthHeader from '@/components/auth/AuthHeader';
+import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
-import LoginAfterConfirmation from '@/components/auth/LoginAfterConfirmation';
-import { Card, CardContent } from '@/components/ui/card';
 import { 
   TrendingUp, 
   Brain, 
@@ -20,158 +16,160 @@ import {
 const AuthPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  // Removed login toggle - always show signup form
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
   const tools = [
     {
       id: 1,
-      icon: <TrendingUp className="h-6 w-6" />,
+      icon: <TrendingUp className="h-5 w-5" />,
       title: "Live Odds Tracking",
-      description: "Real-time monitoring of horse racing odds with automatic updates and alerts."
+      description: "Real-time monitoring with automatic updates"
     },
     {
       id: 2,
-      icon: <Brain className="h-6 w-6" />,
+      icon: <Brain className="h-5 w-5" />,
       title: "Quantum kPCA Analytics",
-      description: "Quantum-inspired predictive model using Classic Kernel PCA to reduce dimensionality."
+      description: "Quantum-inspired predictive modeling"
     },
     {
       id: 3,
-      icon: <Calculator className="h-6 w-6" />,
+      icon: <Calculator className="h-5 w-5" />,
       title: "Personal Model Builder",
-      description: "Customizable handicapping model with adjustable weighting factors."
+      description: "Customizable handicapping with adjustable weights"
     },
     {
       id: 4,
-      icon: <DollarSign className="h-6 w-6" />,
+      icon: <DollarSign className="h-5 w-5" />,
       title: "Sharp Money Movement",
-      description: "Track professional betting patterns and irregular betting activity."
+      description: "Track professional betting patterns"
     },
     {
       id: 5,
-      icon: <BarChart3 className="h-6 w-6" />,
+      icon: <BarChart3 className="h-5 w-5" />,
       title: "Pool Analysis",
-      description: "Monitor betting pools with percentage breakdowns and payout projections."
+      description: "Monitor pools with payout projections"
     },
     {
       id: 6,
-      icon: <Bot className="h-6 w-6" />,
+      icon: <Bot className="h-5 w-5" />,
       title: "AI Race Agent",
-      description: "Real-time race analysis with up-to-the-minute strategic insights."
+      description: "Real-time strategic insights"
     },
     {
       id: 7,
-      icon: <Eye className="h-6 w-6" />,
-      title: "Live Paddock Comments with OpenCV Analysis",
-      description: "AI-powered visual analysis of horse behavior and condition with real-time expert commentary."
+      icon: <Eye className="h-5 w-5" />,
+      title: "Live Paddock Analysis",
+      description: "AI-powered visual analysis with OpenCV"
     },
     {
       id: 8,
-      icon: <Target className="h-6 w-6" />,
-      title: "Rolling Pick 3, Trifecta & Superfecta Bets",
-      description: "Advanced exotic betting strategies with automated ticket construction and optimization."
+      icon: <Target className="h-5 w-5" />,
+      title: "Exotic Bet Builder",
+      description: "Automated ticket construction & optimization"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-betting-dark p-6 text-white relative overflow-hidden">
-      {/* Neumorphic background elements */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-purple-600/30"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 rounded-full bg-blue-600/30"></div>
-      </div>
+    <div className="min-h-screen animated-gradient-bg text-foreground relative overflow-hidden">
+      {/* Floating orbs for ambient effect */}
+      <div className="floating-orb w-[600px] h-[600px] bg-blue-500/20 -top-48 -left-48" style={{ animationDelay: '0s' }} />
+      <div className="floating-orb w-[500px] h-[500px] bg-purple-500/15 top-1/2 -right-32" style={{ animationDelay: '-5s' }} />
+      <div className="floating-orb w-[400px] h-[400px] bg-cyan-500/10 -bottom-32 left-1/4" style={{ animationDelay: '-10s' }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-block px-8 py-4 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm mb-6">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-500 to-blue-600 bg-clip-text text-transparent">Racewise AI</h1>
-          </div>
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-6xl mx-auto">
           
-          <div className="mt-6 max-w-4xl mx-auto px-8 py-6 rounded-3xl bg-betting-darkPurple/50 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm">
-            <p className="text-2xl font-semibold text-gray-300">
-              Join hundreds of professional and recreational handicappers using our advanced AI-Tools
+          {/* Header */}
+          <div className="text-center mb-12 animate-fade-in-up">
+            <h1 className="text-6xl md:text-7xl font-semibold tracking-tight mb-4">
+              <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                Racewise AI
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto">
+              Professional handicapping tools powered by advanced AI
             </p>
           </div>
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Tools 1-4 */}
-          <div className="space-y-4">
-            {tools.slice(0, 4).map((tool) => (
-              <div 
-                key={tool.id} 
-                className="p-6 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all duration-300 cursor-pointer border border-betting-tertiaryPurple/30 backdrop-blur-sm"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="text-orange-400 shrink-0 mt-1 p-3 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
-                    {tool.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
-                    <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
+          <div className="grid lg:grid-cols-3 gap-8 items-start">
+            
+            {/* Left Column - Tools 1-4 */}
+            <div className="space-y-4">
+              {tools.slice(0, 4).map((tool, index) => (
+                <div 
+                  key={tool.id} 
+                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 1}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400">
+                      {tool.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">{tool.title}</h3>
+                      <p className="text-sm text-muted-foreground">{tool.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Center Column - Form */}
-          <div className="flex items-center justify-center">
-            <div className="w-full max-w-md">
+            {/* Center Column - Form */}
+            <div className="flex items-center justify-center animate-fade-in-up stagger-3">
               <SimpleBetaForm />
             </div>
-          </div>
 
-          {/* Right Column - Tools 5-8 */}
-          <div className="space-y-4">
-            {tools.slice(4, 8).map((tool) => (
-              <div 
-                key={tool.id} 
-                className="p-6 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all duration-300 cursor-pointer border border-betting-tertiaryPurple/30 backdrop-blur-sm"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="text-blue-400 shrink-0 mt-1 p-3 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
-                    {tool.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white mb-2">{tool.title}</h3>
-                    <p className="text-sm text-gray-300 leading-relaxed">{tool.description}</p>
+            {/* Right Column - Tools 5-8 */}
+            <div className="space-y-4">
+              {tools.slice(4, 8).map((tool, index) => (
+                <div 
+                  key={tool.id} 
+                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 5}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400">
+                      {tool.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">{tool.title}</h3>
+                      <p className="text-sm text-muted-foreground">{tool.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom Features Banner */}
-        <div className="mt-12 text-center">
-          <div className="p-8 rounded-3xl bg-betting-darkPurple/50 shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/30 backdrop-blur-sm">
-            <div className="inline-block px-6 py-3 rounded-2xl bg-betting-darkPurple/50 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20 mb-6">
-              <h2 className="text-2xl font-bold text-white">
-                🚀 Beta Access Features
-              </h2>
+              ))}
             </div>
-            <div className="grid md:grid-cols-3 gap-6 text-sm">
-              <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
-                <span className="font-semibold text-orange-400">✓ ML Algo Modeling:</span>
-                <p className="text-gray-300 mt-1">Clean data with advanced algorithms</p>
+          </div>
+
+          {/* Bottom Features */}
+          <div className="mt-16 glass-card p-8 animate-fade-in-up stagger-8">
+            <h2 className="text-center text-lg font-medium text-foreground mb-6">
+              Beta Access Features
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 mb-3">
+                  <Brain className="h-5 w-5" />
+                </div>
+                <h3 className="font-medium text-foreground text-sm">ML Algo Modeling</h3>
+                <p className="text-xs text-muted-foreground mt-1">Clean data with advanced algorithms</p>
               </div>
-              <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
-                <span className="font-semibold text-blue-400">✓ AI Video Performance:</span>
-                <p className="text-gray-300 mt-1">Grades with run-out notes</p>
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 mb-3">
+                  <Eye className="h-5 w-5" />
+                </div>
+                <h3 className="font-medium text-foreground text-sm">AI Video Performance</h3>
+                <p className="text-xs text-muted-foreground mt-1">Grades with run-out notes</p>
               </div>
-              <div className="p-4 rounded-2xl bg-betting-darkPurple/50 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-betting-tertiaryPurple/20">
-                <span className="font-semibold text-purple-400">✓ AI Agent Cosmic Bombs - LS Agent:</span>
-                <p className="text-gray-300 mt-1">EV live longshots with deep research RL • Text & Voice agents now available</p>
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 mb-3">
+                  <Bot className="h-5 w-5" />
+                </div>
+                <h3 className="font-medium text-foreground text-sm">AI Cosmic Bombs Agent</h3>
+                <p className="text-xs text-muted-foreground mt-1">EV live longshots • Text & Voice</p>
               </div>
             </div>
           </div>

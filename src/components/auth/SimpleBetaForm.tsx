@@ -1,16 +1,12 @@
-
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SimpleBetaForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +16,6 @@ const SimpleBetaForm = () => {
       return;
     }
     
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error('Please enter a valid email address');
@@ -30,11 +25,8 @@ const SimpleBetaForm = () => {
     setIsLoading(true);
     
     try {
-      console.log('Sending magic link for:', email);
-      
       const userName = email.split('@')[0];
       
-      // Send magic link for both signup and signin - no email confirmation needed
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -53,8 +45,7 @@ const SimpleBetaForm = () => {
         return;
       }
 
-      // Show success message with instructions
-      toast.success('📧 Check your email! Click the magic link to instantly access your dashboard.');
+      toast.success('Check your email for the magic link!');
       
     } catch (error: any) {
       console.error('Magic link error:', error);
@@ -65,54 +56,74 @@ const SimpleBetaForm = () => {
   };
 
   return (
-    <Card className="bg-betting-darkPurple/80 border-4 border-orange-400 backdrop-blur-md shadow-2xl transform hover:scale-105 transition-all duration-300">
-      <CardHeader className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-t-lg">
-        <CardTitle className="text-white text-center text-2xl font-bold">
-          🚀 Join RaceWiseAI Beta
-        </CardTitle>
-      </CardHeader>
-      <form onSubmit={handleEmailSubmit}>
-        <CardContent className="space-y-6 bg-betting-darkPurple/90 backdrop-blur-sm">
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold text-white">Get Instant Access</h3>
-            <p className="text-gray-300">Enter your email to instantly access all our AI-powered tools!</p>
+    <div className="w-full max-w-md">
+      <div className="glass-card p-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 mb-4">
+            <Mail className="h-8 w-8 text-blue-400" />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-100 font-semibold text-lg">Email Address</Label>
-            <Input
-              id="email"
+          <h2 className="text-2xl font-semibold text-foreground mb-2">
+            Get Started
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Enter your email for instant access
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleEmailSubmit} className="space-y-6">
+          <div className="relative">
+            <input
               type="email"
-              placeholder="your.email@example.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-white/20 text-white border-white/40 placeholder:text-gray-300 focus:border-orange-400 text-lg py-3"
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              className={`
+                w-full px-5 py-4 rounded-2xl text-foreground placeholder:text-muted-foreground
+                glass-input text-base
+                ${isFocused ? 'ring-2 ring-blue-500/30' : ''}
+              `}
               required
             />
           </div>
           
-          <div className="text-sm text-white bg-gradient-to-r from-orange-500/30 to-yellow-500/30 p-4 rounded border border-orange-400/50">
-            <p className="text-center">
-              📧 <strong>Magic Link Access:</strong> We'll send you a secure link to access the dashboard instantly!
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="bg-betting-darkPurple/90 backdrop-blur-sm rounded-b-lg pb-6">
-          <Button 
+          <button 
             type="submit"
             disabled={isLoading || !email.trim()}
-            className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold text-xl py-4 shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="
+              w-full py-4 px-6 rounded-2xl font-medium text-base
+              glass-button text-white
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+              flex items-center justify-center gap-2
+            "
           >
             {isLoading ? (
               <>
-                <Loader2 size={20} className="mr-2 animate-spin" />
-                Sending Magic Link...
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Sending link...
               </>
-            ) : "📧 Get Access"}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+            ) : (
+              <>
+                Continue with Email
+                <ArrowRight className="h-5 w-5" />
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-6 pt-6 border-t border-white/5">
+          <p className="text-center text-xs text-muted-foreground">
+            We'll send you a secure magic link.
+            <br />
+            No password required.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 
