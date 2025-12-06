@@ -5,6 +5,7 @@ import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 /**
  * Email-only sign in - creates or retrieves user profile based on email
  * No password, OTP, or social login required
+ * Attempts to use Supabase for profile storage, falls back to localStorage
  */
 export const signInWithEmail = async (email: string): Promise<{ userId: string; email: string }> => {
   try {
@@ -15,50 +16,70 @@ export const signInWithEmail = async (email: string): Promise<{ userId: string; 
       throw new Error('Invalid email format');
     }
 
-    // Check if user profile exists in profiles table
-    const { data: existingProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, email, full_name, is_admin')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (profileError && profileError.code !== 'PGRST116') {
-      console.error('Error checking profile:', profileError);
-      toast.error('Failed to check user profile');
-      throw profileError;
-    }
-
     let userId: string;
+    let isNewUser = false;
     
-    if (existingProfile) {
-      // User exists, return their info
-      userId = existingProfile.id;
-      toast.success('Welcome back!');
-    } else {
-      // New user - create a profile
-      // Generate a UUID for the user
-      const newUserId = crypto.randomUUID();
-      const userName = email.split('@')[0];
-      
-      const { data: newProfile, error: insertError } = await supabase
+    try {
+      // Try to check if user profile exists in profiles table
+      const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          id: newUserId,
-          email: email,
-          full_name: userName,
-          is_admin: false,
-        })
-        .select()
-        .single();
+        .select('id, email, full_name, is_admin')
+        .eq('email', email)
+        .maybeSingle();
 
-      if (insertError) {
-        console.error('Error creating profile:', insertError);
-        toast.error('Failed to create user profile');
-        throw insertError;
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
       }
 
-      userId = newProfile.id;
+      if (existingProfile) {
+        // User exists in Supabase
+        userId = existingProfile.id;
+      } else {
+        // New user - create a profile in Supabase
+        const newUserId = crypto.randomUUID();
+        const userName = email.split('@')[0];
+        
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: newUserId,
+            email: email,
+            full_name: userName,
+            is_admin: false,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        userId = newProfile.id;
+        isNewUser = true;
+      }
+    } catch (supabaseError) {
+      // Supabase connection failed - fall back to localStorage
+      console.warn('Supabase connection unavailable, using localStorage:', supabaseError);
+      
+      // Check localStorage for existing users
+      const localUsers = JSON.parse(localStorage.getItem('racewise_local_users') || '{}');
+      
+      if (localUsers[email]) {
+        userId = localUsers[email];
+      } else {
+        // Create new local user
+        userId = crypto.randomUUID();
+        localUsers[email] = userId;
+        localStorage.setItem('racewise_local_users', JSON.stringify(localUsers));
+        isNewUser = true;
+      }
+    }
+
+    // Show appropriate success message
+    if (isNewUser) {
       toast.success('Account created! Welcome to RaceWise AI!');
+    } else {
+      toast.success('Welcome back!');
     }
 
     return { userId, email };
