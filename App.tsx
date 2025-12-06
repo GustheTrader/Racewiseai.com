@@ -47,6 +47,14 @@ const App = () => (
               } 
             />
             <Route 
+              path="/dashboard" 
+              element={
+                <RequireAuth>
+                  <Index />
+                </RequireAuth>
+              } 
+            />
+            <Route 
               path="/quantum-rankings" 
               element={
                 <RequireAuth>

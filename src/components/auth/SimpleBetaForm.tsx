@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { Loader2, Mail, ArrowRight } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth/AuthContext';
 
 const SimpleBetaForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const { signInWithEmailOnly } = useAuth();
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,31 +26,13 @@ const SimpleBetaForm = () => {
     setIsLoading(true);
     
     try {
-      const userName = email.split('@')[0];
-      
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            full_name: userName,
-            app_name: 'RaceWiseAI',
-            company: 'RaceWiseAI.com'
-          },
-        },
-      });
-      
-      if (error) {
-        console.error('Magic link error:', error);
-        toast.error('Failed to send magic link. Please try again.');
-        return;
-      }
-
-      toast.success('Check your email for the magic link!');
+      // Use the new email-only sign in
+      await signInWithEmailOnly(email);
+      // Navigation is handled in the auth context
       
     } catch (error: any) {
-      console.error('Magic link error:', error);
-      toast.error('Failed to send magic link. Please try again.');
+      console.error('Email sign in error:', error);
+      toast.error('Failed to sign in. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -64,10 +47,10 @@ const SimpleBetaForm = () => {
             <Mail className="h-8 w-8 text-blue-400" />
           </div>
           <h2 className="text-2xl font-semibold text-foreground mb-2">
-            Get Started
+            Email Login
           </h2>
           <p className="text-muted-foreground text-sm">
-            Enter your email for instant access
+            Enter your email to access the Dashboard
           </p>
         </div>
 
@@ -107,7 +90,7 @@ const SimpleBetaForm = () => {
               </>
             ) : (
               <>
-                Continue with Email
+                Access Dashboard
                 <ArrowRight className="h-5 w-5" />
               </>
             )}
@@ -117,9 +100,9 @@ const SimpleBetaForm = () => {
         {/* Footer */}
         <div className="mt-6 pt-6 border-t border-white/5">
           <p className="text-center text-xs text-muted-foreground">
-            We'll send you a secure magic link.
+            Email-only authentication.
             <br />
-            No password required.
+            No password or verification required.
           </p>
         </div>
       </div>

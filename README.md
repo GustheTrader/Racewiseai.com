@@ -4,6 +4,44 @@
 
 **URL**: https://lovable.dev/projects/a07bce7a-713d-446c-8c0f-8ea801d1fd15
 
+## Authentication Flow
+
+This project uses a **simplified email-only authentication** system:
+
+### How Login Works
+
+1. **Email Entry**: Users enter their email address on the login page
+2. **Instant Access**: No password, OTP, or social login required
+3. **Profile Creation**: The system automatically creates or retrieves the user profile from Supabase
+4. **Dashboard Redirect**: Users are immediately redirected to the Dashboard
+
+### Security Considerations
+
+- User emails are stored in the Supabase `profiles` table
+- Each user is assigned a unique UUID identifier
+- Admin privileges are managed through the `is_admin` field in profiles
+- User sessions are persisted in browser localStorage
+- The authentication state is managed by React Context
+
+### Implementation Details
+
+- **Auth Context**: Located in `/src/contexts/auth/AuthContext.tsx`
+- **Auth Functions**: Core authentication logic in `/src/contexts/auth/authFunctions.ts`
+- **Login Form**: Simplified form in `/src/components/auth/SimpleBetaForm.tsx`
+- **Profile Storage**: User profiles stored in Supabase `profiles` table with fields:
+  - `id` (UUID): Unique user identifier
+  - `email` (string): User email address
+  - `full_name` (string): Derived from email username
+  - `is_admin` (boolean): Admin access flag
+  - `created_at`, `updated_at`: Timestamps
+
+### Removed Features
+
+The following authentication methods have been removed/disabled:
+- Password-based authentication
+- Magic link/OTP authentication
+- Social login (Google, etc.)
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
@@ -59,6 +97,7 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Backend & Authentication)
 
 ## How can I deploy this project?
 

@@ -2,6 +2,114 @@ import { supabase } from '../../integrations/supabase/client';
 import { toast } from '../../components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
+/**
+ * Generate a UUID v4 with fallback for environments without crypto.randomUUID
+ * crypto.randomUUID() requires HTTPS or localhost
+ */
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {
+      console.warn('crypto.randomUUID failed, using fallback');
+    }
+  }
+  
+  // Fallback UUID v4 generator
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+/**
+ * Email-only sign in - creates or retrieves user profile based on email
+ * No password, OTP, or social login required
+ * Attempts to use Supabase for profile storage, falls back to localStorage
+ */
+export const signInWithEmail = async (email: string): Promise<{ userId: string; email: string }> => {
+  try {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      throw new Error('Invalid email format');
+    }
+
+    let userId: string;
+    let isNewUser = false;
+    
+    try {
+      // Try to check if user profile exists in profiles table
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, is_admin')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (existingProfile) {
+        // User exists in Supabase
+        userId = existingProfile.id;
+      } else {
+        // New user - create a profile in Supabase
+        const newUserId = generateUUID();
+        const userName = email.split('@')[0];
+        
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: newUserId,
+            email: email,
+            full_name: userName,
+            is_admin: false,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        userId = newProfile.id;
+        isNewUser = true;
+      }
+    } catch (supabaseError) {
+      // Supabase connection failed - fall back to localStorage
+      console.warn('Supabase connection unavailable, using localStorage:', supabaseError);
+      
+      // Check localStorage for existing users
+      const localUsers = JSON.parse(localStorage.getItem('racewise_local_users') || '{}');
+      
+      if (localUsers[email]) {
+        userId = localUsers[email];
+      } else {
+        // Create new local user
+        userId = generateUUID();
+        localUsers[email] = userId;
+        localStorage.setItem('racewise_local_users', JSON.stringify(localUsers));
+        isNewUser = true;
+      }
+    }
+
+    // Show appropriate success message
+    if (isNewUser) {
+      toast.success('Account created! Welcome to RaceWise AI!');
+    } else {
+      toast.success('Welcome back!');
+    }
+
+    return { userId, email };
+  } catch (error) {
+    console.error('Email sign in error:', error);
+    throw error;
+  }
+};
+
 export const signIn = async (email: string, password: string): Promise<void> => {
   try {
     // Try to sign in with password
