@@ -2,6 +2,72 @@ import { supabase } from '../../integrations/supabase/client';
 import { toast } from '../../components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
+/**
+ * Email-only sign in - creates or retrieves user profile based on email
+ * No password, OTP, or social login required
+ */
+export const signInWithEmail = async (email: string): Promise<{ userId: string; email: string }> => {
+  try {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      throw new Error('Invalid email format');
+    }
+
+    // Check if user profile exists in profiles table
+    const { data: existingProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, is_admin')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error checking profile:', profileError);
+      toast.error('Failed to check user profile');
+      throw profileError;
+    }
+
+    let userId: string;
+    
+    if (existingProfile) {
+      // User exists, return their info
+      userId = existingProfile.id;
+      toast.success('Welcome back!');
+    } else {
+      // New user - create a profile
+      // Generate a UUID for the user
+      const newUserId = crypto.randomUUID();
+      const userName = email.split('@')[0];
+      
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: newUserId,
+          email: email,
+          full_name: userName,
+          is_admin: false,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error creating profile:', insertError);
+        toast.error('Failed to create user profile');
+        throw insertError;
+      }
+
+      userId = newProfile.id;
+      toast.success('Account created! Welcome to RaceWise AI!');
+    }
+
+    return { userId, email };
+  } catch (error) {
+    console.error('Email sign in error:', error);
+    throw error;
+  }
+};
+
 export const signIn = async (email: string, password: string): Promise<void> => {
   try {
     // Try to sign in with password
