@@ -3,6 +3,27 @@ import { toast } from '../../components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
 /**
+ * Generate a UUID v4 with fallback for environments without crypto.randomUUID
+ * crypto.randomUUID() requires HTTPS or localhost
+ */
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {
+      console.warn('crypto.randomUUID failed, using fallback');
+    }
+  }
+  
+  // Fallback UUID v4 generator
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+/**
  * Email-only sign in - creates or retrieves user profile based on email
  * No password, OTP, or social login required
  * Attempts to use Supabase for profile storage, falls back to localStorage
@@ -36,7 +57,7 @@ export const signInWithEmail = async (email: string): Promise<{ userId: string; 
         userId = existingProfile.id;
       } else {
         // New user - create a profile in Supabase
-        const newUserId = crypto.randomUUID();
+        const newUserId = generateUUID();
         const userName = email.split('@')[0];
         
         const { data: newProfile, error: insertError } = await supabase
@@ -68,7 +89,7 @@ export const signInWithEmail = async (email: string): Promise<{ userId: string; 
         userId = localUsers[email];
       } else {
         // Create new local user
-        userId = crypto.randomUUID();
+        userId = generateUUID();
         localUsers[email] = userId;
         localStorage.setItem('racewise_local_users', JSON.stringify(localUsers));
         isNewUser = true;

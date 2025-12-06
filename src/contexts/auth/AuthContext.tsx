@@ -9,10 +9,7 @@ import { checkAdminStatus } from './adminUtils';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Custom user type that includes email
-interface CustomUser extends User {
-  userId?: string;
-}
+// Note: Using minimal User structure for email-only authentication
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -67,7 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -84,21 +80,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { userId, email: userEmail } = await authSignInWithEmail(email);
       
       // Create a mock user object for the session
-      const mockUser: CustomUser = {
+      const mockUser: User = {
         id: userId,
         email: userEmail,
-        userId: userId,
         app_metadata: {},
         user_metadata: { email: userEmail },
         aud: 'authenticated',
         created_at: new Date().toISOString(),
-      };
+      } as User;
       
       // Store user in localStorage for persistence
       localStorage.setItem('racewise_user', JSON.stringify(mockUser));
       
       // Set the user in state to mark them as authenticated
-      setUser(mockUser as User);
+      setUser(mockUser);
       
       // Check admin status
       const adminStatus = await checkAdminStatus(userId, userEmail);
