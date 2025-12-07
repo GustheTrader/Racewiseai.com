@@ -36,54 +36,52 @@ export function AppSidebar() {
 
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive 
-      ? "bg-betting-darkPurple/80 text-orange-400 font-semibold shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] border-l-2 border-orange-500" 
-      : "text-gray-300 hover:text-white hover:bg-betting-darkPurple/50 hover:shadow-[2px_2px_4px_rgba(0,0,0,0.3),-2px_-2px_4px_rgba(139,92,246,0.05)]";
+      ? "bg-white/10 text-foreground font-medium border-l-2 border-primary" 
+      : "text-muted-foreground hover:text-foreground hover:bg-white/5";
 
   return (
     <Sidebar
-      className="bg-betting-dark border-r border-betting-tertiaryPurple/30 shadow-[4px_0_8px_rgba(0,0,0,0.4)]"
+      className="glass-sidebar border-r-0"
       collapsible="icon"
     >
-      {/* Toggle and Theme at Top */}
-      <SidebarHeader className="p-4 border-b border-betting-tertiaryPurple/30 flex flex-row items-center justify-between gap-2">
-        <SidebarTrigger className="bg-betting-darkPurple/50 hover:bg-betting-darkPurple/70 text-white rounded-xl p-2 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] transition-all">
-          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+      <SidebarHeader className="p-3 border-b border-white/5 flex flex-row items-center justify-between gap-2">
+        <SidebarTrigger className="glass-button-secondary p-2 rounded-lg">
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </SidebarTrigger>
         {!collapsed && (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-xl hover:bg-betting-darkPurple/50"
+            className="rounded-lg hover:bg-white/5 h-8 w-8"
           >
             {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-yellow-400" />
+              <Sun className="h-4 w-4 text-amber-400" />
             ) : (
-              <Moon className="h-5 w-5 text-purple-400" />
+              <Moon className="h-4 w-4 text-blue-400" />
             )}
           </Button>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="bg-betting-dark">
-        {/* Main Navigation */}
+      <SidebarContent className="p-2">
         <SidebarGroup defaultOpen>
-          <SidebarGroupLabel className="text-gray-400 text-xs uppercase tracking-wider px-4 py-2">
-            {!collapsed && "Main Tools"}
+          <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider px-3 py-2 font-medium">
+            {!collapsed && "Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="my-1">
+                  <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
                       end 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${getNavCls({ isActive })}`
+                        `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${getNavCls({ isActive })}`
                       }
                     >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
                       {!collapsed && <span className="text-sm">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -93,24 +91,23 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Admin Navigation */}
         {isAdmin && (
           <SidebarGroup defaultOpen className="mt-4">
-            <SidebarGroupLabel className="text-gray-400 text-xs uppercase tracking-wider px-4 py-2">
+            <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider px-3 py-2 font-medium">
               {!collapsed && "Admin"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="space-y-1">
                 {adminItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="my-1">
+                    <SidebarMenuButton asChild>
                       <NavLink 
                         to={item.url}
                         className={({ isActive }) => 
-                          `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${getNavCls({ isActive })}`
+                          `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${getNavCls({ isActive })}`
                         }
                       >
-                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
                         {!collapsed && <span className="text-sm">{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
