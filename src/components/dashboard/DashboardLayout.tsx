@@ -1,4 +1,3 @@
-
 import React from 'react';
 import AdminLink from '../AdminLink';
 import UserProfile from '../UserProfile';
@@ -24,32 +23,39 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-betting-dark text-white">
+      <div className="min-h-screen flex w-full animated-gradient-bg text-foreground relative overflow-hidden">
+        {/* Ambient orbs */}
+        <div className="floating-orb w-[600px] h-[600px] bg-blue-500/20 -top-64 -left-64" />
+        <div className="floating-orb w-[500px] h-[500px] bg-purple-500/20 top-1/2 -right-48" style={{ animationDelay: '-10s' }} />
+        <div className="floating-orb w-[400px] h-[400px] bg-cyan-500/15 bottom-0 left-1/3" style={{ animationDelay: '-5s' }} />
+        
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col">
-          <header className="m-4 mb-6 flex justify-between items-center p-6 bg-betting-darkPurple/50 border border-betting-tertiaryPurple/30 rounded-3xl shadow-[8px_8px_16px_rgba(0,0,0,0.4),-8px_-8px_16px_rgba(139,92,246,0.1)] backdrop-blur-sm">
-            <div>
-              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-blue-600">
-                {title}
-              </h1>
-              <p className="text-gray-400">
-                {subtitle}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {extraButtons}
-              <Button
-                onClick={() => navigate('/quantum-rankings')}
-                className="bg-betting-darkPurple/50 hover:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(139,92,246,0.1)] text-white font-bold px-6 py-2 rounded-2xl transition-all shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(139,92,246,0.1)] border border-orange-500/50"
-              >
-                Quantum AI Rankings
-              </Button>
-              <UserProfile />
+        <div className="flex-1 flex flex-col relative z-10">
+          <header className="m-4 mb-0 glass-header p-5">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-semibold text-gradient">
+                  {title}
+                </h1>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  {subtitle}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {extraButtons}
+                <Button
+                  onClick={() => navigate('/quantum-rankings')}
+                  className="glass-button-secondary text-foreground px-4 py-2 text-sm"
+                >
+                  Quantum AI Rankings
+                </Button>
+                <UserProfile />
+              </div>
             </div>
           </header>
           
-          <div className="flex-1 px-4 pb-4">
+          <div className="flex-1 p-4 overflow-auto custom-scrollbar">
             {children}
           </div>
           
