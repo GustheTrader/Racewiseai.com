@@ -34,7 +34,7 @@ const ModelProcessPage: React.FC = () => {
         <CardContent className="p-6 text-white">
           <h3 className="text-xl font-bold mb-4 text-orange-500">Our Mission</h3>
           <p className="mb-6">
-            Welcome to 5D Odds Pulse, where cutting-edge technology meets traditional handicapping wisdom. 
+            Welcome to 5D Collective, where cutting-edge technology meets traditional handicapping wisdom.
             Our team of dedicated horseplayers and data scientists has developed a revolutionary approach to 
             horse race handicapping that brings unprecedented value and insight to the racing community.
           </p>
