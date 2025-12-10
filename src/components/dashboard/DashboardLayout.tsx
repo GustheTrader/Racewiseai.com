@@ -4,6 +4,7 @@ import UserProfile from '../UserProfile';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import RacewiseLogo from './RacewiseLogo';
 import { AppSidebar } from '../AppSidebar';
 
 interface DashboardLayoutProps {
@@ -34,11 +35,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div className="flex-1 flex flex-col relative z-10">
           <header className="m-4 mb-0 glass-header p-5">
             <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-semibold text-gradient">
-                  {title}
-                </h1>
-                <p className="text-muted-foreground text-sm mt-0.5">
+              <div className="flex items-center gap-4">
+                <RacewiseLogo />
+                <div className="h-10 w-px bg-gradient-to-b from-transparent via-muted-foreground/30 to-transparent" />
+                <p className="text-muted-foreground text-sm">
                   {subtitle}
                 </p>
               </div>
