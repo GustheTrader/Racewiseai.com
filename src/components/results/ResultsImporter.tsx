@@ -48,19 +48,37 @@ const ResultsImporter: React.FC<ResultsImporterProps> = ({
 
   const handleScrapePreview = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!url || !url.trim()) {
       toast.error("Please enter a valid URL");
       return;
     }
-    
+
+    // Validate URL to prevent SSRF attacks
+    try {
+      const urlObj = new URL(url);
+      // Only allow offtrackbetting.com domain
+      const allowedDomains = ['offtrackbetting.com', 'app.offtrackbetting.com'];
+      const isAllowed = allowedDomains.some(domain =>
+        urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+      );
+
+      if (!isAllowed) {
+        toast.error("Only offtrackbetting.com URLs are supported");
+        return;
+      }
+    } catch (error) {
+      toast.error("Please enter a valid URL");
+      return;
+    }
+
     setIsImporting(true);
     setPreviewData(null);
-    
+
     try {
       // Call the scraper edge function
       const { data, error } = await supabase.functions.invoke('scrape-race-results', {
-        body: { 
+        body: {
           url,
           trackName: raceTrack || undefined,
           raceNumber: raceNumber ? parseInt(raceNumber) : undefined

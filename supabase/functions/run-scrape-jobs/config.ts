@@ -1,17 +1,38 @@
 
-// CORS headers for cross-origin requests
-export const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// CORS headers - restricted to specific origins for security
+// In production, only allow your domain
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173', // local development
+  'http://localhost:3000',  // alternative local port
+  'https://racewiseai.com',
+  'https://www.racewiseai.com',
+  'https://app.racewiseai.com',
+];
+
+export function getCorsHeaders(origin?: string): Record<string, string> {
+  const isAllowed = origin && ALLOWED_ORIGINS.some(allowed =>
+    allowed === origin || (origin.includes('localhost') && allowed.includes('localhost'))
+  );
+
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin! : "",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  };
+}
 
 // Environment variables
 export const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 export const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
 
-// OTB site credentials
-export const OTB_USERNAME = Deno.env.get("OTB_USERNAME") || "jeffgus@gmail.com";
-export const OTB_PASSWORD = Deno.env.get("OTB_PASSWORD") || "Gusboys1!";
+// OTB site credentials - MUST be set in environment variables
+export const OTB_USERNAME = Deno.env.get("OTB_USERNAME") || "";
+export const OTB_PASSWORD = Deno.env.get("OTB_PASSWORD") || "";
+
+// Validate that credentials are configured
+if (!OTB_USERNAME || !OTB_PASSWORD) {
+  throw new Error("OTB_USERNAME and OTB_PASSWORD environment variables must be configured");
+}
 
 // Track mappings for URL formatting
 export const TRACK_SLUGS: Record<string, string> = {

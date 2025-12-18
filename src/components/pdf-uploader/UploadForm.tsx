@@ -19,10 +19,18 @@ const UploadForm: React.FC<UploadFormProps> = ({
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
 
+  // File size limit: 50MB
+  const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0] || null;
-    
-    if (selectedFile && selectedFile.type !== 'application/pdf') {
+
+    if (!selectedFile) {
+      return;
+    }
+
+    // Validate MIME type
+    if (selectedFile.type !== 'application/pdf') {
       toast({
         title: "Invalid file type",
         description: "Please upload a PDF file",
@@ -30,7 +38,17 @@ const UploadForm: React.FC<UploadFormProps> = ({
       });
       return;
     }
-    
+
+    // Validate file size
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      toast({
+        title: "File too large",
+        description: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setFile(selectedFile);
     if (selectedFile) {
       onFileSelected(selectedFile);
