@@ -15,6 +15,7 @@ import { AuthProvider } from "./contexts/auth/AuthContext";
 import DataDashboardPage from "./pages/DataDashboardPage";
 import QuantumRankingsPage from "./pages/QuantumRankingsPage";
 import ModelProcessPage from "./pages/ModelProcessPage";
+import ScraperDashboardPage from "./pages/ScraperDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -64,29 +65,37 @@ const App = () => (
             />
 
             {/* Admin Routes (Require Admin Role) */}
-            <Route 
-              path="/admin" 
+            <Route
+              path="/admin"
               element={
                 <RequireAuth requireAdmin={true}>
                   <AdminPage />
                 </RequireAuth>
-              } 
+              }
             />
-            <Route 
-              path="/data-dashboard" 
+            <Route
+              path="/data-dashboard"
               element={
                 <RequireAuth requireAdmin={true}>
                   <DataDashboardPage />
                 </RequireAuth>
-              } 
+              }
             />
-            <Route 
-              path="/results/:trackName" 
+            <Route
+              path="/scraper-dashboard"
+              element={
+                <RequireAuth requireAdmin={true}>
+                  <ScraperDashboardPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/results/:trackName"
               element={
                 <RequireAuth requireAdmin={true}>
                   <RaceResultsPage />
                 </RequireAuth>
-              } 
+              }
             />
             
             {/* Catch-all Route */}
