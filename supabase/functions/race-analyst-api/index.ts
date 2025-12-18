@@ -1,13 +1,42 @@
 // @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-};
+// CORS headers - restricted to specific origins for security
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173', // local development
+  'http://localhost:3000',  // alternative local port
+  'https://racewiseai.com',
+  'https://www.racewiseai.com',
+  'https://app.racewiseai.com',
+];
+
+function getCorsHeaders(origin?: string): Record<string, string> {
+  const isAllowed = origin && ALLOWED_ORIGINS.some(allowed =>
+    allowed === origin || (origin.includes('localhost') && allowed.includes('localhost'))
+  );
+
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin! : "",
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  };
+}
+
+// Verify JWT token from Supabase
+async function verifyToken(req: Request): Promise<{ valid: boolean; error?: string }> {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { valid: false, error: 'Missing or invalid authorization header' };
+  }
+  // Token validation would be done here with Supabase JWT verification
+  // For now, we check that the header exists and is properly formatted
+  return { valid: true };
+}
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -88,12 +117,23 @@ serve(async (req) => {
 
     // Analyze race data
     if (path === '/analyze' && method === 'POST') {
+      // Verify authentication
+      const tokenCheck = await verifyToken(req);
+      if (!tokenCheck.valid) {
+        return new Response(JSON.stringify({
+          error: "Unauthorized: " + tokenCheck.error
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const body = await req.json();
       const { track_name, race_number, analysis_type = "full", horses = [] } = body;
 
       if (!track_name || !race_number) {
         return new Response(JSON.stringify({
-          error: "Missing required fields: track_name and race_number"
+          error: "Missing required fields"
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -129,12 +169,23 @@ serve(async (req) => {
 
     // Generate predictions
     if (path === '/predictions' && method === 'POST') {
+      // Verify authentication
+      const tokenCheck = await verifyToken(req);
+      if (!tokenCheck.valid) {
+        return new Response(JSON.stringify({
+          error: "Unauthorized: " + tokenCheck.error
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const body = await req.json();
       const { track_name, race_number, prediction_type = "win_probability", horses = [] } = body;
 
       if (!track_name || !race_number) {
         return new Response(JSON.stringify({
-          error: "Missing required fields: track_name and race_number"
+          error: "Missing required fields"
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -187,8 +238,28 @@ serve(async (req) => {
 
     // Submit odds data
     if (path === '/odds' && method === 'POST') {
+      // Verify authentication
+      const tokenCheck = await verifyToken(req);
+      if (!tokenCheck.valid) {
+        return new Response(JSON.stringify({
+          error: "Unauthorized: " + tokenCheck.error
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const body = await req.json();
       const { track_name, race_number, odds_data, timestamp } = body;
+
+      if (!track_name || !race_number) {
+        return new Response(JSON.stringify({
+          error: "Missing required fields"
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
       return new Response(JSON.stringify({
         status: "received",
@@ -216,8 +287,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in race-analyst-api:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
+    // Don't leak error details to clients
+    return new Response(JSON.stringify({
+      error: "Internal server error",
       timestamp: new Date().toISOString(),
       service: "race-analyst-api"
     }), {

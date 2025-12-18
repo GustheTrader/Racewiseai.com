@@ -197,13 +197,20 @@ export const signOut = async (): Promise<void> => {
 
 export const createDevAccount = async (setIsAdmin: (isAdmin: boolean) => void): Promise<void> => {
   try {
-    const devEmail = "nft.king137@gmail.com";
-    const devPassword = "S3cure@Dev#2025!"; // Updated to use a stronger password that meets security criteria
-    const devName = "Test Developer";
+    // Get dev credentials from environment variables ONLY
+    const devEmail = import.meta.env.VITE_DEV_EMAIL;
+    const devPassword = import.meta.env.VITE_DEV_PASSWORD;
+    const devName = import.meta.env.VITE_DEV_NAME || "Developer";
 
-    toast.info('Creating developer account...');
-    
-    // First try to sign in
+    if (!devEmail || !devPassword) {
+      console.error('Dev credentials not configured in environment variables');
+      toast.error('Developer credentials not configured. Contact administrator.');
+      throw new Error('VITE_DEV_EMAIL and VITE_DEV_PASSWORD must be set in environment');
+    }
+
+    toast.info('Attempting developer account login...');
+
+    // Try to sign in
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: devEmail,
       password: devPassword
@@ -211,107 +218,26 @@ export const createDevAccount = async (setIsAdmin: (isAdmin: boolean) => void): 
 
     // If sign-in is successful
     if (signInData?.user) {
-      console.log('Developer account login successful', signInData.user);
+      console.log('Developer account login successful');
       toast.success('Developer account login successful');
-      
+
       // Ensure admin privileges
       await ensureAdminPrivileges(signInData.user.id);
-      
+
       // Force update the admin status
       setIsAdmin(true);
       return;
     }
-    
-    // If sign-in failed, create a new account
+
+    // If sign-in failed, show error
     if (signInError) {
-      console.log('Sign in failed, creating new developer account...', signInError);
-      toast.info('Creating developer account...');
-      
-      // Create new user with auto-confirm
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: devEmail,
-        password: devPassword,
-        options: {
-          data: {
-            full_name: devName,
-          },
-        },
-      });
-      
-      if (signUpError) {
-        console.error('Error creating developer account:', signUpError);
-        toast.error(`Failed to create developer account: ${signUpError.message}`);
-        throw signUpError;
-      }
-      
-      if (!signUpData.user) {
-        console.error('Failed to create developer account - no user returned');
-        toast.error('Failed to create developer account');
-        return;
-      }
-      
-      console.log('Developer account created, attempting login...', signUpData.user);
-      
-      // Try to sign in with the new account immediately
-      const { data: newLoginData, error: newLoginError } = await supabase.auth.signInWithPassword({
-        email: devEmail,
-        password: devPassword
-      });
-      
-      if (newLoginError) {
-        console.error('Error logging in to new developer account:', newLoginError);
-        toast.error(`Login error: ${newLoginError.message}`);
-        throw newLoginError;
-      }
-      
-      if (newLoginData.user) {
-        console.log('Successfully logged in with new developer account', newLoginData.user);
-        
-        // Check if profile exists
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', newLoginData.user.id)
-          .maybeSingle();
-          
-        if (!profileData || profileError) {
-          // Create profile
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: newLoginData.user.id,
-              email: devEmail,
-              full_name: devName,
-              is_admin: true
-            });
-              
-          if (insertError) {
-            console.error('Failed to create profile:', insertError);
-            toast.error(`Failed to create profile: ${insertError.message}`);
-          }
-        } else {
-          // Update existing profile with admin privileges
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ is_admin: true })
-            .eq('id', newLoginData.user.id);
-              
-          if (updateError) {
-            console.error('Failed to update profile:', updateError);
-            toast.error(`Failed to update profile: ${updateError.message}`);
-          }
-        }
-        
-        // Double-check admin status
-        await checkAdminStatus(newLoginData.user.id, devEmail);
-        
-        // Force update the admin status
-        setIsAdmin(true);
-        toast.success('Developer account created and logged in with admin privileges');
-      }
+      console.error('Developer account login failed');
+      toast.error(`Login failed: ${signInError.message}`);
+      throw signInError;
     }
   } catch (error: any) {
-    console.error('Developer login error:', error);
+    console.error('Developer login error');
     toast.error(`Developer login failed: ${error?.message || 'Unknown error'}`);
+    throw error;
   }
 };
