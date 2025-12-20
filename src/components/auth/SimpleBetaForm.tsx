@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { Loader2, Mail, ArrowRight } from 'lucide-react';
+import { Loader2, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 
 const SimpleBetaForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const { signInWithEmailOnly } = useAuth();
+  const [emailSent, setEmailSent] = useState(false);
+  const { signInWithMagicLink } = useAuth();
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +19,7 @@ const SimpleBetaForm = () => {
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email) || email.length > 254) {
       toast.error('Please enter a valid email address');
       return;
     }
@@ -26,17 +27,45 @@ const SimpleBetaForm = () => {
     setIsLoading(true);
     
     try {
-      // Use the new email-only sign in
-      await signInWithEmailOnly(email);
-      // Navigation is handled in the auth context
-      
-    } catch (error: any) {
-      console.error('Email sign in error:', error);
-      toast.error('Failed to sign in. Please try again.');
+      await signInWithMagicLink(email);
+      setEmailSent(true);
+    } catch {
+      // Error is handled in the auth function
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (emailSent) {
+    return (
+      <div className="w-full max-w-md">
+        <div className="glass-card p-8">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-600/10 mb-4">
+              <CheckCircle className="h-8 w-8 text-green-400" />
+            </div>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              Check Your Email
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              We've sent a login link to <strong className="text-foreground">{email}</strong>
+            </p>
+            <p className="text-muted-foreground text-xs">
+              Click the link in your email to securely access the dashboard.
+              <br />
+              The link expires in 1 hour.
+            </p>
+            <button
+              onClick={() => setEmailSent(false)}
+              className="mt-6 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Use a different email
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md">
@@ -47,10 +76,10 @@ const SimpleBetaForm = () => {
             <Mail className="h-8 w-8 text-blue-400" />
           </div>
           <h2 className="text-2xl font-semibold text-foreground mb-2">
-            Email Login
+            Secure Login
           </h2>
           <p className="text-muted-foreground text-sm">
-            Enter your email to access the Dashboard
+            Enter your email to receive a secure login link
           </p>
         </div>
 
@@ -70,6 +99,8 @@ const SimpleBetaForm = () => {
                 ${isFocused ? 'ring-2 ring-blue-500/30' : ''}
               `}
               required
+              maxLength={254}
+              autoComplete="email"
             />
           </div>
           
@@ -90,7 +121,7 @@ const SimpleBetaForm = () => {
               </>
             ) : (
               <>
-                Access Dashboard
+                Send Login Link
                 <ArrowRight className="h-5 w-5" />
               </>
             )}
@@ -100,9 +131,9 @@ const SimpleBetaForm = () => {
         {/* Footer */}
         <div className="mt-6 pt-6 border-t border-white/5">
           <p className="text-center text-xs text-muted-foreground">
-            Email-only authentication.
+            Secure, passwordless authentication.
             <br />
-            No password or verification required.
+            We'll email you a magic link for instant access.
           </p>
         </div>
       </div>

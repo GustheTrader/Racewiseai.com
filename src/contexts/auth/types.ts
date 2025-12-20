@@ -1,4 +1,3 @@
-
 import { Session, User } from '@supabase/supabase-js';
 
 export interface AuthContextType {
@@ -7,8 +6,7 @@ export interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithEmailOnly: (email: string) => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
-  createDevAccount: () => Promise<void>;
 }

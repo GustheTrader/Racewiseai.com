@@ -1,28 +1,35 @@
 import { supabase } from '../../integrations/supabase/client';
 
-// List of admin emails loaded from environment variables for security
-// Format in .env: VITE_ADMIN_EMAILS="email1@example.com,email2@example.com"
-export const getAdminEmails = (): string[] => {
+/**
+ * Get admin emails from environment variables
+ * Format in .env: VITE_ADMIN_EMAILS="email1@example.com,email2@example.com"
+ */
+const getAdminEmails = (): string[] => {
   const adminEmailsEnv = import.meta.env.VITE_ADMIN_EMAILS || '';
   if (!adminEmailsEnv) {
-    console.warn('VITE_ADMIN_EMAILS not configured in environment');
     return [];
   }
-  return adminEmailsEnv.split(',').map(email => email.trim()).filter(email => email);
+  return adminEmailsEnv
+    .split(',')
+    .map((email: string) => email.trim().toLowerCase())
+    .filter((email: string) => email);
 };
 
-export const ADMIN_EMAILS = getAdminEmails();
-
+/**
+ * Check if user has admin privileges
+ * Checks environment variable list first, then database
+ */
 export const checkAdminStatus = async (userId: string, email?: string | null): Promise<boolean> => {
   try {
-    // First check if email is in the ADMIN_EMAILS list
-    if (email && ADMIN_EMAILS.includes(email)) {
-      // Update the database to ensure the profile has admin privileges
+    const adminEmails = getAdminEmails();
+    
+    // Check if email is in the admin list
+    if (email && adminEmails.includes(email.toLowerCase())) {
       await ensureAdminPrivileges(userId);
       return true;
     }
 
-    // Otherwise check the database as before
+    // Check database for admin status
     const { data, error } = await supabase
       .from('profiles')
       .select('is_admin')
@@ -30,29 +37,25 @@ export const checkAdminStatus = async (userId: string, email?: string | null): P
       .maybeSingle();
 
     if (error) {
-      console.error('Error checking admin status:', error);
       return false;
     }
 
     return data?.is_admin || false;
-  } catch (error) {
-    console.error('Error in admin check:', error);
+  } catch {
     return false;
   }
 };
 
-// Helper function to ensure the user has admin privileges in the database
+/**
+ * Ensure user has admin privileges in the database
+ */
 export const ensureAdminPrivileges = async (userId: string): Promise<void> => {
   try {
-    const { error } = await supabase
+    await supabase
       .from('profiles')
       .update({ is_admin: true })
       .eq('id', userId);
-    
-    if (error) {
-      console.error('Error updating admin privileges:', error);
-    }
-  } catch (error) {
-    console.error('Error ensuring admin privileges:', error);
+  } catch {
+    // Silently fail - admin status will be checked on next request
   }
 };
