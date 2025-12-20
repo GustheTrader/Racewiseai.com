@@ -1,0 +1,38 @@
+{
+  "name": "racewise-scraper-backend",
+  "version": "1.0.0",
+  "description": "Gemini 3.0 Flash powered web scraper with cron jobs",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "scrape": "node --loader ts-node/esm src/services/scraper.ts"
+  },
+  "keywords": [
+    "scraper",
+    "gemini",
+    "cron",
+    "racing",
+    "odds"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.19.2",
+    "@supabase/supabase-js": "^2.49.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-cron": "^3.0.3",
+    "puppeteer": "^22.13.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.24",
+    "@types/node": "^20.14.5",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.5.3",
+    "ts-node": "^10.9.2"
+  }
+}

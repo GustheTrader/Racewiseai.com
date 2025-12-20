@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # RaceWise Scraper Backend
+  scraper-backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SERVER_PORT=3001
+      - MORNING_SCRAP_TIME=08:00
+      - RACING_START_TIME=12:00
+      - RACING_END_TIME=22:00
+      - RACING_SCRAP_INTERVAL=300
+      - ADMIN_EMAILS=${ADMIN_EMAILS}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    volumes:
+      - ./server/logs:/app/logs
+    networks:
+      - racewise
+
+  # Optional: Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - scraper-backend
+    networks:
+      - racewise
+
+networks:
+  racewise:
+    driver: bridge
