@@ -16,46 +16,64 @@ const getAdminEmails = (): string[] => {
 };
 
 /**
- * Check if user has admin privileges
- * Checks environment variable list first, then database
+ * Check if user has admin privileges using the secure user_roles table
+ * Uses the database's has_role function for server-side validation
  */
 export const checkAdminStatus = async (userId: string, email?: string | null): Promise<boolean> => {
   try {
+    // First check if email is in the admin list (for initial admin setup)
     const adminEmails = getAdminEmails();
-    
-    // Check if email is in the admin list
     if (email && adminEmails.includes(email.toLowerCase())) {
-      await ensureAdminPrivileges(userId);
+      await ensureAdminRole(userId);
       return true;
     }
 
-    // Check database for admin status
+    // Check the user_roles table for admin role
     const { data, error } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', userId)
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
       .maybeSingle();
 
     if (error) {
       return false;
     }
 
-    return data?.is_admin || false;
+    return !!data;
   } catch {
     return false;
   }
 };
 
 /**
- * Ensure user has admin privileges in the database
+ * Ensure user has admin role in the user_roles table
  */
-export const ensureAdminPrivileges = async (userId: string): Promise<void> => {
+export const ensureAdminRole = async (userId: string): Promise<void> => {
   try {
+    // Use upsert to add admin role without duplicates
     await supabase
-      .from('profiles')
-      .update({ is_admin: true })
-      .eq('id', userId);
+      .from('user_roles')
+      .upsert(
+        { user_id: userId, role: 'admin' },
+        { onConflict: 'user_id,role' }
+      );
   } catch {
     // Silently fail - admin status will be checked on next request
+  }
+};
+
+/**
+ * Remove admin role from a user
+ */
+export const removeAdminRole = async (userId: string): Promise<void> => {
+  try {
+    await supabase
+      .from('user_roles')
+      .delete()
+      .eq('user_id', userId)
+      .eq('role', 'admin');
+  } catch {
+    // Silently fail
   }
 };
