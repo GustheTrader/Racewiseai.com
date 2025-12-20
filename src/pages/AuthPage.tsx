@@ -86,13 +86,13 @@ const AuthPage = () => {
           
           {/* Header */}
           <div className="text-center mb-12 animate-fade-in-up">
-            <h1 className="text-6xl md:text-7xl font-semibold tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                Racewise AI
-              </span>
-            </h1>
+            <img 
+              src="/assets/racewise-logo.png" 
+              alt="Racewise AI Toolbox" 
+              className="h-48 md:h-64 mx-auto mb-4 object-contain"
+            />
             <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto">
-              Professional handicapping tools powered by advanced AI
+              Professional handicapping tools powered by ML/AI quantum inspired models
             </p>
           </div>
 
