@@ -1,10 +1,12 @@
 import { supabase } from '../../integrations/supabase/client';
 
 // List of admin emails that should always have admin privileges
-export const ADMIN_EMAILS = [
-  'nft.king137@gmail.com',
-  'jeffgus@gmail.com'
-];
+// Read from environment variables
+const adminEmailsStr = import.meta.env.VITE_ADMIN_EMAILS || '';
+export const ADMIN_EMAILS = adminEmailsStr
+  .split(',')
+  .map(email => email.trim())
+  .filter(email => email.length > 0);
 
 export const checkAdminStatus = async (userId: string, email?: string | null): Promise<boolean> => {
   try {

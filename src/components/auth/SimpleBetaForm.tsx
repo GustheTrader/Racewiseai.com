@@ -11,28 +11,27 @@ const SimpleBetaForm = () => {
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email) {
       toast.error('Email is required');
       return;
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error('Please enter a valid email address');
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      // Use the new email-only sign in
+      // Send magic link to email
       await signInWithEmailOnly(email);
-      // Navigation is handled in the auth context
-      
+      // Magic link has been sent - user will verify via email
+      setEmail(''); // Clear form
     } catch (error: any) {
-      console.error('Email sign in error:', error);
-      toast.error('Failed to sign in. Please try again.');
+      toast.error('Failed to send magic link. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -100,9 +99,9 @@ const SimpleBetaForm = () => {
         {/* Footer */}
         <div className="mt-6 pt-6 border-t border-white/5">
           <p className="text-center text-xs text-muted-foreground">
-            Email-only authentication.
+            We'll send a magic link to your email.
             <br />
-            No password or verification required.
+            Check your inbox to sign in securely.
           </p>
         </div>
       </div>

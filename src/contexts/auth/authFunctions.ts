@@ -3,30 +3,8 @@ import { toast } from '../../components/ui/sonner';
 import { ensureAdminPrivileges, checkAdminStatus } from './adminUtils';
 
 /**
- * Generate a UUID v4 with fallback for environments without crypto.randomUUID
- * crypto.randomUUID() requires HTTPS or localhost
- */
-const generateUUID = (): string => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    try {
-      return crypto.randomUUID();
-    } catch (e) {
-      console.warn('crypto.randomUUID failed, using fallback');
-    }
-  }
-  
-  // Fallback UUID v4 generator
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
-
-/**
- * Email-only sign in - creates or retrieves user profile based on email
- * No password, OTP, or social login required
- * Attempts to use Supabase for profile storage, falls back to localStorage
+ * Email-only sign in using Supabase OTP (One-Time Password)
+ * Sends a magic link to verify email ownership before granting access
  */
 export const signInWithEmail = async (email: string): Promise<{ userId: string; email: string }> => {
   try {
@@ -37,75 +15,24 @@ export const signInWithEmail = async (email: string): Promise<{ userId: string; 
       throw new Error('Invalid email format');
     }
 
-    let userId: string;
-    let isNewUser = false;
-    
-    try {
-      // Try to check if user profile exists in profiles table
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, is_admin')
-        .eq('email', email)
-        .maybeSingle();
+    // Send OTP (magic link) to the email
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        throw profileError;
-      }
-
-      if (existingProfile) {
-        // User exists in Supabase
-        userId = existingProfile.id;
-      } else {
-        // New user - create a profile in Supabase
-        const newUserId = generateUUID();
-        const userName = email.split('@')[0];
-        
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            id: newUserId,
-            email: email,
-            full_name: userName,
-            is_admin: false,
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        userId = newProfile.id;
-        isNewUser = true;
-      }
-    } catch (supabaseError) {
-      // Supabase connection failed - fall back to localStorage
-      console.warn('Supabase connection unavailable, using localStorage:', supabaseError);
-      
-      // Check localStorage for existing users
-      const localUsers = JSON.parse(localStorage.getItem('racewise_local_users') || '{}');
-      
-      if (localUsers[email]) {
-        userId = localUsers[email];
-      } else {
-        // Create new local user
-        userId = generateUUID();
-        localUsers[email] = userId;
-        localStorage.setItem('racewise_local_users', JSON.stringify(localUsers));
-        isNewUser = true;
-      }
+    if (otpError) {
+      toast.error('Failed to send magic link. Please try again.');
+      throw otpError;
     }
 
-    // Show appropriate success message
-    if (isNewUser) {
-      toast.success('Account created! Welcome to RaceWise AI!');
-    } else {
-      toast.success('Welcome back!');
-    }
+    // Return success message - don't reveal if email is new or existing (prevents enumeration)
+    toast.success('Magic link sent! Check your email to sign in.');
 
-    return { userId, email };
+    return { userId: '', email };
   } catch (error) {
-    console.error('Email sign in error:', error);
     throw error;
   }
 };
@@ -113,32 +40,15 @@ export const signInWithEmail = async (email: string): Promise<{ userId: string; 
 export const signIn = async (email: string, password: string): Promise<void> => {
   try {
     // Try to sign in with password
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
     if (error) {
-      // If password login fails, send magic link
-      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            app_name: 'RaceWiseAI',
-            company: 'RaceWiseAI.com'
-          }
-        }
-      });
-      
-      if (magicLinkError) {
-        toast.error(magicLinkError.message);
-        throw magicLinkError;
-      } else {
-        toast.success('Magic link sent! Check your email from RaceWiseAI.com to login instantly.');
-      }
-    } else {
-      toast.success('Signed in successfully');
+      toast.error('Invalid email or password. Please try again.');
+      throw error;
     }
+
+    toast.success('Signed in successfully');
   } catch (error) {
-    console.error('Sign in error:', error);
     throw error;
   }
 };
@@ -146,35 +56,24 @@ export const signIn = async (email: string, password: string): Promise<void> => 
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
   try {
     // Create account with email confirmation required
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
           full_name: fullName || email.split('@')[0],
-          app_name: 'RaceWiseAI',
-          company: 'RaceWiseAI.com'
         },
       },
     });
-    
+
     if (error) {
-      console.error('Signup error:', error);
       toast.error(error.message);
       throw error;
     }
-    
-    if (data.user && !data.user.email_confirmed_at) {
-      // User created but needs email confirmation
-      toast.success('Account created! Please check your email for the confirmation link.');
-    } else if (data.user && data.user.email_confirmed_at) {
-      // User created and already confirmed (shouldn't happen normally)
-      toast.success('Welcome to RaceWiseAI beta!');
-    }
-    
+
+    toast.success('Account created! Please check your email to confirm your account.');
   } catch (error) {
-    console.error('Sign up error:', error);
     throw error;
   }
 };
@@ -182,136 +81,24 @@ export const signUp = async (email: string, password: string, fullName: string):
 export const signOut = async (): Promise<void> => {
   try {
     const { error } = await supabase.auth.signOut();
-    
+
     if (error) {
       toast.error(error.message);
       throw error;
     }
-    
+
     toast.success('Signed out successfully');
   } catch (error) {
-    console.error('Sign out error:', error);
     throw error;
   }
 };
 
+/**
+ * Create a dev account for testing - credentials should be managed securely
+ * This is a placeholder that should only be used in development environments
+ * In production, admin accounts should be created through a secure admin panel
+ */
 export const createDevAccount = async (setIsAdmin: (isAdmin: boolean) => void): Promise<void> => {
-  try {
-    const devEmail = "nft.king137@gmail.com";
-    const devPassword = "S3cure@Dev#2025!"; // Updated to use a stronger password that meets security criteria
-    const devName = "Test Developer";
-
-    toast.info('Creating developer account...');
-    
-    // First try to sign in
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: devEmail,
-      password: devPassword
-    });
-
-    // If sign-in is successful
-    if (signInData?.user) {
-      console.log('Developer account login successful', signInData.user);
-      toast.success('Developer account login successful');
-      
-      // Ensure admin privileges
-      await ensureAdminPrivileges(signInData.user.id);
-      
-      // Force update the admin status
-      setIsAdmin(true);
-      return;
-    }
-    
-    // If sign-in failed, create a new account
-    if (signInError) {
-      console.log('Sign in failed, creating new developer account...', signInError);
-      toast.info('Creating developer account...');
-      
-      // Create new user with auto-confirm
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: devEmail,
-        password: devPassword,
-        options: {
-          data: {
-            full_name: devName,
-          },
-        },
-      });
-      
-      if (signUpError) {
-        console.error('Error creating developer account:', signUpError);
-        toast.error(`Failed to create developer account: ${signUpError.message}`);
-        throw signUpError;
-      }
-      
-      if (!signUpData.user) {
-        console.error('Failed to create developer account - no user returned');
-        toast.error('Failed to create developer account');
-        return;
-      }
-      
-      console.log('Developer account created, attempting login...', signUpData.user);
-      
-      // Try to sign in with the new account immediately
-      const { data: newLoginData, error: newLoginError } = await supabase.auth.signInWithPassword({
-        email: devEmail,
-        password: devPassword
-      });
-      
-      if (newLoginError) {
-        console.error('Error logging in to new developer account:', newLoginError);
-        toast.error(`Login error: ${newLoginError.message}`);
-        throw newLoginError;
-      }
-      
-      if (newLoginData.user) {
-        console.log('Successfully logged in with new developer account', newLoginData.user);
-        
-        // Check if profile exists
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', newLoginData.user.id)
-          .maybeSingle();
-          
-        if (!profileData || profileError) {
-          // Create profile
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: newLoginData.user.id,
-              email: devEmail,
-              full_name: devName,
-              is_admin: true
-            });
-              
-          if (insertError) {
-            console.error('Failed to create profile:', insertError);
-            toast.error(`Failed to create profile: ${insertError.message}`);
-          }
-        } else {
-          // Update existing profile with admin privileges
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ is_admin: true })
-            .eq('id', newLoginData.user.id);
-              
-          if (updateError) {
-            console.error('Failed to update profile:', updateError);
-            toast.error(`Failed to update profile: ${updateError.message}`);
-          }
-        }
-        
-        // Double-check admin status
-        await checkAdminStatus(newLoginData.user.id, devEmail);
-        
-        // Force update the admin status
-        setIsAdmin(true);
-        toast.success('Developer account created and logged in with admin privileges');
-      }
-    }
-  } catch (error: any) {
-    console.error('Developer login error:', error);
-    toast.error(`Developer login failed: ${error?.message || 'Unknown error'}`);
-  }
+  toast.error('Development account creation is disabled. Please contact an administrator.');
+  throw new Error('Development account creation is not available in this environment.');
 };

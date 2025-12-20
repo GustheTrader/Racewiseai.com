@@ -15,14 +15,9 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = fals
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        console.log("No user found, should redirect to auth");
-      } else if (requireAdmin && !isAdmin) {
-        console.log("User is not admin, should redirect to home", { isAdmin });
-        toast.error("You don't have permission to access the admin area");
-        navigate('/');
-      }
+    if (!isLoading && requireAdmin && !isAdmin && user) {
+      toast.error("You don't have permission to access the admin area");
+      navigate('/');
     }
   }, [user, isLoading, isAdmin, requireAdmin, navigate]);
 
@@ -37,13 +32,11 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = fals
 
   if (!user) {
     // Redirect to the login page if not logged in
-    console.log("Redirecting to auth page, no user found");
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   if (requireAdmin && !isAdmin) {
     // Redirect to home if admin access is required but user is not an admin
-    console.log("Redirecting to home, user is not admin");
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
