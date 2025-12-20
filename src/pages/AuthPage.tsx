@@ -80,18 +80,43 @@ const AuthPage = () => {
       <div className="floating-orb w-[600px] h-[600px] bg-blue-500/20 -top-48 -left-48" style={{ animationDelay: '0s' }} />
       <div className="floating-orb w-[500px] h-[500px] bg-purple-500/15 top-1/2 -right-32" style={{ animationDelay: '-5s' }} />
       <div className="floating-orb w-[400px] h-[400px] bg-cyan-500/10 -bottom-32 left-1/4" style={{ animationDelay: '-10s' }} />
+      
+      {/* Running horses animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="running-horse absolute bottom-20 text-blue-400/10" style={{ animationDuration: '12s', animationDelay: '0s' }}>
+          <svg viewBox="0 0 100 60" className="w-32 h-20" fill="currentColor">
+            <path d="M90 35c-2-8-8-12-15-12-3 0-5 1-7 2l-3-8c-1-3-4-5-7-5h-3l-5-7c-2-3-6-5-10-5-5 0-10 3-12 8l-3 7c-4 2-7 6-8 11-2 8 2 16 10 19l2 1v4h6v-4h8v4h6v-4h8v4h6v-4l3-1c7-3 11-10 9-18l4-2c3-2 5-6 4-10zm-50-20c2 0 4 1 5 3l3 4h-8c-2-4 0-7 0-7zm-15 15c1-3 3-5 6-6l-2 6c-1 3 0 6 2 8-4-2-7-5-6-8zm55 13c-1 4-5 7-9 8h-2l-8 1-8-1h-2l-8 1h-3c-5-2-8-7-7-13 1-4 4-8 8-9h1l6-1 4 1 6 16h8l-4-16 4-1c5 0 9 3 10 9 1 2 0 4 0 5z"/>
+          </svg>
+        </div>
+        <div className="running-horse absolute bottom-32 text-purple-400/8" style={{ animationDuration: '15s', animationDelay: '-5s' }}>
+          <svg viewBox="0 0 100 60" className="w-24 h-16" fill="currentColor">
+            <path d="M90 35c-2-8-8-12-15-12-3 0-5 1-7 2l-3-8c-1-3-4-5-7-5h-3l-5-7c-2-3-6-5-10-5-5 0-10 3-12 8l-3 7c-4 2-7 6-8 11-2 8 2 16 10 19l2 1v4h6v-4h8v4h6v-4h8v4h6v-4l3-1c7-3 11-10 9-18l4-2c3-2 5-6 4-10zm-50-20c2 0 4 1 5 3l3 4h-8c-2-4 0-7 0-7zm-15 15c1-3 3-5 6-6l-2 6c-1 3 0 6 2 8-4-2-7-5-6-8zm55 13c-1 4-5 7-9 8h-2l-8 1-8-1h-2l-8 1h-3c-5-2-8-7-7-13 1-4 4-8 8-9h1l6-1 4 1 6 16h8l-4-16 4-1c5 0 9 3 10 9 1 2 0 4 0 5z"/>
+          </svg>
+        </div>
+        <div className="running-horse absolute bottom-16 text-cyan-400/6" style={{ animationDuration: '18s', animationDelay: '-10s' }}>
+          <svg viewBox="0 0 100 60" className="w-20 h-12" fill="currentColor">
+            <path d="M90 35c-2-8-8-12-15-12-3 0-5 1-7 2l-3-8c-1-3-4-5-7-5h-3l-5-7c-2-3-6-5-10-5-5 0-10 3-12 8l-3 7c-4 2-7 6-8 11-2 8 2 16 10 19l2 1v4h6v-4h8v4h6v-4h8v4h6v-4l3-1c7-3 11-10 9-18l4-2c3-2 5-6 4-10zm-50-20c2 0 4 1 5 3l3 4h-8c-2-4 0-7 0-7zm-15 15c1-3 3-5 6-6l-2 6c-1 3 0 6 2 8-4-2-7-5-6-8zm55 13c-1 4-5 7-9 8h-2l-8 1-8-1h-2l-8 1h-3c-5-2-8-7-7-13 1-4 4-8 8-9h1l6-1 4 1 6 16h8l-4-16 4-1c5 0 9 3 10 9 1 2 0 4 0 5z"/>
+          </svg>
+        </div>
+      </div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-6xl mx-auto">
           
-          {/* Header */}
-          <div className="text-center mb-12 animate-fade-in-up">
-            <img 
-              src="/assets/racewise-logo.png" 
-              alt="Racewise AI Toolbox" 
-              className="h-48 md:h-64 mx-auto mb-4 object-contain"
-            />
-            <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto">
+          {/* Header with gradient glow */}
+          <div className="text-center mb-12 animate-fade-in-up relative">
+            {/* Gradient glow behind logo */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-80 h-80 bg-gradient-radial from-blue-500/20 via-purple-500/10 to-transparent blur-3xl" />
+            </div>
+            <div className="relative">
+              <img 
+                src="/assets/racewise-logo.png" 
+                alt="Racewise AI Toolbox" 
+                className="h-48 md:h-64 mx-auto mb-4 object-contain drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]"
+              />
+            </div>
+            <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto bg-gradient-to-r from-muted-foreground via-foreground/70 to-muted-foreground bg-clip-text">
               Professional handicapping tools powered by ML/AI quantum inspired models
             </p>
           </div>
