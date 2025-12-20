@@ -81,23 +81,40 @@ const AuthPage = () => {
       <div className="floating-orb w-[500px] h-[500px] bg-purple-500/15 top-1/2 -right-32" style={{ animationDelay: '-5s' }} />
       <div className="floating-orb w-[400px] h-[400px] bg-cyan-500/10 -bottom-32 left-1/4" style={{ animationDelay: '-10s' }} />
       
-      {/* Running horses animation - realistic galloping silhouettes */}
+      {/* Racing track silhouette effect with motion blur */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="running-horse absolute bottom-24 opacity-50" style={{ animationDuration: '10s', animationDelay: '0s' }}>
-          <svg viewBox="0 0 200 120" className="w-40 h-24 text-blue-400" fill="currentColor">
-            <path d="M180 65c-3-2-7-3-11-2l-8-15c-2-4-6-7-11-7l-3-12c-1-5-5-9-10-10l-15-4c-3-1-6 0-8 2l-8 8-20 2c-4 0-8 2-10 5l-12 16c-3 4-7 6-12 6h-8c-5 0-10 3-12 8l-6 14c-2 4-1 9 2 12l8 10v12c0 3 2 5 5 5h8c3 0 5-2 5-5v-8l15-5 25 3v10c0 3 2 5 5 5h8c3 0 5-2 5-5v-15l20-8 15 8v15c0 3 2 5 5 5h8c3 0 5-2 5-5v-20l10-5c5-2 8-7 8-12v-8c0-4-2-8-5-10zM45 55c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5zm95 25c-2 0-4-2-4-4s2-4 4-4 4 2 4 4-2 4-4 4z"/>
+        {/* Track/rail lines */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute bottom-28 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse" />
+          <div className="absolute bottom-36 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+        </div>
+        
+        {/* Running horses - realistic galloping silhouettes at 50% opacity */}
+        <div className="running-horse absolute bottom-20" style={{ animationDuration: '8s', animationDelay: '0s' }}>
+          <svg viewBox="0 0 300 180" className="w-48 h-28 text-foreground/50" fill="currentColor">
+            <path d="M260 95c-4-3-9-4-14-3l-12-22c-3-6-9-10-16-10l-4-18c-2-7-7-13-14-15l-22-6c-4-1-9 0-12 3l-12 12-30 3c-6 0-12 3-15 8l-18 24c-4 6-10 9-18 9h-12c-8 0-15 4-18 12l-9 21c-3 6-2 14 3 18l12 15v18c0 4 3 8 8 8h12c4 0 8-3 8-8v-12l22-8 38 5v15c0 4 3 8 8 8h12c4 0 8-3 8-8v-22l30-12 22 12v22c0 4 3 8 8 8h12c4 0 8-3 8-8v-30l15-8c7-3 12-10 12-18v-12c0-6-3-12-8-15zM68 82c4 0 8 3 8 8s-3 8-8 8-8-3-8-8 3-8 8-8zm142 38c-3 0-6-3-6-6s3-6 6-6 6 3 6 6-3 6-6 6z"/>
+            {/* Jockey silhouette */}
+            <ellipse cx="195" cy="55" rx="8" ry="10"/>
+            <path d="M185 65c0 0 5 15 10 20l15-5-10-20z"/>
           </svg>
         </div>
-        <div className="running-horse absolute bottom-40 opacity-50" style={{ animationDuration: '14s', animationDelay: '-4s' }}>
-          <svg viewBox="0 0 200 120" className="w-32 h-20 text-purple-400" fill="currentColor">
-            <path d="M175 58l-5-8c-2-3-5-5-9-5h-6l-10-18c-2-4-6-6-10-6h-8l-6-8c-3-4-8-6-13-5l-18 3c-4 1-7 4-9 8l-6 15-25 5c-5 1-9 5-10 10l-4 15c-1 5 1 10 5 13l12 10-2 18c0 3 2 5 5 5h10c3 0 5-2 5-5l2-12 18-8 22 5-2 15c0 3 2 5 5 5h10c3 0 5-2 5-5l3-20 25-10 8 12 2 18c0 3 2 5 5 5h10c3 0 5-2 5-5v-25c0-3-1-6-3-8l-8-10 5-8c2-3 2-7 0-10zM55 62c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5z"/>
+        
+        <div className="running-horse absolute bottom-36" style={{ animationDuration: '9s', animationDelay: '-2s' }}>
+          <svg viewBox="0 0 300 180" className="w-40 h-24 text-foreground/50" fill="currentColor">
+            <path d="M255 90l-8-12c-3-5-8-8-14-8h-9l-15-27c-3-6-9-9-15-9h-12l-9-12c-4-6-12-9-19-8l-27 5c-6 2-10 6-14 12l-9 22-38 8c-8 2-14 8-15 15l-6 23c-2 8 2 15 8 20l18 15-3 27c0 4 3 8 8 8h15c4 0 8-3 8-8l3-18 27-12 33 8-3 22c0 4 3 8 8 8h15c4 0 8-3 8-8l5-30 38-15 12 18 3 27c0 4 3 8 8 8h15c4 0 8-3 8-8v-38c0-5-2-9-5-12l-12-15 8-12c3-5 3-10 0-15zM82 93c4 0 8 3 8 8s-3 8-8 8-8-3-8-8 3-8 8-8z"/>
+            <ellipse cx="180" cy="50" rx="7" ry="9"/>
           </svg>
         </div>
-        <div className="running-horse absolute bottom-16 opacity-50" style={{ animationDuration: '18s', animationDelay: '-9s' }}>
-          <svg viewBox="0 0 200 120" className="w-28 h-16 text-cyan-400" fill="currentColor">
-            <path d="M185 70c-2-5-6-8-11-9l-10-5-5-20c-1-5-5-9-10-10l-20-5c-4-1-8 0-11 3l-10 12h-18c-5 0-10 3-13 7l-15 22c-2 3-5 5-9 5h-10c-5 0-9 3-11 7l-8 18c-2 4-1 9 2 12l10 12v8c0 3 2 5 5 5h8c3 0 5-2 5-5v-10l20-8 28 2v11c0 3 2 5 5 5h8c3 0 5-2 5-5v-12l22-10 12 5v17c0 3 2 5 5 5h8c3 0 5-2 5-5v-22c0-3-1-5-3-7l-5-5 8-3c4-2 7-6 7-11v-5zM50 75c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5z"/>
+        
+        <div className="running-horse absolute bottom-14" style={{ animationDuration: '11s', animationDelay: '-5s' }}>
+          <svg viewBox="0 0 300 180" className="w-36 h-20 text-foreground/50" fill="currentColor">
+            <path d="M265 100c-3-7-9-12-16-13l-15-8-8-30c-2-8-8-14-15-15l-30-8c-6-2-12 0-16 4l-15 18h-27c-8 0-15 5-19 10l-22 33c-3 5-8 8-14 8h-15c-8 0-14 5-16 10l-12 27c-3 6-2 14 3 18l15 18v12c0 4 3 8 8 8h12c4 0 8-3 8-8v-15l30-12 42 3v16c0 4 3 8 8 8h12c4 0 8-3 8-8v-18l33-15 18 8v26c0 4 3 8 8 8h12c4 0 8-3 8-8v-33c0-5-2-8-5-10l-8-8 12-5c6-3 10-9 10-16v-8zM75 112c4 0 8 3 8 8s-3 8-8 8-8-3-8-8 3-8 8-8z"/>
+            <ellipse cx="175" cy="58" rx="6" ry="8"/>
           </svg>
         </div>
+        
+        {/* Motion blur/dust effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
