@@ -77,11 +77,15 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       {/* Video Background */}
+      {/* Static fallback background while video loads */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+      
       <video
         autoPlay
         loop
         muted
         playsInline
+        poster="/assets/racewise-logo.png"
         className="absolute inset-0 w-full h-full object-cover opacity-50"
       >
         <source src="/videos/horse-racing-bg.mp4" type="video/mp4" />
