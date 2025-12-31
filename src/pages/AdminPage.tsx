@@ -16,6 +16,7 @@ import StatsCards from '@/components/admin/stats/StatsCards';
 import ConfigInfo from '@/components/admin/config/ConfigInfo';
 import DemoDataGenerator from '@/components/admin/DemoDataGenerator';
 import UserManagementTab from '@/components/admin/UserManagementTab';
+import { DataToolboxTab } from '@/components/admin/DataToolboxTab';
 import { useScrapeJobs } from '@/hooks/useScrapeJobs';
 
 const AdminPage: React.FC = () => {
@@ -77,6 +78,7 @@ const AdminPage: React.FC = () => {
       <Tabs defaultValue="scraper">
         <TabsList className="mb-4 flex-wrap">
           <TabsTrigger value="scraper">Data Scraper</TabsTrigger>
+          <TabsTrigger value="toolbox">Data Toolbox</TabsTrigger>
           <TabsTrigger value="jobs">Job Management</TabsTrigger>
           <TabsTrigger value="tracks">Track Management</TabsTrigger>
           <TabsTrigger value="raceData">Race Data</TabsTrigger>
@@ -90,6 +92,10 @@ const AdminPage: React.FC = () => {
         <div className="bg-betting-dark p-4 rounded-md border border-gray-700">
           <TabsContent value="scraper">
             <DataScraperTab />
+          </TabsContent>
+
+          <TabsContent value="toolbox">
+            <DataToolboxTab />
           </TabsContent>
 
           <TabsContent value="jobs">
