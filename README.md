@@ -1,112 +1,152 @@
-# Welcome to your Lovable project
+# Racewise AI - Professional Horse Racing Handicapping & Analytics Platform
 
-## Project info
+**Racewise AI** (5D Collective) is an advanced data analytics platform designed for serious handicappers, bettors, and racing enthusiasts. Leverage AI-powered insights, real-time odds tracking, and sophisticated analytical tools to make data-driven decisions in horse racing.
 
-**URL**: https://lovable.dev/projects/a07bce7a-713d-446c-8c0f-8ea801d1fd15
+## 🎯 Key Features
 
-## Authentication Flow
+### Core Analytics
+- **Quantum Rankings** - AI-powered horse ranking system analyzing multiple dimensions
+- **5D Model Analysis** - Proprietary analysis framework covering Speed Metrics, Form Cycle, Class Assessment, Connections, and Track Bias
+- **Live Odds Tracking** - Real-time race odds monitoring with automatic updates across 14+ major tracks
+- **Race Results Dashboard** - Comprehensive race outcome data and historical analysis
 
-This project uses a **simplified email-only authentication** system:
+### Advanced Tools
+- **Exotic Bet Builder** - Intelligent ticket construction and optimization
+- **Sharp Money Movement Detection** - Track professional betting activity
+- **Pool Analysis** - Will-pay projections and payout analysis
+- **Personal Model Builder** - Customizable weighting for personalized analysis
+- **Live Paddock Analysis** - Computer vision-based horse performance insights
+- **Video Performance Analysis** - AI-powered video-based handicapping
+- **AI Race Agent** - Real-time strategic betting recommendations
+- **Betting Timeline** - Visual race sequence analysis
 
-### How Login Works
+### Data Management
+- **Automated Web Scraping** - Job-based data collection for odds, results, entries, and payouts
+- **Multi-Track Support** - 14+ major racing venues including Belmont, Churchill Downs, Santa Anita, and more
+- **Data Import Pipeline** - Odds Pulse API integration and external data sources
+- **Admin Dashboard** - Comprehensive data management and system configuration
 
-1. **Email Entry**: Users enter their email address on the login page
-2. **Instant Access**: No password, OTP, or social login required
-3. **Profile Creation**: The system automatically creates or retrieves the user profile from Supabase
-4. **Dashboard Redirect**: Users are immediately redirected to the Dashboard
+## 🛠️ Tech Stack
 
-### Security Considerations
+### Frontend
+- **React 18.3** - Modern UI framework
+- **Vite 5.4** - Lightning-fast build tool
+- **TypeScript 5.5** - Type-safe development
+- **Tailwind CSS 3.4** - Utility-first styling
+- **shadcn/ui** - High-quality React components
+- **Recharts 2.12** - Data visualization and charts
+- **React Router v6** - Client-side routing
+- **React Hook Form 7.53** - Form state management
+- **Zod 3.23** - Runtime type validation
 
-- User emails are stored in the Supabase `profiles` table
-- Each user is assigned a unique UUID identifier
-- Admin privileges are managed through the `is_admin` field in profiles
-- User sessions are persisted in browser localStorage
-- The authentication state is managed by React Context
+### Backend & Services
+- **Supabase** - PostgreSQL database, authentication, and edge functions
+- **React Query** - Server state management and data fetching
+- **Radix UI** - Accessible component primitives
 
-### Implementation Details
+## 🚀 Getting Started
 
-- **Auth Context**: Located in `/src/contexts/auth/AuthContext.tsx`
-- **Auth Functions**: Core authentication logic in `/src/contexts/auth/authFunctions.ts`
-- **Login Form**: Simplified form in `/src/components/auth/SimpleBetaForm.tsx`
-- **Profile Storage**: User profiles stored in Supabase `profiles` table with fields:
-  - `id` (UUID): Unique user identifier
-  - `email` (string): User email address
-  - `full_name` (string): Derived from email username
-  - `is_admin` (boolean): Admin access flag
-  - `created_at`, `updated_at`: Timestamps
+### Prerequisites
+- Node.js 16+ and npm
+- Supabase project with PostgreSQL database
+- Environment variables configured
 
-### Removed Features
+### Installation
 
-The following authentication methods have been removed/disabled:
-- Password-based authentication
-- Magic link/OTP authentication
-- Social login (Google, etc.)
+```bash
+# Clone the repository
+git clone https://github.com/GustheTrader/Racewiseai.com.git
+cd Racewiseai.com
 
-## How can I edit this code?
+# Install dependencies
+npm install
 
-There are several ways of editing your application.
+# Configure environment variables
+cp .env.example .env.local
+# Update .env.local with your Supabase credentials
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/a07bce7a-713d-446c-8c0f-8ea801d1fd15) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Visit `http://localhost:5173` to access the application.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build for Production
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+npm run preview
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📁 Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── pages/              # Main application routes
+├── components/
+│   ├── admin/          # Admin dashboard components
+│   ├── auth/           # Authentication flows
+│   ├── charts/         # Data visualization
+│   ├── dashboard/      # Main dashboard UI
+│   ├── races/          # Race-related components
+│   ├── rankings/       # Quantum rankings display
+│   ├── results/        # Race results view
+│   ├── ticket/         # Bet ticket builder
+│   └── ai-agents/      # AI chat and recommendations
+├── contexts/           # React Context providers
+├── integrations/       # Supabase and external APIs
+├── types/              # TypeScript definitions
+├── utils/              # Utility functions
+├── data/               # Static and mock data
+├── lib/                # Library utilities
+└── assets/             # Images and static files
+```
 
-This project is built with:
+## 📊 Database Schema
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Supabase (Backend & Authentication)
+Key tables in Supabase:
+- `profiles` - User accounts with admin role management
+- `race_results` - Historical race outcome data
+- `scrape_jobs` - Automated data collection job configurations
+- `api_connections` - External API credentials and settings
 
-## How can I deploy this project?
+## 🏁 Supported Racing Tracks
 
-Simply open [Lovable](https://lovable.dev/projects/a07bce7a-713d-446c-8c0f-8ea801d1fd15) and click on Share -> Publish.
+Aqueduct, Belmont Park, Churchill Downs, Del Mar, Gulfstream Park, Keeneland, Kentucky Downs, Los Alamitos (Day & Night), Oaklawn Park, Pimlico, Santa Anita, Saratoga, and Hawera (NZ)
 
-## Can I connect a custom domain to my Lovable project?
+## 🔐 Authentication
 
-Yes, you can!
+- **Email-based authentication** - Simplified login without passwords
+- **Session persistence** - Automatic login state management
+- **Admin role system** - Role-based access control for admin features
+- **Supabase auth** - Secure authentication and user management
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📝 Available Scripts
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+npm run dev          # Start development server with hot reload
+npm run build        # Build for production
+npm run build:dev    # Build in development mode
+npm run lint         # Run ESLint checks
+npm run preview      # Preview production build locally
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please ensure code follows our linting standards:
+
+```bash
+npm run lint
+```
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 📞 Support
+
+For questions or issues, please open a GitHub issue or contact the development team.
+
+---
+
+**Built with ❤️ for the racing community**
