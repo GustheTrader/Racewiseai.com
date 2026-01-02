@@ -9,6 +9,7 @@ const ALLOWED_ORIGINS = [
   'https://racewiseai.com',
   'https://www.racewiseai.com',
   'https://app.racewiseai.com',
+  'https://bqvavkzgmznjfirgfyhd.lovableproject.com',
 ];
 
 function getCorsHeaders(origin?: string): Record<string, string> {
@@ -68,96 +69,86 @@ serve(async (req) => {
     let horsesInserted = 0;
 
     try {
-      // Insert race card
-      const { data: raceCard, error: raceError } = await supabase
-        .from('race_cards')
-        .insert({
+      // Insert into race_data table (exists in schema)
+      const { data: raceRecord, error: raceError } = await supabase
+        .from('race_data')
+        .upsert({
           track_name: raceData.track_name,
-          race_date: raceData.race_date,
-          race_number: raceData.race_number,
-          race_time: raceData.race_time,
-          post_time: raceData.post_time,
-          race_type: raceData.race_type,
-          distance: raceData.distance,
-          surface: raceData.surface,
-          conditions: raceData.conditions,
-          purse: raceData.purse,
-          source_url: sourceUrl,
-          scraped_at: new Date().toISOString(),
-        })
+          race_date: raceData.race_date || new Date().toISOString().split('T')[0],
+          race_number: raceData.race_number || 1,
+          race_conditions: `${raceData.distance || ''} ${raceData.surface || ''} - ${raceData.conditions || ''} - Purse: ${raceData.purse || 'N/A'}`.trim(),
+        }, { onConflict: 'track_name,race_number,race_date' })
         .select()
         .single();
 
       if (raceError) {
-        console.error('Race card insert error:', raceError);
-        throw new Error(`Failed to insert race card: ${raceError.message}`);
-      }
-
-      if (!raceCard) {
-        throw new Error('No race card returned from insert');
+        console.error('Race data insert error:', raceError);
+        throw new Error(`Failed to insert race data: ${raceError.message}`);
       }
 
       racesInserted = 1;
+      console.log('Inserted race:', raceRecord?.id);
 
-      // Insert horses
-      if (raceData.horses && Array.isArray(raceData.horses) && raceData.horses.length > 0) {
-        const horsesToInsert = raceData.horses.map((horse: any) => ({
-          race_card_id: raceCard.id,
-          program_number: horse.program_number,
-          horse_name: horse.horse_name,
-          jockey_name: horse.jockey_name,
-          trainer_name: horse.trainer_name,
-          post_position: horse.post_position,
-          morning_line: horse.morning_line,
-          weight: horse.weight,
-          age: horse.age,
-          recent_form: horse.recent_form,
-        }));
+      // Insert horses into race_horses table
+      if (raceRecord?.id && raceData.horses && Array.isArray(raceData.horses) && raceData.horses.length > 0) {
+        for (const horse of raceData.horses) {
+          const horseNumber = parseInt(horse.program_number) || 0;
+          if (horseNumber <= 0 || !horse.horse_name) continue;
 
-        const { data: horses, error: horsesError } = await supabase
-          .from('horses')
-          .insert(horsesToInsert)
-          .select();
+          const { error: horseError } = await supabase
+            .from('race_horses')
+            .upsert({
+              race_id: raceRecord.id,
+              name: horse.horse_name,
+              pp: horseNumber,
+              jockey: horse.jockey_name || null,
+              trainer: horse.trainer_name || null,
+              ml_odds: horse.morning_line ? parseFloat(horse.morning_line.replace(/[^0-9.]/g, '')) || null : null,
+            }, { onConflict: 'race_id,pp' });
 
-        if (horsesError) {
-          console.error('Horses insert error:', horsesError);
-          throw new Error(`Failed to insert horses: ${horsesError.message}`);
-        }
+          if (!horseError) {
+            horsesInserted++;
+          } else {
+            console.warn('Horse insert warning:', horseError.message);
+          }
 
-        horsesInserted = horses?.length || 0;
-      }
+          // Also insert into odds_data for tracking
+          const { error: oddsError } = await supabase
+            .from('odds_data')
+            .insert({
+              track_name: raceData.track_name,
+              race_number: raceData.race_number || 1,
+              race_date: raceData.race_date || new Date().toISOString().split('T')[0],
+              horse_number: horseNumber,
+              horse_name: horse.horse_name,
+              win_odds: horse.morning_line || null,
+              pool_data: {
+                type: 'scraped',
+                jockey: horse.jockey_name,
+                trainer: horse.trainer_name,
+                weight: horse.weight,
+                source: sourceUrl
+              }
+            });
 
-      // Insert betting pools
-      if (raceData.betting_pools && Array.isArray(raceData.betting_pools)) {
-        const poolsToInsert = raceData.betting_pools.map((pool: any) => ({
-          race_card_id: raceCard.id,
-          pool_type: pool.pool_type,
-          total_pool: pool.total_pool,
-          pool_count: pool.pool_count,
-          captured_at: new Date().toISOString(),
-        }));
-
-        if (poolsToInsert.length > 0) {
-          const { error: poolsError } = await supabase
-            .from('betting_pools')
-            .insert(poolsToInsert);
-
-          if (poolsError) {
-            console.warn('Betting pools insert warning:', poolsError);
-            // Don't fail if pools insertion fails
+          if (oddsError) {
+            console.warn('Odds insert warning:', oddsError.message);
           }
         }
       }
 
-      // Log successful scrape job
-      await supabase.from('scraper_jobs').insert({
-        track_name: raceData.track_name,
-        race_date: raceData.race_date,
-        status: 'SUCCESS',
-        races_scraped: racesInserted,
-        horses_scraped: horsesInserted,
-        completed_at: new Date().toISOString(),
-        duration_ms: Date.now() - startTime,
+      // Log to system_logs
+      await supabase.from('system_logs').insert({
+        component: 'scraper',
+        log_level: 'INFO',
+        message: `Scraped ${raceData.track_name} R${raceData.race_number}: ${horsesInserted} horses`,
+        details: {
+          track: raceData.track_name,
+          race_number: raceData.race_number,
+          horses_count: horsesInserted,
+          duration_ms: Date.now() - startTime,
+          source_url: sourceUrl
+        }
       });
 
       return new Response(
@@ -169,7 +160,7 @@ serve(async (req) => {
             horses_inserted: horsesInserted,
             duration_ms: Date.now() - startTime,
           },
-          race_card_id: raceCard.id,
+          race_id: raceRecord?.id,
         }),
         {
           status: 200,
@@ -177,16 +168,16 @@ serve(async (req) => {
         }
       );
     } catch (error: any) {
-      // Log failed scrape job
-      await supabase.from('scraper_jobs').insert({
-        track_name: raceData.track_name,
-        race_date: raceData.race_date,
-        status: 'FAILED',
-        races_scraped: racesInserted,
-        horses_scraped: horsesInserted,
-        error_message: error.message,
-        completed_at: new Date().toISOString(),
-        duration_ms: Date.now() - startTime,
+      // Log error
+      await supabase.from('system_logs').insert({
+        component: 'scraper',
+        log_level: 'ERROR',
+        message: `Scrape failed: ${error.message}`,
+        details: {
+          track: raceData.track_name,
+          error: error.message,
+          duration_ms: Date.now() - startTime
+        }
       });
 
       throw error;

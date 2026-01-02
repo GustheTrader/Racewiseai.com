@@ -57,3 +57,21 @@ verify_jwt = false
 
 [functions.scheduled-morning-scrape]
 verify_jwt = false
+
+[functions.scrape-with-gemini]
+verify_jwt = false
+
+[functions.save-scraped-data]
+verify_jwt = false
+
+[functions.scrape-race-results]
+verify_jwt = false
+
+[functions.morning-report]
+verify_jwt = false
+
+[functions.race-analyst-api]
+verify_jwt = false
+
+[functions.parse-pdf-with-gemini]
+verify_jwt = false
