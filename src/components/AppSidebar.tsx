@@ -1,6 +1,5 @@
-import { Home, TrendingUp, Video, Settings, ChevronLeft, ChevronRight, Trophy, Sun, Moon } from "lucide-react";
+import { Home, TrendingUp, Video, Settings, ChevronLeft, ChevronRight, Trophy, Sun, Moon, Database, Cpu } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "@/contexts/auth/AuthContext";
 import { useTheme } from "next-themes";
 import {
   Sidebar,
@@ -30,7 +29,6 @@ const adminItems = [
 
 export function AppSidebar() {
   const { collapsed } = useSidebar();
-  const { isAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -90,32 +88,35 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin && (
-          <SidebarGroup defaultOpen className="mt-4">
-            <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider px-3 py-2 font-medium">
-              {!collapsed && "Admin"}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url}
-                        className={({ isActive }) => 
-                          `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${getNavCls({ isActive })}`
-                        }
-                      >
-                        <item.icon className="h-4 w-4 flex-shrink-0" />
-                        {!collapsed && <span className="text-sm">{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        {/* Admin section - visible for testing */}
+        <SidebarGroup defaultOpen className="mt-4">
+          <SidebarGroupLabel className="text-cyan-400/80 text-xs uppercase tracking-wider px-3 py-2 font-medium">
+            {!collapsed && "Admin & Data"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {adminItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to={item.url}
+                      className={({ isActive }) => 
+                        `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                          isActive 
+                            ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 font-medium border-l-2 border-cyan-400" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                        }`
+                      }
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
