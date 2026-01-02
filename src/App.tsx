@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
+import AdminToolboxPage from "./pages/AdminToolboxPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import RaceResultsPage from "./pages/RaceResultsPage";
@@ -79,6 +80,14 @@ const AnimatedRoutes = () => {
           element={
             <RequireAuth requireAdmin={true}>
               <DataDashboardPage />
+            </RequireAuth>
+          } 
+        />
+        <Route 
+          path="/toolbox" 
+          element={
+            <RequireAuth requireAdmin={true}>
+              <AdminToolboxPage />
             </RequireAuth>
           } 
         />

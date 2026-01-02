@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Video, Settings, Database, ChevronLeft, ChevronRight, Trophy, Sun, Moon } from "lucide-react";
+import { Home, TrendingUp, Video, Settings, Database, ChevronLeft, ChevronRight, Trophy, Sun, Moon, Wrench } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { useTheme } from "next-themes";
@@ -25,6 +25,7 @@ const mainItems = [
 ];
 
 const adminItems = [
+  { title: "AI Toolbox", url: "/toolbox", icon: Wrench },
   { title: "Admin Panel", url: "/admin", icon: Settings },
   { title: "Data Dashboard", url: "/data-dashboard", icon: Database },
 ];
