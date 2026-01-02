@@ -54,3 +54,6 @@ verify_jwt = false
 
 [functions.firecrawl-morning-report]
 verify_jwt = false
+
+[functions.scheduled-morning-scrape]
+verify_jwt = false
