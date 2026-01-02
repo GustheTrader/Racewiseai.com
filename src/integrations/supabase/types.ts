@@ -1549,6 +1549,140 @@ export type Database = {
         }
         Relationships: []
       }
+      visual_assessment_history: {
+        Row: {
+          assessments: Json | null
+          avg_gait_symmetry: number | null
+          avg_lameness_risk: number | null
+          horse_id: string
+          id: string
+          last_updated: string | null
+          total_assessments: number | null
+          trend_direction: string | null
+        }
+        Insert: {
+          assessments?: Json | null
+          avg_gait_symmetry?: number | null
+          avg_lameness_risk?: number | null
+          horse_id: string
+          id?: string
+          last_updated?: string | null
+          total_assessments?: number | null
+          trend_direction?: string | null
+        }
+        Update: {
+          assessments?: Json | null
+          avg_gait_symmetry?: number | null
+          avg_lameness_risk?: number | null
+          horse_id?: string
+          id?: string
+          last_updated?: string | null
+          total_assessments?: number | null
+          trend_direction?: string | null
+        }
+        Relationships: []
+      }
+      visual_assessments: {
+        Row: {
+          analysis_notes: string | null
+          analyzed_at: string | null
+          assessment_id: string
+          assessment_type: string | null
+          confidence_score: number | null
+          created_at: string | null
+          eagerness_score: number | null
+          ear_position: string | null
+          entry_id: string | null
+          gait_symmetry: number | null
+          head_position: string | null
+          horse_id: string | null
+          is_class_drop: boolean | null
+          is_return_from_layoff: boolean | null
+          lameness_risk: number | null
+          model_used: string | null
+          nervousness_score: number | null
+          overall_risk_score: number | null
+          previous_injury_flag: boolean | null
+          race_id: string | null
+          raw_analysis: Json | null
+          red_flags: Json | null
+          risk_tier: string | null
+          stride_frequency: number | null
+          stride_length: number | null
+          video_source_url: string | null
+          video_timestamp: string | null
+          warmup_intensity: number | null
+        }
+        Insert: {
+          analysis_notes?: string | null
+          analyzed_at?: string | null
+          assessment_id?: string
+          assessment_type?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          eagerness_score?: number | null
+          ear_position?: string | null
+          entry_id?: string | null
+          gait_symmetry?: number | null
+          head_position?: string | null
+          horse_id?: string | null
+          is_class_drop?: boolean | null
+          is_return_from_layoff?: boolean | null
+          lameness_risk?: number | null
+          model_used?: string | null
+          nervousness_score?: number | null
+          overall_risk_score?: number | null
+          previous_injury_flag?: boolean | null
+          race_id?: string | null
+          raw_analysis?: Json | null
+          red_flags?: Json | null
+          risk_tier?: string | null
+          stride_frequency?: number | null
+          stride_length?: number | null
+          video_source_url?: string | null
+          video_timestamp?: string | null
+          warmup_intensity?: number | null
+        }
+        Update: {
+          analysis_notes?: string | null
+          analyzed_at?: string | null
+          assessment_id?: string
+          assessment_type?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          eagerness_score?: number | null
+          ear_position?: string | null
+          entry_id?: string | null
+          gait_symmetry?: number | null
+          head_position?: string | null
+          horse_id?: string | null
+          is_class_drop?: boolean | null
+          is_return_from_layoff?: boolean | null
+          lameness_risk?: number | null
+          model_used?: string | null
+          nervousness_score?: number | null
+          overall_risk_score?: number | null
+          previous_injury_flag?: boolean | null
+          race_id?: string | null
+          raw_analysis?: Json | null
+          red_flags?: Json | null
+          risk_tier?: string | null
+          stride_frequency?: number | null
+          stride_length?: number | null
+          video_source_url?: string | null
+          video_timestamp?: string | null
+          warmup_intensity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visual_assessments_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "horses"
+            referencedColumns: ["horse_id"]
+          },
+        ]
+      }
       workflow_executions: {
         Row: {
           completed_at: string | null

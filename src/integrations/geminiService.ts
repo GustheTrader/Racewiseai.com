@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { PipelineResult } from "@/types/DataToolboxTypes";
+import { PipelineResult } from "../types/DataToolboxTypes";
 
 export interface ParseRequest {
   text?: string;
