@@ -78,6 +78,42 @@ export const parseRacingDigest = async (
 };
 
 /**
+ * TwinSpires PDF Parser - Full data extraction with ensemble scoring
+ */
+export const parseTwinSpires = async (
+  request: ParseRequest,
+  trackName?: string
+): Promise<TwinSpiresResult> => {
+  if (!request.pdfData) {
+    throw new Error("PDF data is required for parsing");
+  }
+
+  console.log("Calling parse-pdf-with-gemini for TwinSpires...");
+  
+  const { data, error } = await supabase.functions.invoke('parse-pdf-with-gemini', {
+    body: {
+      pdfBase64: request.pdfData.data,
+      mimeType: request.pdfData.mimeType,
+      parserType: 'twinspires',
+      trackName: trackName
+    }
+  });
+
+  if (error) {
+    console.error("Edge function error:", error);
+    throw new Error(`PDF parsing failed: ${error.message}`);
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.error || "Failed to parse PDF");
+  }
+
+  console.log(`TwinSpires: Parsed ${data.stats?.races} races with ${data.stats?.horses} horses`);
+  
+  return data.data as TwinSpiresResult;
+};
+
+/**
  * Backup Entries Parser - Uses edge function
  */
 export const parseBackupEntries = async (
@@ -108,3 +144,115 @@ export const parseBackupEntries = async (
 
   return data.data as PipelineResult;
 };
+
+// TwinSpires specific types
+export interface TwinSpiresHorse {
+  programNumber: string;
+  postPosition: number;
+  name: string;
+  morningLine: string;
+  jockey: {
+    name: string;
+    weight: string;
+    meetStarts: number;
+    meetWins: number;
+    meetWinPct: number;
+  };
+  trainer: {
+    name: string;
+    meetStarts: number;
+    meetWins: number;
+    meetWinPct: number;
+  };
+  owner: string;
+  sire: string;
+  dam: string;
+  damsire: string;
+  age: number;
+  sex: string;
+  color: string;
+  medication: string;
+  equipment: string;
+  speedFigures: {
+    brisnetSpeed: number;
+    primePower: number;
+    classRating: number;
+    last3: number[];
+    avgLast3: number;
+    bestRecent: number;
+  };
+  paceFigures: {
+    earlyPace: number;
+    midPace: number;
+    latePace: number;
+    runningStyle: string;
+  };
+  pastPerformances: Array<{
+    date: string;
+    track: string;
+    distance: string;
+    surface: string;
+    condition: string;
+    finishPosition: number;
+    fieldSize: number;
+    beatenLengths: number;
+    firstCall: number;
+    secondCall: number;
+    stretchCall: number;
+    finalPosition: number;
+    speedFigure: number;
+    finalTime: string;
+    odds: string;
+    comment: string;
+  }>;
+  workouts: Array<{
+    date: string;
+    track: string;
+    distance: string;
+    time: string;
+    ranking: string;
+    isBullet: boolean;
+  }>;
+  ensembleScore: number;
+  valueRating: number;
+}
+
+export interface TwinSpiresRace {
+  number: number;
+  postTime: string;
+  distance: string;
+  surface: string;
+  raceType: string;
+  purse: number;
+  claimingPrice: number | null;
+  conditions: string;
+  restrictions: string;
+  horses: TwinSpiresHorse[];
+}
+
+export interface TwinSpiresResult {
+  source: string;
+  track: string;
+  date: string;
+  weather: string;
+  trackCondition: string;
+  trackBias: {
+    railPosition: string;
+    surfaceBias: string;
+    postPositionBias: string;
+  };
+  races: TwinSpiresRace[];
+  trackStats: {
+    postPositionStats: Array<{
+      post: number;
+      starts: number;
+      wins: number;
+      winPct: number;
+    }>;
+    paceScenarioStats: {
+      loneFront: number;
+      pressedPace: number;
+      closers: number;
+    };
+  };
+}

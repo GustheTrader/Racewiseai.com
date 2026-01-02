@@ -20,6 +20,7 @@ import ScheduleConfigPanel from '@/components/admin/ScheduleConfigPanel';
 import { SystemLogsViewer } from '@/components/admin/SystemLogsViewer';
 import ScrapedDataViewer from '@/components/admin/ScrapedDataViewer';
 import ModelTrainingTab from '@/components/admin/ModelTrainingTab';
+import TwinSpiresModelTab from '@/components/admin/TwinSpiresModelTab';
 
 const tracks = [
   'Santa Anita Park',
@@ -326,9 +327,9 @@ const AdminToolboxPage: React.FC = () => {
           
           {/* Left Column - Workflow Panel */}
           <div className="lg:col-span-3 space-y-4">
-            {/* Workflow Tabs - ORD / TRD / OTC */}
+            {/* Workflow Tabs - ORD / TRD / OTC / TWIN */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-3 bg-[#131a2e] border border-blue-900/30 rounded-lg p-1">
+              <TabsList className="grid grid-cols-4 bg-[#131a2e] border border-blue-900/30 rounded-lg p-1">
                 <TabsTrigger 
                   value="ord" 
                   className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded font-semibold"
@@ -346,6 +347,12 @@ const AdminToolboxPage: React.FC = () => {
                   className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded font-semibold"
                 >
                   OTC
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="twin" 
+                  className="text-xs data-[state=active]:bg-orange-600 data-[state=active]:text-white rounded font-semibold"
+                >
+                  TWIN
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -694,6 +701,11 @@ const AdminToolboxPage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* TwinSpires Model Section */}
+        <div className="mt-8">
+          <TwinSpiresModelTab />
         </div>
 
         {/* Scraped Data Viewer Section */}
