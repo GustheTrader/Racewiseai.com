@@ -103,6 +103,171 @@ Return as JSON with structure:
 
 Return as JSON with the same structure as above.`;
         break;
+      case 'twinspires':
+        prompt = `CRITICAL MISSION: Parse this TwinSpires PDF racing form for complete data extraction.
+
+EXTRACT ALL DATA POINTS FROM THE TWINSPIRES FORMAT:
+
+1. TRACK INFORMATION:
+   - Track name, date, weather, track condition
+   - Track bias data (inside/outside, speed/closer bias)
+   - Rail position and variant
+
+2. RACE CONDITIONS (for each race):
+   - Race number, post time, distance, surface, race type
+   - Purse, claiming price (if applicable), class level
+   - Age/sex restrictions, weight allowances
+
+3. HORSE DATA (for EVERY horse):
+   - Program Number (PP), Horse Name, Post Position
+   - Morning Line Odds (ML)
+   - Jockey (name, weight carried, meet stats: starts, wins, places, shows, win%)
+   - Trainer (name, meet stats: starts, wins, places, shows, win%)
+   - Owner, Breeder, Sire, Dam, Damsire
+   - Color, Sex, Age
+   - Lasix/Bute/Equipment changes
+   
+4. SPEED FIGURES & RATINGS:
+   - Brisnet Speed Rating (BSR)
+   - Prime Power Rating
+   - Class Rating
+   - Pace figures (E1, E2, LP)
+   - Last 3 race speed figures
+   
+5. PAST PERFORMANCES (last 5-10 races):
+   - Date, Track, Distance, Surface, Condition
+   - Finish position, beaten lengths
+   - Running positions (1st call, 2nd call, stretch, finish)
+   - Speed figure for that race
+   - Final time, odds
+   - Comments/trip notes
+
+6. WORKOUT DATA:
+   - Date, Track, Distance, Time, Ranking
+   - Bullet workouts flagged
+
+7. TRACK BIAS & STATS SECTION:
+   - Current meet stats for track
+   - Post position statistics
+   - Speed/pace scenario winners
+   - Jockey/Trainer standings
+
+Return as JSON:
+{
+  "source": "TwinSpires",
+  "track": "string",
+  "date": "YYYY-MM-DD",
+  "weather": "string",
+  "trackCondition": "string",
+  "trackBias": {
+    "railPosition": "string",
+    "surfaceBias": "string (speed/closer)",
+    "postPositionBias": "string (inside/outside/none)"
+  },
+  "races": [{
+    "number": integer,
+    "postTime": "HH:MM",
+    "distance": "string",
+    "surface": "string",
+    "raceType": "string",
+    "purse": number,
+    "claimingPrice": number or null,
+    "conditions": "string",
+    "restrictions": "string",
+    "horses": [{
+      "programNumber": "string",
+      "postPosition": integer,
+      "name": "string",
+      "morningLine": "string",
+      "jockey": {
+        "name": "string",
+        "weight": "string",
+        "meetStarts": integer,
+        "meetWins": integer,
+        "meetWinPct": number
+      },
+      "trainer": {
+        "name": "string",
+        "meetStarts": integer,
+        "meetWins": integer,
+        "meetWinPct": number
+      },
+      "owner": "string",
+      "sire": "string",
+      "dam": "string",
+      "damsire": "string",
+      "age": integer,
+      "sex": "string",
+      "color": "string",
+      "medication": "string",
+      "equipment": "string",
+      "speedFigures": {
+        "brisnetSpeed": integer,
+        "primePower": number,
+        "classRating": integer,
+        "last3": [integer, integer, integer],
+        "avgLast3": number,
+        "bestRecent": integer
+      },
+      "paceFigures": {
+        "earlyPace": number,
+        "midPace": number,
+        "latePace": number,
+        "runningStyle": "string (E/EP/P/PS/S)"
+      },
+      "pastPerformances": [{
+        "date": "string",
+        "track": "string",
+        "distance": "string",
+        "surface": "string",
+        "condition": "string",
+        "finishPosition": integer,
+        "fieldSize": integer,
+        "beatenLengths": number,
+        "firstCall": integer,
+        "secondCall": integer,
+        "stretchCall": integer,
+        "finalPosition": integer,
+        "speedFigure": integer,
+        "finalTime": "string",
+        "odds": "string",
+        "comment": "string"
+      }],
+      "workouts": [{
+        "date": "string",
+        "track": "string",
+        "distance": "string",
+        "time": "string",
+        "ranking": "string",
+        "isBullet": boolean
+      }],
+      "ensembleScore": number (0-100, calculated from all factors),
+      "valueRating": number (1-5 stars based on ML vs true odds)
+    }]
+  }],
+  "trackStats": {
+    "postPositionStats": [{
+      "post": integer,
+      "starts": integer,
+      "wins": integer,
+      "winPct": number
+    }],
+    "paceScenarioStats": {
+      "loneFront": number,
+      "pressedPace": number,
+      "closers": number
+    }
+  }
+}
+
+IMPORTANT: Extract ALL races on the card. DO NOT TRUNCATE. Calculate ensembleScore as weighted average:
+- Speed Figures (30%): Normalize best recent figure to 0-100
+- Class Rating (20%): Normalize to 0-100  
+- Pace Fit (15%): Based on running style vs today's pace scenario
+- Connections (15%): Jockey/Trainer win rates
+- Form (10%): Recent finish positions trend
+- Post Position (10%): Track bias adjustment`;
+        break;
       default:
         prompt = `FULL CARD BACKUP PARSER: Parse all races on this card (R1 to the end).
 Map every entry to our ensemble pipeline. DO NOT STOP until the entire card is processed.
