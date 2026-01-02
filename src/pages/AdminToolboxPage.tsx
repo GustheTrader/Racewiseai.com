@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut } from 'lucide-react';
+import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +12,7 @@ import { useScrapeJobs } from '@/hooks/useScrapeJobs';
 import { parseMorningCard, parseRacingDigest, parseBackupEntries } from '@/integrations/geminiService';
 import { fileToBase64 } from '@/utils/dataToolboxUtils';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import racewiseLogo from '@/assets/racewise-logo.png';
 
 const tracks = [
@@ -35,6 +36,7 @@ const AdminToolboxPage: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState('ord');
   const [connectionStatus, setConnectionStatus] = useState<'ready' | 'syncing' | 'error'>('ready');
+  const [scrapeResult, setScrapeResult] = useState<any>(null);
   
   const { 
     jobs, 
@@ -86,6 +88,34 @@ const AdminToolboxPage: React.FC = () => {
     }
   };
 
+  const handleFirecrawlScrape = async () => {
+    setIsProcessing(true);
+    setConnectionStatus('syncing');
+    setScrapeResult(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('firecrawl-morning-report', {
+        body: { trackName: selectedTrack }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setScrapeResult(data.data);
+        toast.success(`Scraped ${data.data.races?.length || 0} races from ${selectedTrack}`);
+        setConnectionStatus('ready');
+      } else {
+        throw new Error(data.error || 'Scrape failed');
+      }
+    } catch (err: any) {
+      console.error('Firecrawl scrape error:', err);
+      toast.error(err.message || 'Failed to scrape morning report');
+      setConnectionStatus('error');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleScrapeOTB = async () => {
     setIsProcessing(true);
     try {
@@ -97,7 +127,6 @@ const AdminToolboxPage: React.FC = () => {
         await runJobManually(trackJob);
         toast.success('OTB scrape initiated');
       } else {
-        // Simulate scrape for demo
         await new Promise(resolve => setTimeout(resolve, 2000));
         toast.success('OTB data scraped successfully');
       }
@@ -254,6 +283,19 @@ const AdminToolboxPage: React.FC = () => {
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
+                onClick={handleFirecrawlScrape}
+                disabled={isProcessing}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold uppercase tracking-wide py-5"
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Flame className="h-4 w-4 mr-2" />
+                )}
+                Firecrawl Morning Report
+              </Button>
+
+              <Button
                 onClick={handleScrapeOTB}
                 disabled={isProcessing || isRunningJob}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold uppercase tracking-wide py-5"
@@ -268,7 +310,7 @@ const AdminToolboxPage: React.FC = () => {
 
               <Button
                 onClick={handleLoadToSupabase}
-                disabled={isProcessing}
+                disabled={isProcessing || !scrapeResult}
                 variant="outline"
                 className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 font-semibold uppercase tracking-wide py-5"
               >
@@ -276,6 +318,25 @@ const AdminToolboxPage: React.FC = () => {
                 Load to Supabase
               </Button>
             </div>
+
+            {/* Scrape Results Preview */}
+            {scrapeResult && (
+              <Card className="bg-[#131a2e] border-green-900/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-xs text-green-400 uppercase tracking-wide">
+                      Scraped Data
+                    </span>
+                  </div>
+                  <p className="text-sm text-white font-medium">{scrapeResult.trackName}</p>
+                  <p className="text-xs text-gray-500">{scrapeResult.raceDate}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {scrapeResult.races?.length || 0} races found
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Center Column - Hero Section */}
