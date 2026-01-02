@@ -104,9 +104,9 @@ Return as JSON with structure:
 Return as JSON with the same structure as above.`;
         break;
       case 'twinspires':
-        prompt = `CRITICAL MISSION: Parse this TwinSpires PDF racing form for complete data extraction.
+        prompt = `CRITICAL MISSION: Parse this TwinSpires/BrisPicks PDF racing form for complete data extraction.
 
-EXTRACT ALL DATA POINTS FROM THE TWINSPIRES FORMAT:
+EXTRACT ALL DATA POINTS FROM THE FORMAT:
 
 1. TRACK INFORMATION:
    - Track name, date, weather, track condition
@@ -121,20 +121,43 @@ EXTRACT ALL DATA POINTS FROM THE TWINSPIRES FORMAT:
 3. HORSE DATA (for EVERY horse):
    - Program Number (PP), Horse Name, Post Position
    - Morning Line Odds (ML)
-   - Jockey (name, weight carried, meet stats: starts, wins, places, shows, win%)
-   - Trainer (name, meet stats: starts, wins, places, shows, win%)
-   - Owner, Breeder, Sire, Dam, Damsire
-   - Color, Sex, Age
-   - Lasix/Bute/Equipment changes
    
-4. SPEED FIGURES & RATINGS:
+4. JOCKEY DATA (CRITICAL - extract full stats):
+   - Jockey name
+   - Weight carried
+   - Win percentage (the XX% shown)
+   - Career/Meet stats: starts-wins-places-shows (format: XXX-XX-XX-XX)
+   - Calculate bonus: +5 points if win% >= 20%, +3 if >= 15%, +2 if >= 10%
+   
+5. TRAINER DATA (CRITICAL - extract full stats):
+   - Trainer name  
+   - Win percentage (the XX% shown)
+   - Career/Meet stats: starts-wins-places-shows (format: XXX-XX-XX-XX)
+   - Calculate bonus: +5 points if win% >= 20%, +3 if >= 15%, +2 if >= 10%
+   - Hot trainer indicator: flag if win rate is above 14% with 3+ recent wins
+
+6. BRIS PICKS / EXPERT PICKS (CRITICAL - consensus data):
+   - Look for "EXPERT 1ST PICK", "EXPERT 2ND PICK", "EXPERT 3RD PICK" labels
+   - Extract Nick's Picks or expert selection order
+   - Assign brisPickRank: 1 for 1st pick (+10 bonus), 2 for 2nd pick (+7 bonus), 3 for 3rd pick (+5 bonus)
+   - Parse the race analysis text for key insights
+
+7. DAYS OFF / RACE RECENCY (CRITICAL):
+   - Calculate days since last race from past performances
+   - Fresh (15-45 days): +3 bonus
+   - Rested (46-90 days): +1 bonus  
+   - Layoff (>90 days): -5 penalty
+   - Quick turnaround (<14 days): -2 penalty
+   - Flag "has not raced for more than 2 months" horses
+
+8. SPEED FIGURES & RATINGS:
    - Brisnet Speed Rating (BSR)
    - Prime Power Rating
    - Class Rating
    - Pace figures (E1, E2, LP)
    - Last 3 race speed figures
    
-5. PAST PERFORMANCES (last 5-10 races):
+9. PAST PERFORMANCES (last 5-10 races):
    - Date, Track, Distance, Surface, Condition
    - Finish position, beaten lengths
    - Running positions (1st call, 2nd call, stretch, finish)
@@ -142,15 +165,13 @@ EXTRACT ALL DATA POINTS FROM THE TWINSPIRES FORMAT:
    - Final time, odds
    - Comments/trip notes
 
-6. WORKOUT DATA:
-   - Date, Track, Distance, Time, Ranking
-   - Bullet workouts flagged
+10. WORKOUT DATA:
+    - Date, Track, Distance, Time, Ranking
+    - Bullet workouts flagged
 
-7. TRACK BIAS & STATS SECTION:
-   - Current meet stats for track
-   - Post position statistics
-   - Speed/pace scenario winners
-   - Jockey/Trainer standings
+11. SIRE/DAM INFORMATION:
+    - Sire name
+    - Dam name and Damsire
 
 Return as JSON:
 {
@@ -164,6 +185,7 @@ Return as JSON:
     "surfaceBias": "string (speed/closer)",
     "postPositionBias": "string (inside/outside/none)"
   },
+  "raceAnalysis": "string (the BRIS analysis text for the race)",
   "races": [{
     "number": integer,
     "postTime": "HH:MM",
@@ -179,28 +201,41 @@ Return as JSON:
       "postPosition": integer,
       "name": "string",
       "morningLine": "string",
+      "brisPickRank": integer or null (1=1st pick, 2=2nd, 3=3rd, null=not picked),
+      "brisPickBonus": number (10 for 1st, 7 for 2nd, 5 for 3rd, 0 otherwise),
       "jockey": {
         "name": "string",
         "weight": "string",
-        "meetStarts": integer,
-        "meetWins": integer,
-        "meetWinPct": number
+        "winPct": number (the percentage shown like 13, 20, etc),
+        "starts": integer,
+        "wins": integer,
+        "places": integer,
+        "shows": integer,
+        "statsString": "string (raw stats like 712-89-84-94)",
+        "bonusPoints": number (5 if >=20%, 3 if >=15%, 2 if >=10%, 0 otherwise)
       },
       "trainer": {
         "name": "string",
-        "meetStarts": integer,
-        "meetWins": integer,
-        "meetWinPct": number
+        "winPct": number,
+        "starts": integer,
+        "wins": integer,
+        "places": integer,
+        "shows": integer,
+        "statsString": "string (raw stats)",
+        "bonusPoints": number (5 if >=20%, 3 if >=15%, 2 if >=10%, 0 otherwise),
+        "isHot": boolean (true if win% > 14% with recent wins)
       },
-      "owner": "string",
       "sire": "string",
-      "dam": "string",
+      "dam": "string", 
       "damsire": "string",
       "age": integer,
       "sex": "string",
       "color": "string",
       "medication": "string",
       "equipment": "string",
+      "daysOff": integer (days since last race),
+      "recencyCategory": "string (fresh/rested/layoff/quick)",
+      "recencyBonus": number (+3 fresh, +1 rested, -5 layoff, -2 quick),
       "speedFigures": {
         "brisnetSpeed": integer,
         "primePower": number,
@@ -241,7 +276,7 @@ Return as JSON:
         "ranking": "string",
         "isBullet": boolean
       }],
-      "ensembleScore": number (0-100, calculated from all factors),
+      "ensembleScore": number (0-100, calculated with bonuses),
       "valueRating": number (1-5 stars based on ML vs true odds)
     }]
   }],
@@ -260,13 +295,17 @@ Return as JSON:
   }
 }
 
-IMPORTANT: Extract ALL races on the card. DO NOT TRUNCATE. Calculate ensembleScore as weighted average:
-- Speed Figures (30%): Normalize best recent figure to 0-100
-- Class Rating (20%): Normalize to 0-100  
-- Pace Fit (15%): Based on running style vs today's pace scenario
-- Connections (15%): Jockey/Trainer win rates
-- Form (10%): Recent finish positions trend
-- Post Position (10%): Track bias adjustment`;
+IMPORTANT: Extract ALL races on the card. DO NOT TRUNCATE. 
+
+Calculate ensembleScore as weighted average WITH BONUSES:
+- Speed Figures (25%): Normalize best recent figure to 0-100
+- Class Rating (15%): Normalize to 0-100  
+- Pace Fit (10%): Based on running style vs today's pace scenario
+- Jockey Stats (15%): Base on win% + jockey bonus points
+- Trainer Stats (15%): Base on win% + trainer bonus points + hot trainer flag
+- Form/Recency (10%): Recent finish positions + recency bonus
+- Post Position (5%): Track bias adjustment
+- BRIS Pick Bonus (5%): Add brisPickBonus to final score`;
         break;
       default:
         prompt = `FULL CARD BACKUP PARSER: Parse all races on this card (R1 to the end).
