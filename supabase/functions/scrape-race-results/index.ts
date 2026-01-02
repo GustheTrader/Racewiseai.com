@@ -163,7 +163,7 @@ If no results found, return an empty array: []`;
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(\`Gemini API error: \${response.status} - \${error}\`);
+    throw new Error(`Gemini API error: ${response.status} - ${error}`);
   }
 
   const data = await response.json();
@@ -236,7 +236,7 @@ async function saveResults(
     .select();
 
   if (error) {
-    throw new Error(\`Failed to save results: \${error.message}\`);
+    throw new Error(`Failed to save results: ${error.message}`);
   }
 
   return data ? data.length : 0;
@@ -292,7 +292,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(\`Scraping race results from \${trackName}\`);
+    console.log(`Scraping race results from ${trackName}`);
 
     // Fetch webpage
     const htmlContent = await fetchWebPageContent(url);
@@ -304,12 +304,12 @@ serve(async (req) => {
       geminiApiKey
     );
 
-    console.log(\`Extracted \${results.length} race results\`);
+    console.log(`Extracted ${results.length} race results`);
 
     // Save to database
     const savedCount = await saveResults(supabase, results, url);
 
-    console.log(\`Saved \${savedCount} race results to database\`);
+    console.log(`Saved ${savedCount} race results to database`);
 
     return new Response(
       JSON.stringify({
@@ -323,7 +323,7 @@ serve(async (req) => {
     );
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error(\`[ERROR] \${errorMsg}\`);  // Log full error server-side
+    console.error(`[ERROR] ${errorMsg}`);  // Log full error server-side
     // SECURITY FIX: Don't leak internal error details to client
     return new Response(
       JSON.stringify({
