@@ -64,12 +64,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
-      {/* AI Agents Card - position 2 below header */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        <AIAgentsCard />
-      </div>
-
-      {/* Race Navigation Bar - moved below AI agents */}
+      {/* Race Navigation Bar */}
       <RaceNavBar 
         currentTrack={currentTrack}
         currentRace={currentRace}
@@ -139,10 +134,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <TrainingFigures figures={data.trainingFigures} />
       </div>
       
-      {/* Premium Tools Section - CV/VLM Risk Agent & Video Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      {/* Premium AI Tools Section - 3 Across */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <RiskAgentCard />
         <VideoPerformanceCard />
+        <AIAgentsCard />
       </div>
       
       {/* Live Paddock Comments and AI-Thorian Value */}

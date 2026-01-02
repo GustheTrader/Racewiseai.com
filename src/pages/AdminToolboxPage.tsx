@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Zap, Globe, CheckCircle2, Upload, FileText, RefreshCw, Database, Loader2, Brain, Eye, Activity } from 'lucide-react';
+import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScrapeJobs } from '@/hooks/useScrapeJobs';
 import { parseMorningCard, parseRacingDigest, parseBackupEntries } from '@/integrations/geminiService';
 import { fileToBase64 } from '@/utils/dataToolboxUtils';
 import { toast } from 'sonner';
 import racewiseLogo from '@/assets/racewise-logo.png';
-import { RiskAgentCard } from '@/components/RiskAgentCard';
 
 const tracks = [
   'Santa Anita Park',
@@ -372,87 +371,6 @@ const AdminToolboxPage: React.FC = () => {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-
-        {/* AI Agents Section - 3 Across */}
-        <div className="mt-8">
-          <div className="flex items-center gap-3 mb-6">
-            <Brain className="h-6 w-6 text-blue-400" />
-            <h2 className="text-xl font-bold text-white uppercase tracking-wide">AI Agent Tools</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Quantum Handicapping Agent */}
-            <Card className="bg-[#131a2e] border-blue-900/30 hover:border-blue-600/50 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600/30 to-blue-800/30 flex items-center justify-center">
-                    <Zap className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base text-white">Quantum Handicapper</CardTitle>
-                    <CardDescription className="text-xs">ML-Powered Race Analysis</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  Analyzes race conditions, past performances, and speed figures using quantum-inspired algorithms.
-                </p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-blue-600/50 text-blue-400 text-xs">
-                    Active
-                  </Badge>
-                  <Badge variant="outline" className="border-gray-600 text-gray-400 text-xs">
-                    Gemini 2.5 Flash
-                  </Badge>
-                </div>
-                <Button 
-                  className="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-600/30"
-                  variant="outline"
-                >
-                  Run Analysis
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Paddock Vision Agent */}
-            <Card className="bg-[#131a2e] border-blue-900/30 hover:border-amber-600/50 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-600/30 to-orange-800/30 flex items-center justify-center">
-                    <Eye className="h-5 w-5 text-amber-400" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base text-white">Paddock Vision</CardTitle>
-                    <CardDescription className="text-xs">Video Analysis Agent</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  Computer vision analysis of paddock videos to assess horse behavior and readiness indicators.
-                </p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-amber-600/50 text-amber-400 text-xs">
-                    Active
-                  </Badge>
-                  <Badge variant="outline" className="border-gray-600 text-gray-400 text-xs">
-                    Gemini Vision
-                  </Badge>
-                </div>
-                <Button 
-                  className="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 border border-amber-600/30"
-                  variant="outline"
-                >
-                  Upload Video
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* CV/VLM Risk Agent */}
-            <RiskAgentCard />
           </div>
         </div>
       </main>
