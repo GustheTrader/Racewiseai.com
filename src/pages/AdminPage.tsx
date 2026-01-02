@@ -17,6 +17,7 @@ import ConfigInfo from '@/components/admin/config/ConfigInfo';
 import DemoDataGenerator from '@/components/admin/DemoDataGenerator';
 import UserManagementTab from '@/components/admin/UserManagementTab';
 import { DataToolboxTab } from '@/components/admin/DataToolboxTab';
+import { RaceResultsTab } from '@/components/admin/RaceResultsTab';
 import { useScrapeJobs } from '@/hooks/useScrapeJobs';
 
 const AdminPage: React.FC = () => {
@@ -82,6 +83,7 @@ const AdminPage: React.FC = () => {
           <TabsTrigger value="jobs">Job Management</TabsTrigger>
           <TabsTrigger value="tracks">Track Management</TabsTrigger>
           <TabsTrigger value="raceData">Race Data</TabsTrigger>
+          <TabsTrigger value="results">Race Results</TabsTrigger>
           <TabsTrigger value="oddsPulse">Odds Pulse API</TabsTrigger>
           <TabsTrigger value="import">Data Import</TabsTrigger>
           <TabsTrigger value="demo">Demo Data</TabsTrigger>
@@ -140,6 +142,10 @@ const AdminPage: React.FC = () => {
           
           <TabsContent value="raceData">
             <RaceDataManager />
+          </TabsContent>
+
+          <TabsContent value="results">
+            <RaceResultsTab />
           </TabsContent>
 
           <TabsContent value="oddsPulse">
