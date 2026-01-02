@@ -148,6 +148,7 @@ const AdminToolboxPage: React.FC = () => {
       const raceDate = scrapeResult.raceDate || new Date().toISOString().split('T')[0];
       let racesInserted = 0;
       let horsesInserted = 0;
+      let oddsInserted = 0;
 
       for (const race of scrapeResult.races) {
         // Insert race_data
@@ -169,19 +170,21 @@ const AdminToolboxPage: React.FC = () => {
 
         racesInserted++;
 
-        // Insert race_horses if we have a race_id
+        // Insert race_horses and odds_data if we have horses
         if (raceData?.id && race.horses?.length) {
           for (const horse of race.horses) {
             const mlOdds = horse.morningLineOdds 
               ? parseFloat(horse.morningLineOdds.replace(/[^0-9.]/g, '')) || null
               : null;
+            const horseNumber = parseInt(horse.programNumber) || 0;
 
+            // Insert race_horses
             const { error: horseError } = await supabase
               .from('race_horses')
               .upsert({
                 race_id: raceData.id,
                 name: horse.horseName,
-                pp: parseInt(horse.programNumber) || 0,
+                pp: horseNumber,
                 jockey: horse.jockey || null,
                 trainer: horse.trainer || null,
                 ml_odds: mlOdds,
@@ -192,16 +195,43 @@ const AdminToolboxPage: React.FC = () => {
             } else {
               console.error('Error inserting horse:', horseError);
             }
+
+            // Insert odds_data for morning line odds
+            if (horse.horseName && horseNumber > 0) {
+              const { error: oddsError } = await supabase
+                .from('odds_data')
+                .insert({
+                  track_name: scrapeResult.trackName,
+                  race_number: race.raceNumber,
+                  race_date: raceDate,
+                  horse_number: horseNumber,
+                  horse_name: horse.horseName,
+                  win_odds: horse.morningLineOdds || null,
+                  pool_data: {
+                    type: 'morning_line',
+                    jockey: horse.jockey,
+                    trainer: horse.trainer,
+                    weight: horse.weight,
+                    medication: horse.medication,
+                    equipment: horse.equipment
+                  }
+                });
+
+              if (!oddsError) {
+                oddsInserted++;
+              } else {
+                console.error('Error inserting odds:', oddsError);
+              }
+            }
           }
         }
       }
 
-      toast.success(`Saved ${racesInserted} races and ${horsesInserted} horses to Supabase`);
+      toast.success(`Saved ${racesInserted} races, ${horsesInserted} horses, ${oddsInserted} odds records`);
       setScrapeResult(null);
     } catch (err: any) {
       console.error('Error saving to Supabase:', err);
       toast.error(err.message || 'Failed to save data');
-      toast.error('Failed to load data');
     } finally {
       setIsProcessing(false);
     }
