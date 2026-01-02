@@ -35,12 +35,11 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = fals
     );
   }
 
-  // TEMPORARILY DISABLED FOR TESTING - Remove this block to re-enable auth
-  // if (!user) {
-  //   // Redirect to the login page if not logged in
-  //   console.log("Redirecting to auth page, no user found");
-  //   return <Navigate to="/auth" state={{ from: location }} replace />;
-  // }
+  if (!user) {
+    // Redirect to the login page if not logged in
+    console.log("Redirecting to auth page, no user found");
+    return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
 
   if (requireAdmin && !isAdmin) {
     // Redirect to home if admin access is required but user is not an admin
