@@ -13,9 +13,9 @@
     },
     "types": ["deno"],
     "allowJs": true,
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
-    "noUnusedLocals": false,
+    "noImplicitAny": true,  // BUGFIX: Enable to catch implicit any types
+    "noUnusedParameters": true,  // BUGFIX: Enable to catch unused parameters
+    "noUnusedLocals": true,  // BUGFIX: Enable to catch unused variables
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./types"],
@@ -23,11 +23,11 @@
     "noEmit": true,
     "moduleDetection": "force",
     "jsx": "react",
-    "strict": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false
+    "strict": true,  // BUGFIX: Enable strict mode
+    "strictNullChecks": true,  // BUGFIX: Enable null/undefined checks
+    "strictFunctionTypes": true,  // BUGFIX: Enable function type checking
+    "strictBindCallApply": true,  // BUGFIX: Enable bind/call/apply checking
+    "strictPropertyInitialization": true  // BUGFIX: Require property initialization
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

@@ -42,18 +42,28 @@ const AdminPage: React.FC = () => {
 
   useEffect(() => {
     const loadApiSettings = async () => {
-      if (user) {
-        const { data, error } = await supabase
-          .from('api_connections')
-          .select('api_url, api_key, is_test_mode')
-          .eq('user_id', user.id)
-          .maybeSingle();
+      // BUGFIX: Add proper error handling
+      try {
+        if (user) {
+          const { data, error } = await supabase
+            .from('api_connections')
+            .select('api_url, api_key, is_test_mode')
+            .eq('user_id', user.id)
+            .maybeSingle();
 
-        if (data) {
-          setApiUrl(data.api_url || '');
-          setApiKey(data.api_key || '');
-          setIsTestMode(data.is_test_mode !== false);  // Default to true if null
+          if (error) {
+            console.error('Failed to load API settings:', error);
+            return;
+          }
+
+          if (data) {
+            setApiUrl(data.api_url || '');
+            setApiKey(data.api_key || '');
+            setIsTestMode(data.is_test_mode !== false);  // Default to true if null
+          }
         }
+      } catch (err) {
+        console.error('Error loading API settings:', err);
       }
     };
 

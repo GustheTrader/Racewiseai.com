@@ -243,7 +243,9 @@ serve(async (req) => {
     // Validate URL is from allowed domain
     try {
       const urlObj = new URL(url);
-      if (!urlObj.hostname.includes('offtrackbetting.com')) {
+      // BUGFIX: Use whitelist matching instead of includes() to prevent domain bypass
+      const allowedDomains = ['offtrackbetting.com', 'www.offtrackbetting.com', 'app.offtrackbetting.com'];
+      if (!allowedDomains.includes(urlObj.hostname)) {
         throw new Error('Only offtrackbetting.com URLs are allowed');
       }
     } catch (error) {
