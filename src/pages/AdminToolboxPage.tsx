@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut, Flame } from 'lucide-react';
+import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut, Flame, ChevronDown, ChevronRight, User, Award, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useScrapeJobs } from '@/hooks/useScrapeJobs';
 import { parseMorningCard, parseRacingDigest, parseBackupEntries } from '@/integrations/geminiService';
 import { fileToBase64 } from '@/utils/dataToolboxUtils';
@@ -37,6 +39,29 @@ const AdminToolboxPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ord');
   const [connectionStatus, setConnectionStatus] = useState<'ready' | 'syncing' | 'error'>('ready');
   const [scrapeResult, setScrapeResult] = useState<any>(null);
+  const [expandedRaces, setExpandedRaces] = useState<Set<number>>(new Set());
+  
+  const toggleRaceExpanded = (raceNum: number) => {
+    setExpandedRaces(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(raceNum)) {
+        newSet.delete(raceNum);
+      } else {
+        newSet.add(raceNum);
+      }
+      return newSet;
+    });
+  };
+
+  const expandAllRaces = () => {
+    if (scrapeResult?.races) {
+      setExpandedRaces(new Set(scrapeResult.races.map((r: any) => r.raceNumber)));
+    }
+  };
+
+  const collapseAllRaces = () => {
+    setExpandedRaces(new Set());
+  };
   
   const { 
     jobs, 
@@ -427,35 +452,156 @@ const AdminToolboxPage: React.FC = () => {
             )}
           </div>
 
-          {/* Center Column - Hero Section */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-center min-h-[500px]">
-            {/* Neural Engine Visual */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 blur-3xl bg-blue-600/20 rounded-full scale-150" />
-              <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-900/50 to-blue-950/50 border border-blue-700/30 flex items-center justify-center">
-                <Zap className="h-12 w-12 text-blue-400" />
+          {/* Center Column - Preview Panel or Hero Section */}
+          <div className="lg:col-span-6 flex flex-col min-h-[500px]">
+            {scrapeResult && scrapeResult.races?.length > 0 ? (
+              /* Preview Panel */
+              <Card className="bg-[#131a2e] border-blue-900/30 h-full">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg text-white flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        Scraped Data Preview
+                      </CardTitle>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {scrapeResult.trackName} • {scrapeResult.raceDate} • {scrapeResult.races.length} races
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={expandAllRaces}
+                        className="text-xs text-gray-400 hover:text-white"
+                      >
+                        Expand All
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={collapseAllRaces}
+                        className="text-xs text-gray-400 hover:text-white"
+                      >
+                        Collapse All
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setScrapeResult(null)}
+                        className="text-gray-400 hover:text-white"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[450px] px-4 pb-4">
+                    <div className="space-y-3">
+                      {scrapeResult.races.map((race: any) => (
+                        <Collapsible
+                          key={race.raceNumber}
+                          open={expandedRaces.has(race.raceNumber)}
+                          onOpenChange={() => toggleRaceExpanded(race.raceNumber)}
+                        >
+                          <CollapsibleTrigger asChild>
+                            <div className="flex items-center justify-between p-3 bg-[#0d1221] rounded-lg cursor-pointer hover:bg-[#151d33] transition-colors">
+                              <div className="flex items-center gap-3">
+                                <Badge className="bg-amber-600/20 text-amber-400 border-amber-600/30 font-bold">
+                                  R{race.raceNumber}
+                                </Badge>
+                                <div>
+                                  <p className="text-sm font-medium text-white">
+                                    {race.distance} {race.surface} • {race.raceType}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {race.postTime} • Purse: {race.purse || 'N/A'} • {race.horses?.length || 0} horses
+                                  </p>
+                                </div>
+                              </div>
+                              {expandedRaces.has(race.raceNumber) ? (
+                                <ChevronDown className="h-4 w-4 text-gray-400" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-gray-400" />
+                              )}
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="mt-2 ml-4 space-y-1">
+                              {race.conditions && (
+                                <p className="text-xs text-gray-500 italic mb-2">{race.conditions}</p>
+                              )}
+                              <div className="grid grid-cols-1 gap-1">
+                                {race.horses?.map((horse: any, idx: number) => (
+                                  <div 
+                                    key={idx} 
+                                    className="flex items-center justify-between p-2 bg-[#0a0e1a] rounded border border-blue-900/20"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <span className="w-6 h-6 flex items-center justify-center rounded bg-blue-900/30 text-blue-400 text-xs font-bold">
+                                        {horse.programNumber}
+                                      </span>
+                                      <div>
+                                        <p className="text-sm font-medium text-white">{horse.horseName}</p>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                          <span className="flex items-center gap-1">
+                                            <User className="h-3 w-3" />
+                                            {horse.jockey || 'TBD'}
+                                          </span>
+                                          <span className="flex items-center gap-1">
+                                            <Award className="h-3 w-3" />
+                                            {horse.trainer || 'TBD'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <Badge variant="outline" className="border-green-600/50 text-green-400">
+                                      ML: {horse.morningLineOdds || 'N/A'}
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            ) : (
+              /* Hero Section when no data */
+              <div className="flex flex-col items-center justify-center h-full">
+                {/* Neural Engine Visual */}
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 blur-3xl bg-blue-600/20 rounded-full scale-150" />
+                  <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-900/50 to-blue-950/50 border border-blue-700/30 flex items-center justify-center">
+                    <Zap className="h-12 w-12 text-blue-400" />
+                  </div>
+                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-24 border border-blue-900/30 rounded-full opacity-30" />
+                </div>
+
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-300 text-center tracking-wide uppercase mb-2">
+                  Gemini Data Pipeline
+                </h2>
+                <h3 className="text-2xl md:text-3xl font-bold text-amber-500 text-center tracking-wide uppercase mb-6">
+                  ORD • TRD • OTC
+                </h3>
+
+                <p className="text-gray-500 text-center max-w-md uppercase tracking-widest text-xs leading-relaxed">
+                  Parse morning cards, integrate TRD rankings, and scrape live OTB odds data through the Gemini AI pipeline.
+                </p>
+
+                {/* Connection Status */}
+                <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full border border-gray-700 bg-[#0d1221]">
+                  <CheckCircle2 className={`h-4 w-4 ${connectionStatus === 'ready' ? 'text-green-500' : 'text-yellow-500'}`} />
+                  <span className="text-sm font-medium uppercase tracking-wide text-gray-400">
+                    {connectionStatus === 'ready' ? 'System Ready' : 'Syncing...'}
+                  </span>
+                </div>
               </div>
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-24 border border-blue-900/30 rounded-full opacity-30" />
-            </div>
-
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-300 text-center tracking-wide uppercase mb-2">
-              Gemini Data Pipeline
-            </h2>
-            <h3 className="text-2xl md:text-3xl font-bold text-amber-500 text-center tracking-wide uppercase mb-6">
-              ORD • TRD • OTC
-            </h3>
-
-            <p className="text-gray-500 text-center max-w-md uppercase tracking-widest text-xs leading-relaxed">
-              Parse morning cards, integrate TRD rankings, and scrape live OTB odds data through the Gemini AI pipeline.
-            </p>
-
-            {/* Connection Status */}
-            <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full border border-gray-700 bg-[#0d1221]">
-              <CheckCircle2 className={`h-4 w-4 ${connectionStatus === 'ready' ? 'text-green-500' : 'text-yellow-500'}`} />
-              <span className="text-sm font-medium uppercase tracking-wide text-gray-400">
-                {connectionStatus === 'ready' ? 'System Ready' : 'Syncing...'}
-              </span>
-            </div>
+            )}
           </div>
 
           {/* Right Column - Stats & Jobs */}
