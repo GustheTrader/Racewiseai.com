@@ -66,12 +66,12 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* Admin Routes (Require Admin Role) */}
+        {/* Admin Routes - All redirect to unified Toolbox */}
         <Route 
           path="/admin" 
           element={
             <RequireAuth requireAdmin={true}>
-              <AdminPage />
+              <AdminToolboxPage />
             </RequireAuth>
           } 
         />
@@ -79,7 +79,7 @@ const AnimatedRoutes = () => {
           path="/data-dashboard" 
           element={
             <RequireAuth requireAdmin={true}>
-              <DataDashboardPage />
+              <AdminToolboxPage />
             </RequireAuth>
           } 
         />
