@@ -138,11 +138,69 @@ const AdminToolboxPage: React.FC = () => {
   };
 
   const handleLoadToSupabase = async () => {
+    if (!scrapeResult || !scrapeResult.races?.length) {
+      toast.error('No scraped data to save');
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success('Data loaded to Supabase');
-    } catch (err) {
+      const raceDate = scrapeResult.raceDate || new Date().toISOString().split('T')[0];
+      let racesInserted = 0;
+      let horsesInserted = 0;
+
+      for (const race of scrapeResult.races) {
+        // Insert race_data
+        const { data: raceData, error: raceError } = await supabase
+          .from('race_data')
+          .upsert({
+            track_name: scrapeResult.trackName,
+            race_number: race.raceNumber,
+            race_date: raceDate,
+            race_conditions: `${race.distance || ''} ${race.surface || ''} ${race.raceType || ''} - ${race.conditions || ''} - Purse: ${race.purse || 'N/A'}`.trim(),
+          }, { onConflict: 'track_name,race_number,race_date' })
+          .select()
+          .maybeSingle();
+
+        if (raceError) {
+          console.error('Error inserting race:', raceError);
+          continue;
+        }
+
+        racesInserted++;
+
+        // Insert race_horses if we have a race_id
+        if (raceData?.id && race.horses?.length) {
+          for (const horse of race.horses) {
+            const mlOdds = horse.morningLineOdds 
+              ? parseFloat(horse.morningLineOdds.replace(/[^0-9.]/g, '')) || null
+              : null;
+
+            const { error: horseError } = await supabase
+              .from('race_horses')
+              .upsert({
+                race_id: raceData.id,
+                name: horse.horseName,
+                pp: parseInt(horse.programNumber) || 0,
+                jockey: horse.jockey || null,
+                trainer: horse.trainer || null,
+                ml_odds: mlOdds,
+              }, { onConflict: 'race_id,pp' });
+
+            if (!horseError) {
+              horsesInserted++;
+            } else {
+              console.error('Error inserting horse:', horseError);
+            }
+          }
+        }
+      }
+
+      toast.success(`Saved ${racesInserted} races and ${horsesInserted} horses to Supabase`);
+      setScrapeResult(null);
+    } catch (err: any) {
+      console.error('Error saving to Supabase:', err);
+      toast.error(err.message || 'Failed to save data');
       toast.error('Failed to load data');
     } finally {
       setIsProcessing(false);
