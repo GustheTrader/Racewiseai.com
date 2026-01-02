@@ -16,6 +16,7 @@ import { fileToBase64 } from '@/utils/dataToolboxUtils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import racewiseLogo from '@/assets/racewise-logo.png';
+import ScheduleConfigPanel from '@/components/admin/ScheduleConfigPanel';
 
 const tracks = [
   'Santa Anita Park',
@@ -644,6 +645,9 @@ const AdminToolboxPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Schedule Config Panel */}
+            <ScheduleConfigPanel />
 
             {/* Recent Jobs */}
             <Card className="bg-[#131a2e] border-blue-900/30">

@@ -991,6 +991,39 @@ export type Database = {
         }
         Relationships: []
       }
+      scrape_schedule_config: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          schedule_hour: number
+          schedule_minute: number
+          timezone: string
+          track_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          schedule_hour?: number
+          schedule_minute?: number
+          timezone?: string
+          track_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          schedule_hour?: number
+          schedule_minute?: number
+          timezone?: string
+          track_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       speed_figures: {
         Row: {
           created_at: string | null

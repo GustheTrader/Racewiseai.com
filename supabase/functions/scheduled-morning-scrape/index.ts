@@ -6,15 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Tracks to scrape each morning
-const MORNING_TRACKS = [
-  'Santa Anita Park',
-  'Gulfstream Park',
-  'Churchill Downs',
-  'Aqueduct',
-  'Del Mar',
-  'Oaklawn Park',
-];
+interface TrackConfig {
+  track_name: string;
+  is_enabled: boolean;
+  schedule_hour: number;
+  schedule_minute: number;
+}
 
 interface Horse {
   programNumber: string;
@@ -220,10 +217,24 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Fetch enabled tracks from config
+    const { data: trackConfigs, error: configError } = await supabase
+      .from('scrape_schedule_config')
+      .select('track_name, is_enabled')
+      .eq('is_enabled', true);
+
+    if (configError) {
+      console.error('Error fetching config:', configError);
+      throw new Error('Failed to fetch track configuration');
+    }
+
+    const enabledTracks = trackConfigs?.map((t: TrackConfig) => t.track_name) || [];
+    console.log(`Found ${enabledTracks.length} enabled tracks to scrape`);
+
     const results: { track: string; success: boolean; stats?: { races: number; horses: number; odds: number }; error?: string }[] = [];
 
     // Scrape each track sequentially to avoid rate limits
-    for (const trackName of MORNING_TRACKS) {
+    for (const trackName of enabledTracks) {
       console.log(`Processing ${trackName}...`);
       
       const data = await scrapeTrack(trackName, firecrawlKey);
@@ -245,7 +256,7 @@ serve(async (req) => {
     await supabase.from('system_logs').insert({
       log_level: 'INFO',
       component: 'scheduled-morning-scrape',
-      message: `Completed morning scrape for ${MORNING_TRACKS.length} tracks`,
+      message: `Completed morning scrape for ${enabledTracks.length} tracks`,
       details: {
         results,
         executionTimeMs: Date.now() - startTime,
@@ -254,12 +265,12 @@ serve(async (req) => {
     });
 
     const successCount = results.filter(r => r.success).length;
-    console.log(`Morning scrape completed: ${successCount}/${MORNING_TRACKS.length} tracks successful`);
+    console.log(`Morning scrape completed: ${successCount}/${enabledTracks.length} tracks successful`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Processed ${successCount}/${MORNING_TRACKS.length} tracks`,
+        message: `Processed ${successCount}/${enabledTracks.length} tracks`,
         results,
         executionTimeMs: Date.now() - startTime
       }),
