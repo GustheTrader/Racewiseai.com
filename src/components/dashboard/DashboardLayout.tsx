@@ -38,8 +38,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <div className="flex items-center gap-4">
                 <RacewiseLogo />
                 <div className="h-10 w-px bg-gradient-to-b from-transparent via-muted-foreground/30 to-transparent" />
-                <p className="text-muted-foreground text-sm">
-                  {subtitle}
+                <p className="text-sm">
+                  <span className="text-muted-foreground">AI/ML powered </span>
+                  <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent font-medium">
+                    {subtitle}
+                  </span>
                 </p>
               </div>
               <div className="flex items-center gap-3">
