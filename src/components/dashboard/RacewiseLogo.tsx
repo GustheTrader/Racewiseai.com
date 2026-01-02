@@ -4,9 +4,9 @@ import { Zap } from 'lucide-react';
 const RacewiseLogo: React.FC = () => {
   return (
     <div className="flex items-center gap-3">
-      {/* Gradient icon container */}
-      <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-        <Zap className="w-6 h-6 text-white fill-white" />
+      {/* Gradient icon container with pulsing glow */}
+      <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 flex items-center justify-center shadow-lg shadow-blue-500/40 animate-logo-glow">
+        <Zap className="w-6 h-6 text-white fill-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
       </div>
       
       {/* Text container */}
