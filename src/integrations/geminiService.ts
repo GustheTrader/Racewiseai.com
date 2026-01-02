@@ -1,5 +1,9 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { PipelineResult } from "../types/DataToolboxTypes";
+import {
+  GoogleGenerativeAI,
+  SchemaType,
+  GenerateContentRequest,
+} from "@google/generative-ai";
+import { PipelineResult } from "@/types/DataToolboxTypes";
 
 export interface ParseRequest {
   text?: string;
@@ -86,7 +90,7 @@ export const parseMorningCard = async (
   trackName?: string,
   apiKey?: string
 ): Promise<PipelineResult> => {
-  const key = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  const key = (apiKey || import.meta.env.VITE_GEMINI_API_KEY) as string | undefined;
   if (!key) {
     throw new Error("Gemini API key not configured. Please set VITE_GEMINI_API_KEY");
   }
@@ -120,14 +124,16 @@ export const parseMorningCard = async (
     parts.push({ text: request.text });
   }
 
-  const response = await model.generateContent({
-    contents: [{ role: 'user', parts }],
+  const genRequest: GenerateContentRequest = {
+    contents: [{ role: "user", parts }],
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
-      maxOutputTokens: 4096
-    }
-  });
+      maxOutputTokens: 4096,
+    },
+  };
+
+  const response = await model.generateContent(genRequest);
 
   const text = response.response.text();
   const data = JSON.parse(text);
@@ -142,7 +148,7 @@ export const parseRacingDigest = async (
   request: ParseRequest,
   apiKey?: string
 ): Promise<PipelineResult> => {
-  const key = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  const key = (apiKey || import.meta.env.VITE_GEMINI_API_KEY) as string | undefined;
   if (!key) {
     throw new Error("Gemini API key not configured");
   }
@@ -168,14 +174,16 @@ export const parseRacingDigest = async (
     parts.push({ text: request.text });
   }
 
-  const response = await model.generateContent({
-    contents: [{ role: 'user', parts }],
+  const genRequest2: GenerateContentRequest = {
+    contents: [{ role: "user", parts }],
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
-      maxOutputTokens: 4096
-    }
-  });
+      maxOutputTokens: 4096,
+    },
+  };
+
+  const response = await model.generateContent(genRequest2);
 
   const text = response.response.text();
   return JSON.parse(text) as PipelineResult;
@@ -188,7 +196,7 @@ export const parseBackupEntries = async (
   request: ParseRequest,
   apiKey?: string
 ): Promise<PipelineResult> => {
-  const key = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  const key = (apiKey || import.meta.env.VITE_GEMINI_API_KEY) as string | undefined;
   if (!key) {
     throw new Error("Gemini API key not configured");
   }
@@ -212,14 +220,16 @@ export const parseBackupEntries = async (
     parts.push({ text: request.text });
   }
 
-  const response = await model.generateContent({
-    contents: [{ role: 'user', parts }],
+  const genRequest3: GenerateContentRequest = {
+    contents: [{ role: "user", parts }],
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
-      maxOutputTokens: 4096
-    }
-  });
+      maxOutputTokens: 4096,
+    },
+  };
+
+  const response = await model.generateContent(genRequest3);
 
   const text = response.response.text();
   return JSON.parse(text) as PipelineResult;

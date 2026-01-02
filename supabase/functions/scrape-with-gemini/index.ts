@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error - Deno imports are not typed
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // CORS headers - restricted to specific origins
@@ -11,9 +11,8 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin?: string): Record<string, string> {
-  const isAllowed = origin && ALLOWED_ORIGINS.some(allowed =>
-    allowed === origin || (origin.includes('localhost') && allowed.includes('localhost'))
-  );
+  // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin! : "",
@@ -244,7 +243,9 @@ serve(async (req) => {
     // Validate URL is from allowed domain
     try {
       const urlObj = new URL(url);
-      if (!urlObj.hostname.includes('offtrackbetting.com')) {
+      // BUGFIX: Use whitelist matching instead of includes() to prevent domain bypass
+      const allowedDomains = ['offtrackbetting.com', 'www.offtrackbetting.com', 'app.offtrackbetting.com'];
+      if (!allowedDomains.includes(urlObj.hostname)) {
         throw new Error('Only offtrackbetting.com URLs are allowed');
       }
     } catch (error) {
