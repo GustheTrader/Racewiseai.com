@@ -143,6 +143,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <RiskAgentCard />
         <VideoPerformanceCard />
+      </div>
       
       {/* Live Paddock Comments and AI-Thorian Value */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
