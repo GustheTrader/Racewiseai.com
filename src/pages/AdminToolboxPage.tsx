@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import racewiseLogo from '@/assets/racewise-logo.webp';
 import ScheduleConfigPanel from '@/components/admin/ScheduleConfigPanel';
 import { SystemLogsViewer } from '@/components/admin/SystemLogsViewer';
+import ScrapedDataViewer from '@/components/admin/ScrapedDataViewer';
 
 const tracks = [
   'Santa Anita Park',
@@ -692,6 +693,11 @@ const AdminToolboxPage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Scraped Data Viewer Section */}
+        <div className="mt-8">
+          <ScrapedDataViewer />
         </div>
       </main>
     </div>
