@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
-import AdminPage from "./pages/AdminPage";
 import AdminToolboxPage from "./pages/AdminToolboxPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
@@ -13,7 +12,6 @@ import PublicResultsPage from "./pages/PublicResultsPage";
 import ResultsPage from "./pages/ResultsPage";
 import RequireAuth from "./components/RequireAuth";
 import { AuthProvider } from "./contexts/auth/AuthContext";
-import DataDashboardPage from "./pages/DataDashboardPage";
 import QuantumRankingsPage from "./pages/QuantumRankingsPage";
 import ModelProcessPage from "./pages/ModelProcessPage";
 import VideoPerformancePage from "./pages/VideoPerformancePage";
@@ -66,25 +64,9 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* Admin Routes - All redirect to unified Toolbox */}
+        {/* Admin Route - Single unified dashboard */}
         <Route 
           path="/admin" 
-          element={
-            <RequireAuth requireAdmin={true}>
-              <AdminToolboxPage />
-            </RequireAuth>
-          } 
-        />
-        <Route 
-          path="/data-dashboard" 
-          element={
-            <RequireAuth requireAdmin={true}>
-              <AdminToolboxPage />
-            </RequireAuth>
-          } 
-        />
-        <Route 
-          path="/toolbox" 
           element={
             <RequireAuth requireAdmin={true}>
               <AdminToolboxPage />
