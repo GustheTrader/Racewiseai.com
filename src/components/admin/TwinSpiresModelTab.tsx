@@ -224,6 +224,68 @@ const TwinSpiresModelTab: React.FC = () => {
 
   const selectedRaceData = parsedData?.races?.find(r => r.number === selectedRace);
 
+  // Upload full model report to Supabase with realtime trigger
+  const handleUploadModelReport = async (uploadAllRaces = false) => {
+    if (!parsedData) {
+      toast.error('No data to upload');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const raceDate = parsedData.date || new Date().toISOString().split('T')[0];
+      const racesToUpload = uploadAllRaces ? parsedData.races : [selectedRaceData].filter(Boolean);
+      
+      let uploaded = 0;
+      for (const race of racesToUpload || []) {
+        if (!race) continue;
+        
+        // Prepare ensemble scores for the race
+        const ensembleScores = race.horses?.reduce((acc, horse) => {
+          acc[horse.programNumber] = {
+            name: horse.name,
+            ensembleScore: horse.ensembleScore,
+            valueRating: horse.valueRating,
+            brisPickRank: horse.brisPickRank,
+            jockeyBonus: horse.jockey?.bonusPoints,
+            trainerBonus: horse.trainer?.bonusPoints,
+            recencyBonus: horse.recencyBonus,
+            daysOff: horse.daysOff
+          };
+          return acc;
+        }, {} as Record<string, any>);
+
+        const { error } = await supabase
+          .from('model_reports')
+          .upsert({
+            model_type: 'twinspires',
+            track_name: parsedData.track,
+            race_date: raceDate,
+            race_number: race.number,
+            report_data: race as any,
+            ensemble_scores: ensembleScores,
+            track_bias: parsedData.trackBias,
+            bris_analysis: parsedData.raceAnalysis
+          }, { 
+            onConflict: 'model_type,track_name,race_date,race_number' 
+          });
+
+        if (error) {
+          console.error('Upload error:', error);
+          throw error;
+        }
+        uploaded++;
+      }
+
+      toast.success(`Uploaded ${uploaded} race report(s) to Supabase - Dashboard will update live!`);
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.error(err.message || 'Failed to upload model report');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleSaveToDatabase = async () => {
     if (!parsedData || !selectedRaceData) {
       toast.error('No data to save');
@@ -749,14 +811,38 @@ const TwinSpiresModelTab: React.FC = () => {
                       </Table>
                     </ScrollArea>
 
-                    <div className="mt-4 flex justify-end">
-                      <Button onClick={handleSaveToDatabase} disabled={isProcessing}>
+                    <div className="mt-4 flex justify-end gap-2">
+                      <Button onClick={handleSaveToDatabase} disabled={isProcessing} variant="outline">
                         {isProcessing ? (
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         ) : (
                           <CheckCircle2 className="h-4 w-4 mr-2" />
                         )}
-                        Save Race to Database
+                        Save Race to DB
+                      </Button>
+                      <Button 
+                        onClick={() => handleUploadModelReport(false)} 
+                        disabled={isProcessing}
+                        className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                      >
+                        {isProcessing ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        Upload Race Report
+                      </Button>
+                      <Button 
+                        onClick={() => handleUploadModelReport(true)} 
+                        disabled={isProcessing}
+                        className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                      >
+                        {isProcessing ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        Upload All Races
                       </Button>
                     </div>
                   </CardContent>

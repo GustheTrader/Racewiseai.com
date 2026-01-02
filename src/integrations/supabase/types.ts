@@ -422,6 +422,51 @@ export type Database = {
         }
         Relationships: []
       }
+      model_reports: {
+        Row: {
+          bris_analysis: string | null
+          created_at: string
+          created_by: string | null
+          ensemble_scores: Json | null
+          id: string
+          model_type: string
+          race_date: string
+          race_number: number
+          report_data: Json
+          track_bias: Json | null
+          track_name: string
+          updated_at: string
+        }
+        Insert: {
+          bris_analysis?: string | null
+          created_at?: string
+          created_by?: string | null
+          ensemble_scores?: Json | null
+          id?: string
+          model_type: string
+          race_date: string
+          race_number: number
+          report_data: Json
+          track_bias?: Json | null
+          track_name: string
+          updated_at?: string
+        }
+        Update: {
+          bris_analysis?: string | null
+          created_at?: string
+          created_by?: string | null
+          ensemble_scores?: Json | null
+          id?: string
+          model_type?: string
+          race_date?: string
+          race_number?: number
+          report_data?: Json
+          track_bias?: Json | null
+          track_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       odds_changes: {
         Row: {
           change_direction: string | null

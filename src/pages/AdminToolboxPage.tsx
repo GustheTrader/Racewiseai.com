@@ -21,6 +21,7 @@ import { SystemLogsViewer } from '@/components/admin/SystemLogsViewer';
 import ScrapedDataViewer from '@/components/admin/ScrapedDataViewer';
 import ModelTrainingTab from '@/components/admin/ModelTrainingTab';
 import TwinSpiresModelTab from '@/components/admin/TwinSpiresModelTab';
+import LiveModelReports from '@/components/dashboard/LiveModelReports';
 
 const tracks = [
   'Santa Anita Park',
@@ -656,6 +657,9 @@ const AdminToolboxPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Live Model Reports - Realtime Dashboard */}
+            <LiveModelReports />
 
             {/* Schedule Config Panel */}
             <ScheduleConfigPanel />
