@@ -108,7 +108,7 @@ describe("Morning Report Workflow", () => {
       const trackName = "CHURCHILL DOWNS";
       const jobUrl = `https://app.offtrackbetting.com/#/lobby/live-racing?programName=${trackName
         .toLowerCase()
-        .replace(/\\s+/g, "-")}`;
+        .replace(/\s+/g, "-")}`;
 
       expect(jobUrl).toBe(
         "https://app.offtrackbetting.com/#/lobby/live-racing?programName=churchill-downs"
