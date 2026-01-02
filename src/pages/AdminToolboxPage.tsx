@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2 } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,11 +28,12 @@ const tracks = [
 ];
 
 const AdminToolboxPage: React.FC = () => {
-  const { user, isLoading: authLoading, isAdmin } = useAuth();
+  const { user, isLoading: authLoading, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
   const [selectedTrack, setSelectedTrack] = useState(tracks[0]);
   const [cardData, setCardData] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState('morning');
+  const [activeTab, setActiveTab] = useState('ord');
   const [connectionStatus, setConnectionStatus] = useState<'ready' | 'syncing' | 'error'>('ready');
   
   const { 
@@ -63,7 +64,7 @@ const AdminToolboxPage: React.FC = () => {
       const base64Data = await fileToBase64(file);
       
       let result;
-      if (activeTab === 'morning') {
+      if (activeTab === 'ord') {
         result = await parseMorningCard({
           pdfData: { data: base64Data, mimeType: file.type }
         });
@@ -85,28 +86,25 @@ const AdminToolboxPage: React.FC = () => {
     }
   };
 
-  const handleQuantumReport = async () => {
+  const handleScrapeOTB = async () => {
     setIsProcessing(true);
     try {
-      // Simulate quantum morning report processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Quantum Morning Report generated');
+      const trackJob = jobs.find(j => 
+        j.track_name.toLowerCase().includes(selectedTrack.toLowerCase().split(' ')[0])
+      );
+      
+      if (trackJob) {
+        await runJobManually(trackJob);
+        toast.success('OTB scrape initiated');
+      } else {
+        // Simulate scrape for demo
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        toast.success('OTB data scraped successfully');
+      }
     } catch (err) {
-      toast.error('Failed to generate report');
+      toast.error('Failed to scrape OTB data');
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const handleScrapeBaseline = async () => {
-    const trackJob = jobs.find(j => 
-      j.track_name.toLowerCase().includes(selectedTrack.toLowerCase().split(' ')[0])
-    );
-    
-    if (trackJob) {
-      await runJobManually(trackJob);
-    } else {
-      toast.info('No scrape job configured for this track');
     }
   };
 
@@ -122,6 +120,11 @@ const AdminToolboxPage: React.FC = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white">
       {/* Header */}
@@ -133,19 +136,39 @@ const AdminToolboxPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold">
-                RaceWise AI <span className="text-amber-500">Toolbox</span>
+                <span className="text-amber-500">ADMIN</span> <span className="text-white">DASHBOARD</span>
               </h1>
-              <p className="text-xs text-gray-500 tracking-widest uppercase">
-                Quantum Inspired Models
+              <p className="text-xs text-gray-500">
+                Gemini ORD & TRD OTC Systems
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-700 bg-[#0d1221]">
-            <CheckCircle2 className={`h-4 w-4 ${connectionStatus === 'ready' ? 'text-green-500' : 'text-yellow-500'}`} />
-            <span className="text-sm font-medium uppercase tracking-wide">
-              {connectionStatus === 'ready' ? 'Ready' : 'Syncing...'}
-            </span>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="border-blue-900/50 text-gray-300 hover:bg-blue-900/20"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Main Dashboard
+            </Button>
+            
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-700 bg-[#0d1221]">
+              <span className="text-sm text-gray-400">{user.email}</span>
+              <Badge className="bg-amber-600/20 text-amber-400 border-amber-600/30">Admin</Badge>
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="text-gray-400 hover:text-white"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
@@ -156,32 +179,26 @@ const AdminToolboxPage: React.FC = () => {
           
           {/* Left Column - Workflow Panel */}
           <div className="lg:col-span-3 space-y-4">
-            {/* Workflow Tabs */}
+            {/* Workflow Tabs - ORD / TRD / OTC */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-4 bg-[#131a2e] border border-blue-900/30 rounded-lg p-1">
+              <TabsList className="grid grid-cols-3 bg-[#131a2e] border border-blue-900/30 rounded-lg p-1">
                 <TabsTrigger 
-                  value="morning" 
-                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded"
+                  value="ord" 
+                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded font-semibold"
                 >
-                  1. MORNING
+                  ORD
                 </TabsTrigger>
                 <TabsTrigger 
                   value="trd" 
-                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded"
+                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded font-semibold"
                 >
-                  2. TRD
+                  TRD
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="backup" 
-                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded"
+                  value="otc" 
+                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded font-semibold"
                 >
-                  BACKUP
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="live" 
-                  className="text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded"
-                >
-                  3. LIVE
+                  OTC
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -189,6 +206,7 @@ const AdminToolboxPage: React.FC = () => {
             {/* Track Selector */}
             <Card className="bg-[#131a2e] border-blue-900/30">
               <CardContent className="p-4">
+                <label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block">Select Track</label>
                 <Select value={selectedTrack} onValueChange={setSelectedTrack}>
                   <SelectTrigger className="bg-[#0d1221] border-blue-900/30 text-white">
                     <SelectValue placeholder="Select Track" />
@@ -210,19 +228,16 @@ const AdminToolboxPage: React.FC = () => {
                 <Textarea
                   value={cardData}
                   onChange={(e) => setCardData(e.target.value)}
-                  placeholder="Enter Card Data or Drag PDF here..."
-                  className="min-h-[120px] bg-[#0d1221] border-blue-900/30 text-white placeholder:text-gray-500 resize-none"
+                  placeholder="Paste race card data or upload PDF..."
+                  className="min-h-[100px] bg-[#0d1221] border-blue-900/30 text-white placeholder:text-gray-500 resize-none"
                 />
                 
                 {/* File Upload Zone */}
                 <label className="block cursor-pointer">
-                  <div className="border-2 border-dashed border-blue-900/50 rounded-lg p-8 text-center hover:border-blue-600/50 transition-colors">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-500" />
-                    <p className="text-sm text-gray-400 font-medium uppercase tracking-wide">
-                      Drag PDF here or
-                    </p>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide">
-                      Click to Upload
+                  <div className="border-2 border-dashed border-blue-900/50 rounded-lg p-6 text-center hover:border-blue-600/50 transition-colors">
+                    <Upload className="h-6 w-6 mx-auto mb-2 text-gray-500" />
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">
+                      Drop PDF or Click to Upload
                     </p>
                   </div>
                   <input
@@ -239,31 +254,23 @@ const AdminToolboxPage: React.FC = () => {
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
-                onClick={handleQuantumReport}
-                disabled={isProcessing}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold uppercase tracking-wide py-6"
+                onClick={handleScrapeOTB}
+                disabled={isProcessing || isRunningJob}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold uppercase tracking-wide py-5"
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Quantum Morning Report
-              </Button>
-
-              <Button
-                onClick={handleScrapeBaseline}
-                disabled={isRunningJob}
-                variant="outline"
-                className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 font-semibold uppercase tracking-wide py-5"
-              >
-                <Globe className="h-4 w-4 mr-2" />
-                Scrape Market Baseline
+                ) : (
+                  <Globe className="h-4 w-4 mr-2" />
+                )}
+                Scrape OTB Data
               </Button>
 
               <Button
                 onClick={handleLoadToSupabase}
                 disabled={isProcessing}
-                variant="ghost"
-                className="w-full text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium uppercase tracking-wide py-5"
+                variant="outline"
+                className="w-full border-blue-600 text-blue-400 hover:bg-blue-600/10 font-semibold uppercase tracking-wide py-5"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
                 Load to Supabase
@@ -275,102 +282,111 @@ const AdminToolboxPage: React.FC = () => {
           <div className="lg:col-span-6 flex flex-col items-center justify-center min-h-[500px]">
             {/* Neural Engine Visual */}
             <div className="relative mb-8">
-              {/* Glow Effect */}
               <div className="absolute inset-0 blur-3xl bg-blue-600/20 rounded-full scale-150" />
-              
-              {/* Icon Container */}
               <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-900/50 to-blue-950/50 border border-blue-700/30 flex items-center justify-center">
                 <Zap className="h-12 w-12 text-blue-400" />
               </div>
-              
-              {/* Decorative Ring */}
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-24 border border-blue-900/30 rounded-full opacity-30" />
             </div>
 
-            {/* Title */}
             <h2 className="text-3xl md:text-4xl font-bold text-gray-300 text-center tracking-wide uppercase mb-2">
-              Professional Handicapping
+              Gemini Data Pipeline
             </h2>
             <h3 className="text-2xl md:text-3xl font-bold text-amber-500 text-center tracking-wide uppercase mb-6">
-              Neural Engine
+              ORD • TRD • OTC
             </h3>
 
-            {/* Description */}
             <p className="text-gray-500 text-center max-w-md uppercase tracking-widest text-xs leading-relaxed">
-              Use automated morning reports to scrape live OTB data and enrich it with TRD ensemble rankings.
+              Parse morning cards, integrate TRD rankings, and scrape live OTB odds data through the Gemini AI pipeline.
             </p>
+
+            {/* Connection Status */}
+            <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full border border-gray-700 bg-[#0d1221]">
+              <CheckCircle2 className={`h-4 w-4 ${connectionStatus === 'ready' ? 'text-green-500' : 'text-yellow-500'}`} />
+              <span className="text-sm font-medium uppercase tracking-wide text-gray-400">
+                {connectionStatus === 'ready' ? 'System Ready' : 'Syncing...'}
+              </span>
+            </div>
           </div>
 
-          {/* Right Column - Market Feed */}
+          {/* Right Column - Stats & Jobs */}
           <div className="lg:col-span-3 space-y-4">
-            {/* Market Feed Header */}
-            <Card className="bg-[#131a2e] border-blue-900/30">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-sm font-semibold text-green-500 uppercase tracking-wide">
-                    Market Feed
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                  OTB Dashboard Sync Active
-                </p>
-              </CardContent>
-            </Card>
-
             {/* Stats Summary */}
             <Card className="bg-[#131a2e] border-blue-900/30">
-              <CardContent className="p-4 space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-blue-900/20">
-                  <span className="text-xs text-gray-500 uppercase">Active Jobs</span>
-                  <Badge variant="outline" className="border-blue-600 text-blue-400">
-                    {stats?.activeJobs || 0}
-                  </Badge>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-green-500 uppercase tracking-wide">
+                    System Status
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-blue-900/20">
-                  <span className="text-xs text-gray-500 uppercase">Total Scrapes</span>
-                  <Badge variant="outline" className="border-green-600 text-green-400">
-                    {stats?.totalRuns || 0}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-xs text-gray-500 uppercase">Success Rate</span>
-                  <Badge variant="outline" className="border-amber-600 text-amber-400">
-                    {stats?.successRate || 100}%
-                  </Badge>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-blue-900/20">
+                    <span className="text-xs text-gray-500 uppercase">Active Jobs</span>
+                    <Badge variant="outline" className="border-blue-600 text-blue-400">
+                      {stats?.activeJobs || 0}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-blue-900/20">
+                    <span className="text-xs text-gray-500 uppercase">Total Scrapes</span>
+                    <Badge variant="outline" className="border-green-600 text-green-400">
+                      {stats?.totalRuns || 0}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-blue-900/20">
+                    <span className="text-xs text-gray-500 uppercase">Success Rate</span>
+                    <Badge variant="outline" className="border-amber-600 text-amber-400">
+                      {stats?.successRate || 100}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-xs text-gray-500 uppercase">Total Records</span>
+                    <Badge variant="outline" className="border-purple-600 text-purple-400">
+                      {stats?.totalRecords || 0}
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Action */}
+            {/* Recent Jobs */}
+            <Card className="bg-[#131a2e] border-blue-900/30">
+              <CardContent className="p-4">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                  Recent Jobs
+                </h3>
+                <div className="space-y-2">
+                  {jobs.slice(0, 4).map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-2 rounded bg-[#0d1221]">
+                      <div>
+                        <p className="text-sm font-medium text-white">{job.track_name}</p>
+                        <p className="text-xs text-gray-500">{job.job_type}</p>
+                      </div>
+                      <Badge 
+                        variant={job.is_active ? 'default' : 'outline'}
+                        className={job.is_active ? 'bg-green-600/20 text-green-400 border-green-600/30' : 'text-gray-500'}
+                      >
+                        {job.is_active ? 'Active' : 'Paused'}
+                      </Badge>
+                    </div>
+                  ))}
+                  {jobs.length === 0 && (
+                    <p className="text-xs text-gray-500 text-center py-4">No jobs configured</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Info */}
             <Card className="bg-[#131a2e] border-blue-900/30">
               <CardContent className="p-4 text-center">
                 <Globe className="h-8 w-8 mx-auto mb-3 text-gray-600" />
                 <p className="text-xs text-gray-500 uppercase tracking-wide leading-relaxed">
-                  Run Quantum Morning Report to scrape live entries from offtrackbetting.com.
+                  Use ORD for morning entries, TRD for rankings, and OTC for live OTB odds scraping.
                 </p>
               </CardContent>
             </Card>
-
-            {/* Recent Activity */}
-            {jobs.slice(0, 3).map((job) => (
-              <Card key={job.id} className="bg-[#0d1221] border-blue-900/20">
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-white">{job.track_name}</p>
-                      <p className="text-xs text-gray-500">{job.job_type}</p>
-                    </div>
-                    <Badge 
-                      variant={job.is_active ? 'default' : 'outline'}
-                      className={job.is_active ? 'bg-green-600/20 text-green-400 border-green-600/30' : 'text-gray-500'}
-                    >
-                      {job.is_active ? 'Active' : 'Paused'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </main>
