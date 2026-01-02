@@ -9,11 +9,11 @@ import { format } from 'date-fns';
 
 interface SystemLog {
   log_id: number;
-  timestamp: string;
+  timestamp: string | null;
   component: string | null;
   log_level: string | null;
   message: string;
-  details: Record<string, unknown> | null;
+  details: unknown;
 }
 
 export const SystemLogsViewer = () => {
@@ -138,7 +138,7 @@ export const SystemLogsViewer = () => {
                       {getLogIcon(log.log_level)}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{log.message}</p>
-                        {log.details && (
+                        {log.details && typeof log.details === 'object' && (
                           <pre className="mt-1 text-xs text-muted-foreground bg-muted p-2 rounded overflow-x-auto">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
