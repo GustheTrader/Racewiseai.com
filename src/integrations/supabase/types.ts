@@ -817,6 +817,61 @@ export type Database = {
           },
         ]
       }
+      race_cards: {
+        Row: {
+          id: string
+          track_name: string
+          race_date: string
+          race_number: number
+          race_time: string | null
+          post_time: string | null
+          race_type: string | null
+          distance: string | null
+          surface: string | null
+          conditions: string | null
+          purse: string | null
+          created_at: string | null
+          updated_at: string | null
+          source_url: string | null
+          scraped_at: string | null
+        }
+        Insert: {
+          id?: string
+          track_name: string
+          race_date: string
+          race_number: number
+          race_time?: string | null
+          post_time?: string | null
+          race_type?: string | null
+          distance?: string | null
+          surface?: string | null
+          conditions?: string | null
+          purse?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          source_url?: string | null
+          scraped_at?: string | null
+        }
+        Update: {
+          id?: string
+          track_name?: string
+          race_date?: string
+          race_number?: number
+          race_time?: string | null
+          post_time?: string | null
+          race_type?: string | null
+          distance?: string | null
+          surface?: string | null
+          conditions?: string | null
+          purse?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          source_url?: string | null
+          scraped_at?: string | null
+        }
+        Relationships: []
+      }
+      ,
       race_results: {
         Row: {
           created_at: string

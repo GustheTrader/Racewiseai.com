@@ -49,7 +49,7 @@ const ScrapedRacesDisplay: React.FC = () => {
   const fetchRaces = async () => {
     setIsLoading(true);
     try {
-      let query = supabase
+                  let query = (supabase as any)
         .from('race_cards')
         .select(`
           *,
@@ -69,7 +69,7 @@ const ScrapedRacesDisplay: React.FC = () => {
         throw error;
       }
 
-      setRaces(data || []);
+      setRaces((data || []) as unknown as RaceCard[]);
     } catch (error: any) {
       console.error('Error fetching races:', error);
       toast.error('Failed to load scraped races');
