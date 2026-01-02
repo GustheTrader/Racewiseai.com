@@ -15,6 +15,14 @@ import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 
+interface JobFormValues {
+  url: string;
+  track_name: string;
+  job_type: string;
+  interval_seconds: number;
+  is_active: boolean;
+}
+
 const DataScraperTab = () => {
   const [activeTab, setActiveTab] = useState('active');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -89,7 +97,7 @@ const DataScraperTab = () => {
   }, [loadJobs, loadStats]);
 
   // Function to handle form submission to create a new job
-  const handleCreateJob = async (values: any) => {
+  const handleCreateJob = async (values: JobFormValues) => {
     const success = await createJob(values);
     if (success) {
       setIsDialogOpen(false);

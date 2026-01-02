@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error - Deno imports are not typed
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // CORS headers - restricted to specific origins
