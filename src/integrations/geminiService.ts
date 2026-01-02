@@ -91,7 +91,7 @@ export const parseMorningCard = async (
     throw new Error("Gemini API key not configured. Please set VITE_GEMINI_API_KEY");
   }
 
-  const client = new GoogleGenerativeAI({ apiKey: key });
+  const client = new GoogleGenerativeAI(key);
   const model = client.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `MISSION: ABSOLUTE FULL DAILY CARD EXTRACTION & VERIFICATION.
@@ -121,7 +121,7 @@ export const parseMorningCard = async (
   }
 
   const response = await model.generateContent({
-    contents: [{ parts }],
+    contents: [{ role: 'user', parts }],
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
@@ -147,7 +147,7 @@ export const parseRacingDigest = async (
     throw new Error("Gemini API key not configured");
   }
 
-  const client = new GoogleGenerativeAI({ apiKey: key });
+  const client = new GoogleGenerativeAI(key);
   const model = client.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `CRITICAL MISSION: Parse this Racing Digest PDF for Racewise AI.
@@ -169,7 +169,7 @@ export const parseRacingDigest = async (
   }
 
   const response = await model.generateContent({
-    contents: [{ parts }],
+    contents: [{ role: 'user', parts }],
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
@@ -193,7 +193,7 @@ export const parseBackupEntries = async (
     throw new Error("Gemini API key not configured");
   }
 
-  const client = new GoogleGenerativeAI({ apiKey: key });
+  const client = new GoogleGenerativeAI(key);
   const model = client.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `FULL CARD BACKUP PARSER: Parse all races on this card (R1 to the end).
@@ -213,7 +213,7 @@ export const parseBackupEntries = async (
   }
 
   const response = await model.generateContent({
-    contents: [{ parts }],
+    contents: [{ role: 'user', parts }],
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
