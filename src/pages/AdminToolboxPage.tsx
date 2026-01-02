@@ -15,7 +15,7 @@ import { parseMorningCard, parseRacingDigest, parseBackupEntries } from '@/integ
 import { fileToBase64 } from '@/utils/dataToolboxUtils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import racewiseLogo from '@/assets/racewise-logo.png';
+import racewiseLogo from '@/assets/racewise-logo.webp';
 import ScheduleConfigPanel from '@/components/admin/ScheduleConfigPanel';
 
 const tracks = [
