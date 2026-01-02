@@ -21,7 +21,10 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Flame
+  Flame,
+  Calendar,
+  Award,
+  Users
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseTwinSpires, TwinSpiresResult, TwinSpiresRace, TwinSpiresHorse } from '@/integrations/geminiService';
@@ -312,6 +315,21 @@ const TwinSpiresModelTab: React.FC = () => {
                 </CardContent>
               </Card>
 
+              {/* BRIS Analysis Card */}
+              {parsedData.raceAnalysis && (
+                <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <FileText className="h-4 w-4 text-blue-400" />
+                      BRIS Race Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-foreground leading-relaxed">{parsedData.raceAnalysis}</p>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Race Selector */}
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {parsedData.races?.map(race => (
@@ -352,12 +370,12 @@ const TwinSpiresModelTab: React.FC = () => {
                             <TableHead className="w-[50px]">PP</TableHead>
                             <TableHead>Horse</TableHead>
                             <TableHead>ML</TableHead>
+                            <TableHead>BRIS Pick</TableHead>
+                            <TableHead>Days Off</TableHead>
                             <TableHead>Speed</TableHead>
-                            <TableHead>Class</TableHead>
-                            <TableHead>Pace</TableHead>
                             <TableHead>Style</TableHead>
-                            <TableHead>Jockey %</TableHead>
-                            <TableHead>Trainer %</TableHead>
+                            <TableHead>Jockey</TableHead>
+                            <TableHead>Trainer</TableHead>
                             <TableHead className="text-center">Ensemble</TableHead>
                             <TableHead className="text-center">Value</TableHead>
                           </TableRow>
@@ -398,32 +416,87 @@ const TwinSpiresModelTab: React.FC = () => {
                                     {horse.morningLine}
                                   </TableCell>
                                   <TableCell>
+                                    {horse.brisPickRank ? (
+                                      <Badge className={
+                                        horse.brisPickRank === 1 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                                        horse.brisPickRank === 2 ? 'bg-gray-400/20 text-gray-300 border-gray-400/30' :
+                                        'bg-orange-700/20 text-orange-400 border-orange-700/30'
+                                      }>
+                                        <Award className="h-3 w-3 mr-1" />
+                                        #{horse.brisPickRank}
+                                      </Badge>
+                                    ) : (
+                                      <span className="text-muted-foreground">-</span>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex flex-col">
+                                      <span className={
+                                        horse.recencyCategory === 'fresh' ? 'text-green-400 font-semibold' :
+                                        horse.recencyCategory === 'rested' ? 'text-blue-400' :
+                                        horse.recencyCategory === 'layoff' ? 'text-red-400' :
+                                        horse.recencyCategory === 'quick' ? 'text-orange-400' :
+                                        'text-muted-foreground'
+                                      }>
+                                        {horse.daysOff ? `${horse.daysOff}d` : '-'}
+                                      </span>
+                                      {horse.recencyBonus !== 0 && (
+                                        <span className={`text-xs ${horse.recencyBonus > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                          {horse.recencyBonus > 0 ? '+' : ''}{horse.recencyBonus}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
                                     <span className="font-bold text-blue-400">
                                       {horse.speedFigures?.brisnetSpeed || '-'}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className="text-purple-400">
-                                      {horse.speedFigures?.classRating || '-'}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className="text-orange-400">
-                                      {horse.speedFigures?.avgLast3?.toFixed(0) || '-'}
                                     </span>
                                   </TableCell>
                                   <TableCell>
                                     {getRunningStyleBadge(horse.paceFigures?.runningStyle || '-')}
                                   </TableCell>
                                   <TableCell>
-                                    <span className={horse.jockey?.meetWinPct >= 15 ? 'text-green-400' : 'text-muted-foreground'}>
-                                      {horse.jockey?.meetWinPct?.toFixed(0) || '-'}%
-                                    </span>
+                                    <div className="flex flex-col">
+                                      <span className="text-xs text-muted-foreground truncate max-w-[80px]">
+                                        {horse.jockey?.name?.split(' ').pop() || '-'}
+                                      </span>
+                                      <div className="flex items-center gap-1">
+                                        <span className={horse.jockey?.winPct >= 15 ? 'text-green-400 font-semibold' : 'text-muted-foreground'}>
+                                          {horse.jockey?.winPct?.toFixed(0) || '-'}%
+                                        </span>
+                                        {horse.jockey?.bonusPoints > 0 && (
+                                          <Badge variant="outline" className="text-[10px] px-1 py-0 text-green-400 border-green-400/30">
+                                            +{horse.jockey.bonusPoints}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <span className="text-[10px] text-muted-foreground">
+                                        {horse.jockey?.statsString || ''}
+                                      </span>
+                                    </div>
                                   </TableCell>
                                   <TableCell>
-                                    <span className={horse.trainer?.meetWinPct >= 15 ? 'text-green-400' : 'text-muted-foreground'}>
-                                      {horse.trainer?.meetWinPct?.toFixed(0) || '-'}%
-                                    </span>
+                                    <div className="flex flex-col">
+                                      <span className="text-xs text-muted-foreground truncate max-w-[80px]">
+                                        {horse.trainer?.name?.split(' ').pop() || '-'}
+                                      </span>
+                                      <div className="flex items-center gap-1">
+                                        <span className={horse.trainer?.winPct >= 15 ? 'text-green-400 font-semibold' : 'text-muted-foreground'}>
+                                          {horse.trainer?.winPct?.toFixed(0) || '-'}%
+                                        </span>
+                                        {horse.trainer?.bonusPoints > 0 && (
+                                          <Badge variant="outline" className="text-[10px] px-1 py-0 text-green-400 border-green-400/30">
+                                            +{horse.trainer.bonusPoints}
+                                          </Badge>
+                                        )}
+                                        {horse.trainer?.isHot && (
+                                          <Flame className="h-3 w-3 text-orange-400" />
+                                        )}
+                                      </div>
+                                      <span className="text-[10px] text-muted-foreground">
+                                        {horse.trainer?.statsString || ''}
+                                      </span>
+                                    </div>
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <span className={`text-lg font-bold ${getScoreColor(horse.ensembleScore || 0)}`}>
@@ -441,7 +514,41 @@ const TwinSpiresModelTab: React.FC = () => {
                                 {expandedHorses.has(horse.programNumber) && (
                                   <TableRow>
                                     <TableCell colSpan={11} className="bg-muted/20 p-4">
-                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        {/* Bonus Points Summary */}
+                                        <div className="p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20">
+                                          <h5 className="text-xs font-semibold text-green-400 uppercase mb-2 flex items-center gap-1">
+                                            <Award className="h-3 w-3" />
+                                            Bonus Points
+                                          </h5>
+                                          <div className="space-y-1 text-sm">
+                                            <div className="flex justify-between">
+                                              <span className="text-muted-foreground">Jockey:</span>
+                                              <span className="text-green-400 font-bold">+{horse.jockey?.bonusPoints || 0}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                              <span className="text-muted-foreground">Trainer:</span>
+                                              <span className="text-green-400 font-bold">+{horse.trainer?.bonusPoints || 0}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                              <span className="text-muted-foreground">BRIS Pick:</span>
+                                              <span className="text-yellow-400 font-bold">+{horse.brisPickBonus || 0}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                              <span className="text-muted-foreground">Recency:</span>
+                                              <span className={`font-bold ${horse.recencyBonus >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                {horse.recencyBonus >= 0 ? '+' : ''}{horse.recencyBonus || 0}
+                                              </span>
+                                            </div>
+                                            <div className="border-t border-green-500/20 pt-1 mt-1 flex justify-between">
+                                              <span className="text-muted-foreground font-semibold">Total:</span>
+                                              <span className="text-green-400 font-bold">
+                                                +{(horse.jockey?.bonusPoints || 0) + (horse.trainer?.bonusPoints || 0) + (horse.brisPickBonus || 0) + (horse.recencyBonus || 0)}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+
                                         {/* Breeding */}
                                         <div>
                                           <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Breeding</h5>

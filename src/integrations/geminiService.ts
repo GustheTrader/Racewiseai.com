@@ -151,20 +151,30 @@ export interface TwinSpiresHorse {
   postPosition: number;
   name: string;
   morningLine: string;
+  brisPickRank: number | null;
+  brisPickBonus: number;
   jockey: {
     name: string;
     weight: string;
-    meetStarts: number;
-    meetWins: number;
-    meetWinPct: number;
+    winPct: number;
+    starts: number;
+    wins: number;
+    places: number;
+    shows: number;
+    statsString: string;
+    bonusPoints: number;
   };
   trainer: {
     name: string;
-    meetStarts: number;
-    meetWins: number;
-    meetWinPct: number;
+    winPct: number;
+    starts: number;
+    wins: number;
+    places: number;
+    shows: number;
+    statsString: string;
+    bonusPoints: number;
+    isHot: boolean;
   };
-  owner: string;
   sire: string;
   dam: string;
   damsire: string;
@@ -173,6 +183,9 @@ export interface TwinSpiresHorse {
   color: string;
   medication: string;
   equipment: string;
+  daysOff: number;
+  recencyCategory: string;
+  recencyBonus: number;
   speedFigures: {
     brisnetSpeed: number;
     primePower: number;
@@ -236,6 +249,7 @@ export interface TwinSpiresResult {
   date: string;
   weather: string;
   trackCondition: string;
+  raceAnalysis: string;
   trackBias: {
     railPosition: string;
     surfaceBias: string;
