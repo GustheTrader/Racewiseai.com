@@ -84,7 +84,14 @@ export function RiskAgentCard({ horseId, raceId, entryId, horseName }: RiskAgent
   };
 
   return (
-    <Card className="bg-card border-border">
+    <Card className="bg-card border-border relative overflow-hidden">
+      {/* Premium Badge */}
+      <div className="absolute top-0 right-0">
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-bold px-3 py-1 rounded-bl-lg">
+          PREMIUM
+        </div>
+      </div>
+      
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -99,7 +106,7 @@ export function RiskAgentCard({ horseId, raceId, entryId, horseName }: RiskAgent
           )}
         </div>
         <CardDescription>
-          {horseName ? `Analyzing: ${horseName}` : 'Analyze paddock/warm-up footage for lameness and behavior'}
+          {horseName ? `Analyzing: ${horseName}` : 'Analyze paddock footage for lameness & gait'}
         </CardDescription>
       </CardHeader>
       
