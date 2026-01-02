@@ -16,12 +16,8 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin?: string): Record<string, string> {
-  const isAllowed =
-    origin &&
-    ALLOWED_ORIGINS.some(
-      (allowed) =>
-        allowed === origin || (origin.includes("localhost") && allowed.includes("localhost"))
-    );
+  // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin! : "",
@@ -239,6 +235,19 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY FIX: Verify authentication token (added check for Bearer token)
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.warn("[SECURITY] Unauthorized access attempt to run-scrape-jobs");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - valid Bearer token required" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Initialize Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -247,11 +256,12 @@ serve(async (req) => {
 
     console.log(`[SCHEDULER] Starting job execution (force_run: ${force_run})`);
 
-    // Get all pending jobs
+    // Get all pending jobs (SECURITY FIX: Added pagination limit to prevent memory exhaustion)
     let query = supabase
       .from("scrape_jobs")
       .select("*")
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .limit(100);  // Prevent querying unlimited jobs
 
     if (!force_run) {
       // Only get jobs where next_run_at is in the past

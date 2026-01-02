@@ -12,12 +12,8 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin?: string): Record<string, string> {
-  const isAllowed =
-    origin &&
-    ALLOWED_ORIGINS.some(
-      (allowed) =>
-        allowed === origin || (origin.includes("localhost") && allowed.includes("localhost"))
-    );
+  // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin! : "",
@@ -138,12 +134,13 @@ Return ONLY a valid JSON array with this exact structure:
 
 If no results found, return an empty array: []`;
 
-  const apiUrl = \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=\${geminiKey}\`;
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
 
   const response = await fetch(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-goog-api-key": geminiKey,  // Use header instead of URL parameter (SECURITY FIX)
     },
     body: JSON.stringify({
       contents: [
@@ -274,9 +271,20 @@ serve(async (req) => {
     const body = await req.json();
     const { url, track_name: trackName } = body;
 
-    if (!url || !trackName) {
+    // SECURITY FIX: Validate input before processing
+    if (!url || typeof url !== "string" || !url.startsWith("https://")) {
       return new Response(
-        JSON.stringify({ error: "url and track_name are required" }),
+        JSON.stringify({ error: "Valid HTTPS URL required" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!trackName || typeof trackName !== "string" || trackName.length === 0 || trackName.length > 100) {
+      return new Response(
+        JSON.stringify({ error: "Valid track name required" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -315,12 +323,12 @@ serve(async (req) => {
     );
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error(\`[ERROR] \${errorMsg}\`);
-
+    console.error(\`[ERROR] \${errorMsg}\`);  // Log full error server-side
+    // SECURITY FIX: Don't leak internal error details to client
     return new Response(
       JSON.stringify({
         status: "error",
-        error: errorMsg,
+        error: "Failed to scrape race results. Please try again later.",
       }),
       {
         status: 500,

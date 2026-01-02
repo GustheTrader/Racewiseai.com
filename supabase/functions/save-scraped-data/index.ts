@@ -12,9 +12,8 @@ const ALLOWED_ORIGINS = [
 ];
 
 function getCorsHeaders(origin?: string): Record<string, string> {
-  const isAllowed = origin && ALLOWED_ORIGINS.some(allowed =>
-    allowed === origin || (origin.includes('localhost') && allowed.includes('localhost'))
-  );
+  // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin! : "",
