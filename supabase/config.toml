@@ -51,3 +51,6 @@ verify_jwt = false
 
 [functions.analyze-paddock-video]
 verify_jwt = false
+
+[functions.firecrawl-morning-report]
+verify_jwt = false
