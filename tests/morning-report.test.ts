@@ -54,7 +54,7 @@ describe("Morning Report Workflow", () => {
         .map(([track, _]) => track);
 
       // Saturday has most tracks
-      expect(tracksRunning.length).toBe(11);
+      expect(tracksRunning.length).toBe(13);
       expect(tracksRunning).toContain("CHURCHILL DOWNS");
       expect(tracksRunning).toContain("KENTUCKY DOWNS");
       expect(tracksRunning).toContain("LOS ALAMITOS-DAY");
@@ -66,7 +66,7 @@ describe("Morning Report Workflow", () => {
         .filter(([_, days]) => days.includes(today))
         .map(([track, _]) => track);
 
-      expect(tracksRunning.length).toBe(11);
+      expect(tracksRunning.length).toBe(12);
       expect(tracksRunning).not.toContain("LOS ALAMITOS-NIGHT");
     });
 
