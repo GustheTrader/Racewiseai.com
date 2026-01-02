@@ -19,6 +19,7 @@ import racewiseLogo from '@/assets/racewise-logo.webp';
 import ScheduleConfigPanel from '@/components/admin/ScheduleConfigPanel';
 import { SystemLogsViewer } from '@/components/admin/SystemLogsViewer';
 import ScrapedDataViewer from '@/components/admin/ScrapedDataViewer';
+import ModelTrainingTab from '@/components/admin/ModelTrainingTab';
 
 const tracks = [
   'Santa Anita Park',
@@ -698,6 +699,11 @@ const AdminToolboxPage: React.FC = () => {
         {/* Scraped Data Viewer Section */}
         <div className="mt-8">
           <ScrapedDataViewer />
+        </div>
+
+        {/* Model Training Section */}
+        <div className="mt-8">
+          <ModelTrainingTab />
         </div>
       </main>
     </div>
