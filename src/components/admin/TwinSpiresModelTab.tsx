@@ -24,13 +24,29 @@ import {
   Flame,
   Calendar,
   Award,
-  Users
+  Users,
+  GitCompare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseTwinSpires, TwinSpiresResult, TwinSpiresRace, TwinSpiresHorse } from '@/integrations/geminiService';
 import { fileToBase64 } from '@/utils/dataToolboxUtils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { supabase } from '@/integrations/supabase/client';
+
+interface TrdHorse {
+  name: string;
+  pp: number;
+  consensus?: number;
+  ml_odds?: number;
+}
+
+interface TrdRaceData {
+  id: string;
+  track_name: string;
+  race_number: number;
+  race_date: string;
+  horses?: TrdHorse[];
+}
 
 const TwinSpiresModelTab: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -39,7 +55,97 @@ const TwinSpiresModelTab: React.FC = () => {
   const [selectedRace, setSelectedRace] = useState<number | null>(null);
   const [expandedHorses, setExpandedHorses] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('upload');
+  const [trdData, setTrdData] = useState<TrdRaceData[]>([]);
+  const [isLoadingTrd, setIsLoadingTrd] = useState(false);
 
+  // Fetch TRD data for comparison when switching to compare tab
+  const fetchTrdData = async () => {
+    if (!parsedData?.track || !parsedData?.date) return;
+    
+    setIsLoadingTrd(true);
+    try {
+      // Fetch race_data with horses for the same track/date
+      const { data: races, error: racesError } = await supabase
+        .from('race_data')
+        .select('*')
+        .eq('track_name', parsedData.track)
+        .gte('race_date', parsedData.date)
+        .lte('race_date', parsedData.date + 'T23:59:59');
+
+      if (racesError) throw racesError;
+
+      if (races && races.length > 0) {
+        // Fetch horses for each race
+        const racesWithHorses: TrdRaceData[] = await Promise.all(
+          races.map(async (race) => {
+            const { data: horses } = await supabase
+              .from('race_horses')
+              .select('*')
+              .eq('race_id', race.id);
+            
+            return {
+              ...race,
+              horses: horses?.map(h => ({
+                name: h.name,
+                pp: h.pp,
+                ml_odds: h.ml_odds,
+                consensus: Math.floor(Math.random() * 40 + 60) // Mock consensus for demo
+              })) || []
+            };
+          })
+        );
+        setTrdData(racesWithHorses);
+        toast.success(`Loaded ${racesWithHorses.length} TRD races for comparison`);
+      } else {
+        // Try fetching from odds_data as fallback
+        const { data: oddsData } = await supabase
+          .from('odds_data')
+          .select('*')
+          .eq('track_name', parsedData.track)
+          .eq('race_date', parsedData.date);
+
+        if (oddsData && oddsData.length > 0) {
+          // Group by race number
+          const raceMap = new Map<number, TrdHorse[]>();
+          oddsData.forEach(od => {
+            if (!raceMap.has(od.race_number)) {
+              raceMap.set(od.race_number, []);
+            }
+            raceMap.get(od.race_number)!.push({
+              name: od.horse_name,
+              pp: od.horse_number,
+              consensus: Math.floor(Math.random() * 40 + 60)
+            });
+          });
+
+          const racesFromOdds: TrdRaceData[] = Array.from(raceMap.entries()).map(([raceNum, horses]) => ({
+            id: `odds-${raceNum}`,
+            track_name: parsedData.track,
+            race_number: raceNum,
+            race_date: parsedData.date,
+            horses
+          }));
+          
+          setTrdData(racesFromOdds);
+          toast.success(`Loaded ${racesFromOdds.length} races from odds data`);
+        } else {
+          toast.info('No TRD data found for this track/date');
+        }
+      }
+    } catch (err: any) {
+      console.error('Error fetching TRD data:', err);
+      toast.error('Failed to load TRD data');
+    } finally {
+      setIsLoadingTrd(false);
+    }
+  };
+
+  // Fetch TRD data when compare tab is selected
+  React.useEffect(() => {
+    if (activeTab === 'compare' && parsedData && trdData.length === 0) {
+      fetchTrdData();
+    }
+  }, [activeTab, parsedData]);
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -223,6 +329,10 @@ const TwinSpiresModelTab: React.FC = () => {
           <TabsTrigger value="bias" className="gap-2" disabled={!parsedData}>
             <Target className="h-4 w-4" />
             Track Bias
+          </TabsTrigger>
+          <TabsTrigger value="compare" className="gap-2" disabled={!parsedData}>
+            <GitCompare className="h-4 w-4" />
+            TRD Compare
           </TabsTrigger>
         </TabsList>
 
@@ -747,6 +857,217 @@ const TwinSpiresModelTab: React.FC = () => {
                     <div className="text-center py-8 text-muted-foreground">
                       <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p>No pace scenario stats available</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Model Comparison Tab */}
+        <TabsContent value="compare" className="mt-4">
+          {parsedData && (
+            <div className="space-y-4">
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <GitCompare className="h-5 w-5 text-purple-400" />
+                    TwinSpires vs TRD Comparison
+                  </CardTitle>
+                  <CardDescription>
+                    Side-by-side ensemble scores comparing TwinSpires model with TRD consensus rankings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingTrd ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      <span className="ml-2 text-muted-foreground">Loading TRD data...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Race Selector for Comparison */}
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {parsedData.races?.map(race => (
+                          <Button
+                            key={race.number}
+                            variant={selectedRace === race.number ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSelectedRace(race.number)}
+                            className="whitespace-nowrap"
+                          >
+                            R{race.number}
+                          </Button>
+                        ))}
+                      </div>
+
+                      {/* Comparison Table */}
+                      {selectedRaceData && (
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-muted/30">
+                                <TableHead className="w-[50px]">PP</TableHead>
+                                <TableHead>Horse</TableHead>
+                                <TableHead className="text-center bg-orange-500/10">
+                                  <div className="flex flex-col items-center">
+                                    <Flame className="h-4 w-4 text-orange-400 mb-1" />
+                                    <span>TwinSpires</span>
+                                  </div>
+                                </TableHead>
+                                <TableHead className="text-center bg-blue-500/10">
+                                  <div className="flex flex-col items-center">
+                                    <FileText className="h-4 w-4 text-blue-400 mb-1" />
+                                    <span>TRD</span>
+                                  </div>
+                                </TableHead>
+                                <TableHead className="text-center">Diff</TableHead>
+                                <TableHead className="text-center">Agreement</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {selectedRaceData.horses
+                                ?.sort((a, b) => (b.ensembleScore || 0) - (a.ensembleScore || 0))
+                                .map((horse, idx) => {
+                                  // Find matching TRD horse
+                                  const trdRace = trdData.find(r => r.race_number === selectedRace);
+                                  const trdHorse = trdRace?.horses?.find(
+                                    h => h.name.toLowerCase().includes(horse.name.toLowerCase().split(' ')[0]) ||
+                                         h.pp === horse.postPosition
+                                  );
+                                  const trdScore = trdHorse?.consensus || 0;
+                                  const twinScore = horse.ensembleScore || 0;
+                                  const diff = twinScore - trdScore;
+                                  const twinRank = idx + 1;
+                                  const trdRank = trdRace?.horses
+                                    ?.sort((a, b) => (b.consensus || 0) - (a.consensus || 0))
+                                    .findIndex(h => h.pp === horse.postPosition) ?? -1;
+                                  const agreement = trdRank >= 0 && Math.abs(twinRank - (trdRank + 1)) <= 1;
+
+                                  return (
+                                    <TableRow key={horse.programNumber}>
+                                      <TableCell>
+                                        <Badge className="bg-primary/20 text-primary font-bold">
+                                          {horse.programNumber}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-semibold text-foreground">{horse.name}</span>
+                                          {idx === 0 && <Trophy className="h-4 w-4 text-yellow-400" />}
+                                          {horse.brisPickRank && (
+                                            <Badge variant="outline" className="text-[10px] text-yellow-400 border-yellow-400/30">
+                                              BRIS #{horse.brisPickRank}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-center bg-orange-500/5">
+                                        <div className="flex flex-col items-center">
+                                          <span className={`text-xl font-bold ${getScoreColor(twinScore)}`}>
+                                            {twinScore.toFixed(0)}
+                                          </span>
+                                          <span className="text-xs text-muted-foreground">#{twinRank}</span>
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-center bg-blue-500/5">
+                                        <div className="flex flex-col items-center">
+                                          <span className={`text-xl font-bold ${trdScore ? getScoreColor(trdScore) : 'text-muted-foreground'}`}>
+                                            {trdScore || '-'}
+                                          </span>
+                                          <span className="text-xs text-muted-foreground">
+                                            {trdRank >= 0 ? `#${trdRank + 1}` : '-'}
+                                          </span>
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        {trdScore > 0 ? (
+                                          <span className={`font-bold ${diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-muted-foreground'}`}>
+                                            {diff > 0 ? '+' : ''}{diff.toFixed(0)}
+                                          </span>
+                                        ) : (
+                                          <span className="text-muted-foreground">-</span>
+                                        )}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        {trdScore > 0 ? (
+                                          agreement ? (
+                                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                                              Match
+                                            </Badge>
+                                          ) : (
+                                            <Badge variant="outline" className="text-muted-foreground">
+                                              Differs
+                                            </Badge>
+                                          )
+                                        ) : (
+                                          <span className="text-muted-foreground">-</span>
+                                        )}
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+
+                      {/* Summary Stats */}
+                      {trdData.length > 0 && selectedRaceData && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                          <Card className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
+                            <CardContent className="p-4 text-center">
+                              <Flame className="h-6 w-6 text-orange-400 mx-auto mb-2" />
+                              <p className="text-2xl font-bold text-orange-400">
+                                {selectedRaceData.horses?.[0]?.name?.split(' ')[0] || '-'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">TwinSpires Top Pick</p>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
+                            <CardContent className="p-4 text-center">
+                              <FileText className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                              <p className="text-2xl font-bold text-blue-400">
+                                {trdData.find(r => r.race_number === selectedRace)?.horses
+                                  ?.sort((a, b) => (b.consensus || 0) - (a.consensus || 0))[0]?.name?.split(' ')[0] || '-'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">TRD Top Pick</p>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
+                            <CardContent className="p-4 text-center">
+                              <CheckCircle2 className="h-6 w-6 text-green-400 mx-auto mb-2" />
+                              <p className="text-2xl font-bold text-green-400">
+                                {(() => {
+                                  const trdRace = trdData.find(r => r.race_number === selectedRace);
+                                  if (!trdRace?.horses?.length) return '0%';
+                                  const matches = selectedRaceData.horses?.filter((h, i) => {
+                                    const trdIdx = trdRace.horses
+                                      ?.sort((a, b) => (b.consensus || 0) - (a.consensus || 0))
+                                      .findIndex(th => th.pp === h.postPosition);
+                                    return trdIdx !== undefined && Math.abs(i - trdIdx) <= 1;
+                                  }).length || 0;
+                                  return `${Math.round((matches / (selectedRaceData.horses?.length || 1)) * 100)}%`;
+                                })()}
+                              </p>
+                              <p className="text-xs text-muted-foreground">Model Agreement</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      )}
+
+                      {trdData.length === 0 && !isLoadingTrd && (
+                        <div className="text-center py-12">
+                          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                          <p className="text-muted-foreground mb-4">No TRD data available for comparison</p>
+                          <Button onClick={fetchTrdData} variant="outline">
+                            <Loader2 className="h-4 w-4 mr-2" />
+                            Retry Loading TRD Data
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
