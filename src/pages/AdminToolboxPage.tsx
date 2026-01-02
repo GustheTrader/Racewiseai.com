@@ -21,6 +21,8 @@ import { SystemLogsViewer } from '@/components/admin/SystemLogsViewer';
 import ScrapedDataViewer from '@/components/admin/ScrapedDataViewer';
 import ModelTrainingTab from '@/components/admin/ModelTrainingTab';
 import TwinSpiresModelTab from '@/components/admin/TwinSpiresModelTab';
+import TrdModelUploadTab from '@/components/admin/TrdModelUploadTab';
+import OtcLiveScraperTab from '@/components/admin/OtcLiveScraperTab';
 import LiveModelReports from '@/components/dashboard/LiveModelReports';
 
 const tracks = [
@@ -710,6 +712,16 @@ const AdminToolboxPage: React.FC = () => {
         {/* TwinSpires Model Section */}
         <div className="mt-8">
           <TwinSpiresModelTab />
+        </div>
+
+        {/* TRD Model Upload Section - Independent */}
+        <div className="mt-8">
+          <TrdModelUploadTab />
+        </div>
+
+        {/* OTC Live Scraper Section - Independent */}
+        <div className="mt-8">
+          <OtcLiveScraperTab />
         </div>
 
         {/* Scraped Data Viewer Section */}
