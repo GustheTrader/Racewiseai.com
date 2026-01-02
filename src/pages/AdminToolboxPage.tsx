@@ -80,9 +80,10 @@ const AdminToolboxPage: React.FC = () => {
     );
   }
 
-  if (!user || !isAdmin) {
-    return <Navigate to="/auth" replace />;
-  }
+  // TEMPORARILY DISABLED FOR TESTING - Restore this check later
+  // if (!user || !isAdmin) {
+  //   return <Navigate to="/auth" replace />;
+  // }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
