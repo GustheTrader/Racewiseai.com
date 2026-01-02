@@ -18,6 +18,7 @@ import EmptyStatePrompt from './EmptyStatePrompt';
 import PersonalModelCard from '../PersonalModelCard';
 import AIAgentsCard from '../ai-agents/AIAgentsCard';
 import VideoPerformanceCard from '../VideoPerformanceCard';
+import { RiskAgentCard } from '../RiskAgentCard';
 
 interface DashboardContentProps {
   data: any;
@@ -138,10 +139,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <TrainingFigures figures={data.trainingFigures} />
       </div>
       
-      {/* Video Performance Summary Grade */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
+      {/* Premium Tools Section - CV/VLM Risk Agent & Video Performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <RiskAgentCard />
         <VideoPerformanceCard />
-      </div>
       
       {/* Live Paddock Comments and AI-Thorian Value */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
