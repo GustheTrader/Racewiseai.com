@@ -1,4 +1,6 @@
+// @ts-expect-error - Deno imports are not typed
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-expect-error - Supabase JS library typing issues
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const ALLOWED_ORIGINS = [
@@ -7,7 +9,6 @@ const ALLOWED_ORIGINS = [
   'https://racewiseai.com',
   'https://www.racewiseai.com',
   'https://app.racewiseai.com',
-  'https://bqvavkzgmznjfirgfyhd.lovableproject.com'
 ];
 
 function getCorsHeaders(origin?: string | null): Record<string, string> {
@@ -33,8 +34,6 @@ interface Horse {
   trainer: string;
   morningLineOdds: string;
   weight: number | null;
-  medication: string | null;
-  equipment: string | null;
 }
 
 interface RaceData {
@@ -59,7 +58,7 @@ async function scrapeTrack(trackName: string, apiKey: string): Promise<MorningRe
   const trackCode = trackName.toLowerCase().replace(/\s+/g, '-');
   const url = `https://www.offtrackbetting.com/tracks/${trackCode}`;
 
-  console.log(`Scraping morning report from: ${url}`);
+  console.log(`[Firecrawl] Scraping morning report from: ${url}`);
 
   try {
     const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
@@ -77,20 +76,20 @@ async function scrapeTrack(trackName: string, apiKey: string): Promise<MorningRe
             schema: {
               type: 'object',
               properties: {
-                trackName: { type: 'string' },
-                raceDate: { type: 'string' },
+                trackName: { type: 'string', description: 'Name of the race track' },
+                raceDate: { type: 'string', description: 'Date of the races (YYYY-MM-DD)' },
                 races: {
                   type: 'array',
                   items: {
                     type: 'object',
                     properties: {
-                      raceNumber: { type: 'number' },
-                      postTime: { type: 'string' },
-                      distance: { type: 'string' },
-                      surface: { type: 'string' },
-                      raceType: { type: 'string' },
-                      purse: { type: 'string' },
-                      conditions: { type: 'string' },
+                      raceNumber: { type: 'number', description: 'Race number' },
+                      postTime: { type: 'string', description: 'Post time' },
+                      distance: { type: 'string', description: 'Race distance' },
+                      surface: { type: 'string', description: 'Track surface (dirt, turf, etc)' },
+                      raceType: { type: 'string', description: 'Type of race' },
+                      purse: { type: 'string', description: 'Purse amount' },
+                      conditions: { type: 'string', description: 'Race conditions' },
                       horses: {
                         type: 'array',
                         items: {
@@ -101,9 +100,7 @@ async function scrapeTrack(trackName: string, apiKey: string): Promise<MorningRe
                             jockey: { type: 'string' },
                             trainer: { type: 'string' },
                             morningLineOdds: { type: 'string' },
-                            weight: { type: 'number' },
-                            medication: { type: 'string' },
-                            equipment: { type: 'string' }
+                            weight: { type: 'number' }
                           }
                         }
                       }
@@ -112,7 +109,7 @@ async function scrapeTrack(trackName: string, apiKey: string): Promise<MorningRe
                 }
               }
             },
-            prompt: 'Extract all horse racing information including race details and entries.'
+            prompt: 'Extract all horse racing information from the page. For each race, extract: race number, post time, distance, surface, race type, purse, conditions, and all horse entries with program number, name, jockey, trainer, morning line odds, and weight.'
           }
         ],
         onlyMainContent: true,
@@ -121,106 +118,78 @@ async function scrapeTrack(trackName: string, apiKey: string): Promise<MorningRe
     });
 
     if (!response.ok) {
-      console.error(`Firecrawl error for ${trackName}:`, response.status);
+      console.error(`[Firecrawl] Error for ${trackName}: status ${response.status}`);
       return null;
     }
 
     const data = await response.json();
     const extractedData = data.data?.json || data.json || null;
 
+    if (!extractedData || !extractedData.races) {
+      console.warn(`[Firecrawl] No races found for ${trackName}`);
+      return null;
+    }
+
+    console.log(`[Firecrawl] ${trackName}: Found ${extractedData.races.length} races`);
+
     return {
-      trackName: extractedData?.trackName || trackName,
-      raceDate: extractedData?.raceDate || new Date().toISOString().split('T')[0],
-      races: extractedData?.races || [],
+      trackName: extractedData.trackName || trackName,
+      raceDate: extractedData.raceDate || new Date().toISOString().split('T')[0],
+      races: extractedData.races || [],
       scrapedAt: new Date().toISOString(),
     };
   } catch (error) {
-    console.error(`Error scraping ${trackName}:`, error);
+    console.error(`[Firecrawl] Error scraping ${trackName}:`, error);
     return null;
   }
 }
 
-async function saveToDatabase(supabase: any, data: MorningReportData): Promise<{ races: number; horses: number; odds: number }> {
-  const stats = { races: 0, horses: 0, odds: 0 };
-  const raceDate = data.raceDate || new Date().toISOString().split('T')[0];
+async function saveMorningReport(supabase: any, data: MorningReportData): Promise<{ races: number; horses: number; success: boolean }> {
+  const stats = { races: 0, horses: 0, success: false };
 
-  for (const race of data.races) {
-    // Insert race_data
-    const { data: raceData, error: raceError } = await supabase
-      .from('race_data')
+  try {
+    // Save to morning_reports table
+    const { error: reportError } = await supabase
+      .from('morning_reports')
       .upsert({
         track_name: data.trackName,
-        race_number: race.raceNumber,
-        race_date: raceDate,
-        race_conditions: `${race.distance || ''} ${race.surface || ''} ${race.raceType || ''} - ${race.conditions || ''} - Purse: ${race.purse || 'N/A'}`.trim(),
-      }, { onConflict: 'track_name,race_number,race_date' })
-      .select()
-      .maybeSingle();
+        race_date: data.raceDate,
+        races_found: data.races.length,
+        horses_found: data.races.reduce((sum: number, race) => sum + (race.horses?.length || 0), 0),
+        raw_data: data,
+        status: 'success',
+        scraped_at: new Date().toISOString()
+      }, {
+        onConflict: 'track_name,race_date'
+      });
 
-    if (raceError) {
-      console.error('Error inserting race:', raceError);
-      continue;
+    if (reportError) {
+      console.error(`[DB] Error saving morning report:`, reportError);
+      return stats;
     }
-    stats.races++;
 
-    if (raceData?.id && race.horses?.length) {
-      for (const horse of race.horses) {
-        const mlOdds = horse.morningLineOdds 
-          ? parseFloat(horse.morningLineOdds.replace(/[^0-9.]/g, '')) || null
-          : null;
-        const horseNumber = parseInt(horse.programNumber) || 0;
+    stats.races = data.races.length;
+    stats.horses = data.races.reduce((sum: number, race) => sum + (race.horses?.length || 0), 0);
+    stats.success = true;
 
-        // Insert race_horses
-        const { error: horseError } = await supabase
-          .from('race_horses')
-          .upsert({
-            race_id: raceData.id,
-            name: horse.horseName,
-            pp: horseNumber,
-            jockey: horse.jockey || null,
-            trainer: horse.trainer || null,
-            ml_odds: mlOdds,
-          }, { onConflict: 'race_id,pp' });
+    console.log(`[DB] Saved morning report for ${data.trackName}: ${stats.races} races, ${stats.horses} horses`);
 
-        if (!horseError) stats.horses++;
-
-        // Insert odds_data
-        if (horse.horseName && horseNumber > 0) {
-          const { error: oddsError } = await supabase
-            .from('odds_data')
-            .insert({
-              track_name: data.trackName,
-              race_number: race.raceNumber,
-              race_date: raceDate,
-              horse_number: horseNumber,
-              horse_name: horse.horseName,
-              win_odds: horse.morningLineOdds || null,
-              pool_data: {
-                type: 'morning_line',
-                jockey: horse.jockey,
-                trainer: horse.trainer,
-                source: 'scheduled_scrape'
-              }
-            });
-
-          if (!oddsError) stats.odds++;
-        }
-      }
-    }
+    return stats;
+  } catch (error) {
+    console.error(`[DB] Error processing ${data.trackName}:`, error);
+    return stats;
   }
-
-  return stats;
 }
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req.headers.get('origin'));
-  
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   const startTime = Date.now();
-  console.log('Starting scheduled morning scrape at:', new Date().toISOString());
+  console.log('[Morning Report] Starting scheduled morning scrape at:', new Date().toISOString());
 
   try {
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
@@ -228,77 +197,79 @@ serve(async (req) => {
       throw new Error('FIRECRAWL_API_KEY not configured');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase credentials not configured');
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch enabled tracks from config
+    // Fetch enabled tracks from track_config table
     const { data: trackConfigs, error: configError } = await supabase
-      .from('scrape_schedule_config')
+      .from('track_config')
       .select('track_name, is_enabled')
       .eq('is_enabled', true);
 
     if (configError) {
-      console.error('Error fetching config:', configError);
+      console.error('[Morning Report] Error fetching config:', configError);
       throw new Error('Failed to fetch track configuration');
     }
 
-    const enabledTracks = trackConfigs?.map((t: TrackConfig) => t.track_name) || [];
-    console.log(`Found ${enabledTracks.length} enabled tracks to scrape`);
+    const enabledTracks = (trackConfigs as TrackConfig[])?.map((t) => t.track_name) || [];
+    console.log(`[Morning Report] Found ${enabledTracks.length} enabled tracks to scrape`);
 
-    const results: { track: string; success: boolean; stats?: { races: number; horses: number; odds: number }; error?: string }[] = [];
+    const results: { track: string; success: boolean; stats?: { races: number; horses: number }; error?: string }[] = [];
 
-    // Scrape each track sequentially to avoid rate limits
+    // Scrape each track
     for (const trackName of enabledTracks) {
-      console.log(`Processing ${trackName}...`);
-      
+      console.log(`[Morning Report] Processing ${trackName}...`);
+
       const data = await scrapeTrack(trackName, firecrawlKey);
-      
+
       if (data && data.races.length > 0) {
-        const stats = await saveToDatabase(supabase, data);
-        results.push({ track: trackName, success: true, stats });
-        console.log(`${trackName}: Saved ${stats.races} races, ${stats.horses} horses, ${stats.odds} odds`);
+        const stats = await saveMorningReport(supabase, data);
+        if (stats.success) {
+          results.push({ track: trackName, success: true, stats: { races: stats.races, horses: stats.horses } });
+          console.log(`[Morning Report] ✓ ${trackName}: ${stats.races} races, ${stats.horses} horses`);
+        } else {
+          results.push({ track: trackName, success: false, error: 'Failed to save to database' });
+        }
       } else {
-        results.push({ track: trackName, success: false, error: 'No data returned' });
-        console.log(`${trackName}: No data found`);
+        results.push({ track: trackName, success: false, error: 'No data returned from Firecrawl' });
+        console.log(`[Morning Report] ✗ ${trackName}: No data found`);
       }
 
-      // Wait 2 seconds between tracks to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Wait 1 second between requests
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // Log execution to system_logs
-    await supabase.from('system_logs').insert({
-      log_level: 'INFO',
-      component: 'scheduled-morning-scrape',
-      message: `Completed morning scrape for ${enabledTracks.length} tracks`,
-      details: {
-        results,
-        executionTimeMs: Date.now() - startTime,
-        timestamp: new Date().toISOString()
-      }
-    });
+    const successCount = results.filter((r) => r.success).length;
+    const executionTimeMs = Date.now() - startTime;
 
-    const successCount = results.filter(r => r.success).length;
-    console.log(`Morning scrape completed: ${successCount}/${enabledTracks.length} tracks successful`);
+    console.log(`[Morning Report] Completed: ${successCount}/${enabledTracks.length} successful (${executionTimeMs}ms)`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: `Processed ${successCount}/${enabledTracks.length} tracks`,
+      JSON.stringify({
+        success: true,
+        message: `Processed ${successCount}/${enabledTracks.length} tracks successfully`,
         results,
-        executionTimeMs: Date.now() - startTime
+        executionTimeMs,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Scheduled scrape error:', error);
-    
+    const executionTimeMs = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    console.error('[Morning Report] Error:', errorMessage);
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        executionTimeMs: Date.now() - startTime
+      JSON.stringify({
+        success: false,
+        error: errorMessage,
+        executionTimeMs,
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
