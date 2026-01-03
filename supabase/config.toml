@@ -75,3 +75,6 @@ verify_jwt = false
 
 [functions.parse-pdf-with-gemini]
 verify_jwt = false
+
+[functions.firecrawl-live-odds]
+verify_jwt = false
