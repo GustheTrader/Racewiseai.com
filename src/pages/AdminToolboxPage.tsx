@@ -19,6 +19,7 @@ import racewiseLogo from '@/assets/racewise-logo.webp';
 import ScheduleConfigPanel from '@/components/admin/ScheduleConfigPanel';
 import { SystemLogsViewer } from '@/components/admin/SystemLogsViewer';
 import ScrapedDataViewer from '@/components/admin/ScrapedDataViewer';
+import ScrapedRaceCard from '@/components/admin/ScrapedRaceCard';
 import ModelTrainingTab from '@/components/admin/ModelTrainingTab';
 import TwinSpiresModelTab from '@/components/admin/TwinSpiresModelTab';
 import TrdModelUploadTab from '@/components/admin/TrdModelUploadTab';
@@ -537,74 +538,15 @@ const AdminToolboxPage: React.FC = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScrollArea className="h-[450px] px-4 pb-4">
+                  <ScrollArea className="h-[500px] px-4 pb-4">
                     <div className="space-y-3">
                       {scrapeResult.races.map((race: any) => (
-                        <Collapsible
+                        <ScrapedRaceCard
                           key={race.raceNumber}
-                          open={expandedRaces.has(race.raceNumber)}
-                          onOpenChange={() => toggleRaceExpanded(race.raceNumber)}
-                        >
-                          <CollapsibleTrigger asChild>
-                            <div className="flex items-center justify-between p-3 bg-[#0d1221] rounded-lg cursor-pointer hover:bg-[#151d33] transition-colors">
-                              <div className="flex items-center gap-3">
-                                <Badge className="bg-amber-600/20 text-amber-400 border-amber-600/30 font-bold">
-                                  R{race.raceNumber}
-                                </Badge>
-                                <div>
-                                  <p className="text-sm font-medium text-white">
-                                    {race.distance} {race.surface} • {race.raceType}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {race.postTime} • Purse: {race.purse || 'N/A'} • {race.horses?.length || 0} horses
-                                  </p>
-                                </div>
-                              </div>
-                              {expandedRaces.has(race.raceNumber) ? (
-                                <ChevronDown className="h-4 w-4 text-gray-400" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-gray-400" />
-                              )}
-                            </div>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="mt-2 ml-4 space-y-1">
-                              {race.conditions && (
-                                <p className="text-xs text-gray-500 italic mb-2">{race.conditions}</p>
-                              )}
-                              <div className="grid grid-cols-1 gap-1">
-                                {race.horses?.map((horse: any, idx: number) => (
-                                  <div 
-                                    key={idx} 
-                                    className="flex items-center justify-between p-2 bg-[#0a0e1a] rounded border border-blue-900/20"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <span className="w-6 h-6 flex items-center justify-center rounded bg-blue-900/30 text-blue-400 text-xs font-bold">
-                                        {horse.programNumber}
-                                      </span>
-                                      <div>
-                                        <p className="text-sm font-medium text-white">{horse.horseName}</p>
-                                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                                          <span className="flex items-center gap-1">
-                                            <User className="h-3 w-3" />
-                                            {horse.jockey || 'TBD'}
-                                          </span>
-                                          <span className="flex items-center gap-1">
-                                            <Award className="h-3 w-3" />
-                                            {horse.trainer || 'TBD'}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <Badge variant="outline" className="border-green-600/50 text-green-400">
-                                      ML: {horse.morningLineOdds || 'N/A'}
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
+                          race={race}
+                          isExpanded={expandedRaces.has(race.raceNumber)}
+                          onToggle={() => toggleRaceExpanded(race.raceNumber)}
+                        />
                       ))}
                     </div>
                   </ScrollArea>

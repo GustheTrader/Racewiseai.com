@@ -197,6 +197,45 @@ export type Database = {
         }
         Relationships: []
       }
+      firecrawl_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error: string | null
+          id: string
+          job_id: string | null
+          race_date: string
+          requested_at: string | null
+          result: Json | null
+          status: string | null
+          track_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          race_date: string
+          requested_at?: string | null
+          result?: Json | null
+          status?: string | null
+          track_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          race_date?: string
+          requested_at?: string | null
+          result?: Json | null
+          status?: string | null
+          track_name?: string
+        }
+        Relationships: []
+      }
       horse_ratings: {
         Row: {
           class_rating: number | null
@@ -464,6 +503,51 @@ export type Database = {
           track_bias?: Json | null
           track_name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      morning_reports: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          firecrawl_request_id: string | null
+          horses_found: number | null
+          id: string
+          markdown_content: string | null
+          race_date: string
+          races_found: number | null
+          raw_data: Json | null
+          scraped_at: string | null
+          status: string | null
+          track_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          firecrawl_request_id?: string | null
+          horses_found?: number | null
+          id?: string
+          markdown_content?: string | null
+          race_date: string
+          races_found?: number | null
+          raw_data?: Json | null
+          scraped_at?: string | null
+          status?: string | null
+          track_name: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          firecrawl_request_id?: string | null
+          horses_found?: number | null
+          id?: string
+          markdown_content?: string | null
+          race_date?: string
+          races_found?: number | null
+          raw_data?: Json | null
+          scraped_at?: string | null
+          status?: string | null
+          track_name?: string
         }
         Relationships: []
       }
@@ -1351,6 +1435,39 @@ export type Database = {
           log_level?: string | null
           message?: string
           timestamp?: string | null
+        }
+        Relationships: []
+      }
+      track_config: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          schedule_hour: number | null
+          schedule_minute: number | null
+          timezone: string | null
+          track_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          schedule_hour?: number | null
+          schedule_minute?: number | null
+          timezone?: string | null
+          track_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          schedule_hour?: number | null
+          schedule_minute?: number | null
+          timezone?: string | null
+          track_name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
