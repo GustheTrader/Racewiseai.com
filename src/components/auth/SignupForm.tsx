@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
 
 const SignupForm = () => {
-  const { signUp } = useAuth();
+  const { signInWithMagicLink } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [signupEmail, setSignupEmail] = useState('');
@@ -32,15 +31,16 @@ const SignupForm = () => {
     
     setIsLoading(true);
     try {
-      await signUp(signupEmail, '', signupFullName);
+      // Use magic link for passwordless signup
+      await signInWithMagicLink(signupEmail);
+      toast.success('Check your email for a login link!');
       setSignupEmail('');
       setSignupFullName('');
-      
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
+      if (error?.message?.includes('already registered')) {
+        toast.error('This email is already registered. Check your email for a login link.');
+      }
     } finally {
       setIsLoading(false);
     }

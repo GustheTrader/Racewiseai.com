@@ -37,7 +37,7 @@ interface TrdHorse {
   name: string;
   pp: number;
   consensus?: number;
-  ml_odds?: number;
+  ml_odds?: number | null;
 }
 
 interface TrdRaceData {

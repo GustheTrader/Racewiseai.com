@@ -74,7 +74,7 @@ export const useScrapeJobs = () => {
     if (result.success) {
       // Update jobs state
       setJobs(jobs.map(j => 
-        j.id === job.id ? { ...j, is_active: result.isActive } : j
+        j.id === job.id ? { ...j, is_active: result.isActive ?? false } : j
       ));
       loadStats();
     }

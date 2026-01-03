@@ -24,9 +24,10 @@ interface ModelReport {
   race_date: string;
   race_number: number;
   report_data: any;
-  ensemble_scores: Record<string, any>;
+  ensemble_scores: Record<string, any> | null;
   track_bias: any;
-  bris_analysis: string;
+  bris_analysis: string | null;
+  created_by?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -48,7 +49,7 @@ const LiveModelReports: React.FC = () => {
         .limit(50);
 
       if (error) throw error;
-      setReports(data || []);
+      setReports((data || []) as ModelReport[]);
       setLastUpdate(new Date());
     } catch (err: any) {
       console.error('Error fetching reports:', err);

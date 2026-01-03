@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const LoginForm = () => {
-  const { signIn } = useAuth();
+  const { signInWithMagicLink } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
 
@@ -24,7 +24,8 @@ const LoginForm = () => {
     
     setIsLoading(true);
     try {
-      await signIn(loginEmail, 'beta-temp-password');
+      await signInWithMagicLink(loginEmail);
+      toast.success('Check your email for a login link!');
       setLoginEmail('');
     } catch (error) {
       console.error('Login error:', error);
