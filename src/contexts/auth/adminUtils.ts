@@ -37,11 +37,13 @@ export const checkAdminStatus = async (userId: string, email?: string | null): P
       .maybeSingle();
 
     if (error) {
+      console.error('[Admin Check] Error querying user_roles:', error);
       return false;
     }
 
     return !!data;
-  } catch {
+  } catch (err) {
+    console.error('[Admin Check] Exception checking admin status:', err);
     return false;
   }
 };
@@ -58,8 +60,8 @@ export const ensureAdminRole = async (userId: string): Promise<void> => {
         { user_id: userId, role: 'admin' },
         { onConflict: 'user_id,role' }
       );
-  } catch {
-    // Silently fail - admin status will be checked on next request
+  } catch (err) {
+    console.error('[Admin Role] Failed to ensure admin role for user:', userId, err);
   }
 };
 
@@ -73,7 +75,7 @@ export const removeAdminRole = async (userId: string): Promise<void> => {
       .delete()
       .eq('user_id', userId)
       .eq('role', 'admin');
-  } catch {
-    // Silently fail
+  } catch (err) {
+    console.error('[Admin Role] Failed to remove admin role from user:', userId, err);
   }
 };

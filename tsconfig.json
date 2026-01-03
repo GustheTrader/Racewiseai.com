@@ -7,15 +7,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "target": "esnext",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "types": ["vite/client"],
     "allowJs": true,
-    "noImplicitAny": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./types"],
@@ -23,14 +19,8 @@
     "noEmit": true,
     "moduleDetection": "force",
     "jsx": "react",
-    "strict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true
+    "strict": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules"]
-  "include": ["src/**/*", "types/**/*", "**/*.ts", "**/*.tsx", "**/*.d.ts"],
+  "include": ["src/**/*", "types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

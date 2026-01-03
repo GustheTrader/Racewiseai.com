@@ -78,40 +78,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize auth state
   useEffect(() => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // First, check if we're on the callback page with tokens
+        const hash = window.location.hash;
+        const hasTokens = hash.includes('access_token=');
+
+        if (hasTokens) {
+          console.log('[AuthContext] Tokens detected in URL, waiting for Supabase to process...');
+          // Give Supabase time to process tokens from URL
+          // The onAuthStateChange listener will fire when tokens are processed
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Get current session (might now include tokens that were just processed)
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+        if (mounted) {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+
+          if (currentSession?.user) {
+            lastActivityRef.current = Date.now();
+            checkAdminStatus(currentSession.user.id, currentSession.user.email)
+              .then(adminStatus => {
+                if (mounted) {
+                  setIsAdmin(adminStatus);
+                }
+              });
+          } else {
+            setIsAdmin(false);
+          }
+        }
+      } catch (error) {
+        console.error('[AuthContext] Error initializing auth:', error);
+        if (mounted) {
+          setIsAdmin(false);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    // Set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (currentSession?.user) {
-          // Reset activity on new session
-          lastActivityRef.current = Date.now();
-          
-          // Defer admin check to prevent deadlock
-          setTimeout(() => {
+        console.log('[AuthContext] Auth state changed:', event);
+        if (mounted) {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+
+          if (currentSession?.user) {
+            lastActivityRef.current = Date.now();
+
             checkAdminStatus(currentSession.user.id, currentSession.user.email)
-              .then(adminStatus => setIsAdmin(adminStatus));
-          }, 0);
-        } else {
-          setIsAdmin(false);
+              .then(adminStatus => {
+                if (mounted) {
+                  setIsAdmin(adminStatus);
+                }
+              });
+          } else {
+            setIsAdmin(false);
+          }
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        lastActivityRef.current = Date.now();
-        checkAdminStatus(currentSession.user.id, currentSession.user.email)
-          .then(adminStatus => setIsAdmin(adminStatus));
-      }
-      
-      setIsLoading(false);
-    });
+    // Initialize auth state
+    initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
