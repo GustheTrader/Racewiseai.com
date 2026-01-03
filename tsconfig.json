@@ -9,13 +9,12 @@
     "target": "esnext",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../src/*"]
+      "@/*": ["src/*"]
     },
-    "types": ["deno"],
     "allowJs": true,
-    "noImplicitAny": true,  // BUGFIX: Enable to catch implicit any types
-    "noUnusedParameters": true,  // BUGFIX: Enable to catch unused parameters
-    "noUnusedLocals": true,  // BUGFIX: Enable to catch unused variables
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./types"],
@@ -23,12 +22,12 @@
     "noEmit": true,
     "moduleDetection": "force",
     "jsx": "react",
-    "strict": true,  // BUGFIX: Enable strict mode
-    "strictNullChecks": true,  // BUGFIX: Enable null/undefined checks
-    "strictFunctionTypes": true,  // BUGFIX: Enable function type checking
-    "strictBindCallApply": true,  // BUGFIX: Enable bind/call/apply checking
-    "strictPropertyInitialization": true  // BUGFIX: Require property initialization
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
