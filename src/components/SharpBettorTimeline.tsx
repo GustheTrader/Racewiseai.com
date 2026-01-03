@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import BettingTimeline from './charts/BettingTimeline';
+const BettingTimeline = React.lazy(() => import('./charts/BettingTimeline'));
 import ChartInfoPanel from './charts/ChartInfoPanel';
 import RunnerLegend from './charts/RunnerLegend';
 import { Horse } from '../utils/types';
@@ -206,15 +206,17 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
       <CardContent className="p-2 pt-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <div className="relative z-10">
-          <BettingTimeline
-            bettingData={enhancedData}
-            spikes={spikes}
-            runnerNames={runnerNames}
-            runnerColors={runnerColors}
-            maxVolume={maxVolume}
-            maxOdds={maxOdds}
-            smallText={true}
-          />
+          <Suspense fallback={<div className="h-80 flex items-center justify-center text-sm text-gray-400">Loading chart…</div>}>
+            <BettingTimeline
+              bettingData={enhancedData}
+              spikes={spikes}
+              runnerNames={runnerNames}
+              runnerColors={runnerColors}
+              maxVolume={maxVolume}
+              maxOdds={maxOdds}
+              smallText={true}
+            />
+          </Suspense>
           
           <ChartInfoPanel 
             spikesCount={spikes.length}

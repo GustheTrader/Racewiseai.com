@@ -47,6 +47,10 @@ export interface ScraperStats {
   willPaysRecords: number;
   resultsRecords: number;
   lastExecutionTime: string | null;
+  // Additional aggregated metrics used in the admin UI
+  totalRuns?: number;
+  successRate?: number;
+  totalRecords?: number;
 }
 
 export interface TrackOption {

@@ -14,3 +14,17 @@ declare const Deno: {
     get(key: string): string | undefined;
   };
 };
+
+// Deno standard library module declarations
+declare module "https://deno.land/std@0.168.0/http/server.ts" {
+  export function serve(handler: (request: Request) => Response | Promise<Response>): void;
+}
+
+declare module "https://deno.land/x/xhr@0.1.0/mod.ts" {
+  // XHR polyfill for Deno
+}
+
+// Supabase client module declaration
+declare module "https://esm.sh/@supabase/supabase-js@2" {
+  export * from "@supabase/supabase-js";
+}

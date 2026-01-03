@@ -26,6 +26,7 @@ const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
   state: "expanded" | "collapsed"
+  collapsed?: boolean
   open: boolean
   setOpen: (open: boolean) => void
   openMobile: boolean
@@ -114,7 +115,7 @@ const SidebarProvider = React.forwardRef<
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
-    const contextValue = React.useMemo<SidebarContext>(
+    const contextValue = React.useMemo<SidebarContext & { collapsed: boolean }>(
       () => ({
         state,
         open,
@@ -123,6 +124,7 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        collapsed: state === "collapsed",
       }),
       [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
     )
@@ -413,7 +415,7 @@ SidebarContent.displayName = "SidebarContent"
 
 const SidebarGroup = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div">
+  React.ComponentProps<"div"> & { defaultOpen?: boolean }
 >(({ className, ...props }, ref) => {
   return (
     <div

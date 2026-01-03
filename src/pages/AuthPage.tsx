@@ -1,4 +1,8 @@
 import React, { useEffect } from 'react';
+import logoWebp600 from '@/assets/racewise-logo@600.webp';
+import logoAvif600 from '@/assets/racewise-logo@600.avif';
+import logoWebp from '@/assets/racewise-logo.webp';
+import logoAvif from '@/assets/racewise-logo.avif';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
@@ -85,7 +89,7 @@ const AuthPage = () => {
         loop
         muted
         playsInline
-        poster="/assets/racewise-logo.png"
+        poster={logoWebp600}
         className="absolute inset-0 w-full h-full object-cover opacity-50"
       >
         <source src="/videos/horse-racing-bg.mp4" type="video/mp4" />
@@ -107,11 +111,15 @@ const AuthPage = () => {
               <div className="w-80 h-80 bg-gradient-radial from-blue-500/20 via-purple-500/10 to-transparent blur-3xl" />
             </div>
             <div className="relative">
-              <img 
-                src="/assets/racewise-logo.png" 
-                alt="Racewise AI Toolbox" 
-                className="h-48 md:h-64 mx-auto mb-4 object-contain drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]"
-              />
+              <picture>
+                <source srcSet={logoAvif} type="image/avif" />
+                <source srcSet={logoWebp} type="image/webp" />
+                <img 
+                  src={logoWebp} 
+                  alt="Racewise AI Toolbox" 
+                  className="h-48 md:h-64 mx-auto mb-4 object-contain drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]"
+                />
+              </picture>
             </div>
             <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto bg-gradient-to-r from-muted-foreground via-foreground/70 to-muted-foreground bg-clip-text">
               Professional handicapping tools powered by ML/AI quantum inspired models

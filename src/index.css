@@ -423,6 +423,62 @@
     50% { opacity: 0.5; }
   }
 
+  /* Logo pulsing glow animation - inner */
+  .animate-logo-glow {
+    animation: logo-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes logo-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
+    }
+    50% { 
+      box-shadow: 0 0 35px rgba(59, 130, 246, 0.8), 0 0 70px rgba(139, 92, 246, 0.5);
+    }
+  }
+
+  /* Logo outer glow ring animation */
+  .animate-logo-glow-outer {
+    animation: logo-glow-outer 3s ease-in-out infinite;
+  }
+
+  @keyframes logo-glow-outer {
+    0%, 100% { 
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.7;
+      transform: scale(1.15);
+    }
+  }
+
+  /* Icon pulse animation */
+  .animate-icon-pulse {
+    animation: icon-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes icon-pulse {
+    0%, 100% { 
+      transform: scale(1);
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
+    }
+    50% { 
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 16px rgba(255,255,255,1));
+    }
+  }
+
+  /* Text shimmer animation */
+  .animate-text-shimmer {
+    animation: text-shimmer 3s linear infinite;
+  }
+
+  @keyframes text-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   /* Shimmer loading effect */
   .shimmer {
     background: linear-gradient(

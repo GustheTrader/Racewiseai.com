@@ -1,4 +1,4 @@
-import { PipelineResult, Race, Horse } from "@/types/DataToolboxTypes";
+import { PipelineResult, Race, Horse } from "../types/DataToolboxTypes";
 
 /**
  * Calculates handicapping metrics using the weighted ensemble model.
