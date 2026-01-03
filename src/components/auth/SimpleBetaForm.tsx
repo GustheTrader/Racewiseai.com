@@ -1,42 +1,61 @@
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { Loader2, Mail, ArrowRight, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 
 const SimpleBetaForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const { signInWithMagicLink } = useAuth();
+  const [password, setPassword] = useState('');
+  const [isSignup, setIsSignup] = useState(true);
+  const [confirmationSent, setConfirmationSent] = useState(false);
+  const { signUp, signIn } = useAuth();
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email) {
       toast.error('Email is required');
       return;
     }
-    
+
+    if (!password) {
+      toast.error('Password is required');
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email) || email.length > 254) {
       toast.error('Please enter a valid email address');
       return;
     }
-    
+
+    if (isSignup && password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
     setIsLoading(true);
-    
+
     try {
-      await signInWithMagicLink(email);
-      setEmailSent(true);
-    } catch {
+      if (isSignup) {
+        // Signup with email verification
+        await signUp(email, password, email.split('@')[0]);
+        setConfirmationSent(true);
+      } else {
+        // Login with email/password
+        await signIn(email, password);
+        // Navigation happens in auth context
+      }
+    } catch (error) {
       // Error is handled in the auth function
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (emailSent) {
+  // Show confirmation sent message
+  if (confirmationSent) {
     return (
       <div className="w-full max-w-md">
         <div className="glass-card p-8">
@@ -45,21 +64,26 @@ const SimpleBetaForm = () => {
               <CheckCircle className="h-8 w-8 text-green-400" />
             </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">
-              Check Your Email
+              Confirm Your Email
             </h2>
             <p className="text-muted-foreground text-sm mb-6">
-              We've sent a login link to <strong className="text-foreground">{email}</strong>
+              We've sent a confirmation email to <strong className="text-foreground">{email}</strong>
             </p>
-            <p className="text-muted-foreground text-xs">
-              Click the link in your email to securely access the dashboard.
+            <p className="text-muted-foreground text-xs mb-6">
+              Click the confirmation link in your email to activate your account.
               <br />
-              The link expires in 1 hour.
+              Then you can sign in with your email and password.
             </p>
             <button
-              onClick={() => setEmailSent(false)}
-              className="mt-6 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              onClick={() => {
+                setConfirmationSent(false);
+                setEmail('');
+                setPassword('');
+                setIsSignup(false);
+              }}
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
             >
-              Use a different email
+              Already confirmed? Sign in here
             </button>
           </div>
         </div>
@@ -73,67 +97,113 @@ const SimpleBetaForm = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 mb-4">
-            <Mail className="h-8 w-8 text-blue-400" />
+            <Lock className="h-8 w-8 text-blue-400" />
           </div>
           <h2 className="text-2xl font-semibold text-foreground mb-2">
-            Secure Login
+            {isSignup ? 'Create Account' : 'Sign In'}
           </h2>
           <p className="text-muted-foreground text-sm">
-            Enter your email to receive a secure login link
+            {isSignup
+              ? 'Enter your email and password to get started'
+              : 'Enter your credentials to access the dashboard'}
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleEmailSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Input */}
           <div className="relative">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Email
+            </label>
             <input
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              className={`
-                w-full px-5 py-4 rounded-2xl text-foreground placeholder:text-muted-foreground
-                glass-input text-base
-                ${isFocused ? 'ring-2 ring-blue-500/30' : ''}
-              `}
+              className="
+                w-full px-4 py-3 rounded-xl text-foreground placeholder:text-muted-foreground
+                glass-input text-base border border-white/10 focus:border-blue-500/30
+                focus:ring-2 focus:ring-blue-500/20 transition-all
+              "
               required
               maxLength={254}
-              autoComplete="email"
+              autoComplete={isSignup ? 'email' : 'email'}
             />
           </div>
-          
-          <button 
+
+          {/* Password Input */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder={isSignup ? 'At least 6 characters' : 'Your password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="
+                w-full px-4 py-3 rounded-xl text-foreground placeholder:text-muted-foreground
+                glass-input text-base border border-white/10 focus:border-blue-500/30
+                focus:ring-2 focus:ring-blue-500/20 transition-all
+              "
+              required
+              minLength={6}
+              autoComplete={isSignup ? 'new-password' : 'current-password'}
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
             type="submit"
-            disabled={isLoading || !email.trim()}
+            disabled={isLoading || !email.trim() || !password.trim()}
             className="
-              w-full py-4 px-6 rounded-2xl font-medium text-base
+              w-full py-3 px-6 rounded-xl font-medium text-base mt-6
               glass-button text-white
               disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
               flex items-center justify-center gap-2
+              hover:bg-blue-600/20 transition-all
             "
           >
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Sending link...
+                {isSignup ? 'Creating account...' : 'Signing in...'}
               </>
             ) : (
               <>
-                Send Login Link
+                {isSignup ? 'Create Account' : 'Sign In'}
                 <ArrowRight className="h-5 w-5" />
               </>
             )}
           </button>
         </form>
 
-        {/* Footer */}
+        {/* Toggle Between Signup/Signin */}
         <div className="mt-6 pt-6 border-t border-white/5">
-          <p className="text-center text-xs text-muted-foreground">
-            Secure, passwordless authentication.
-            <br />
-            We'll email you a magic link for instant access.
+          <p className="text-center text-sm text-muted-foreground">
+            {isSignup ? 'Already have an account?' : "Don't have an account?"}
+            {' '}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignup(!isSignup);
+                setEmail('');
+                setPassword('');
+              }}
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            >
+              {isSignup ? 'Sign in' : 'Sign up'}
+            </button>
+          </p>
+        </div>
+
+        {/* Info */}
+        <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+          <p className="text-xs text-blue-300 text-center">
+            {isSignup
+              ? '✓ Confirmation email required to activate account'
+              : '✓ Fast and secure authentication'}
           </p>
         </div>
       </div>
