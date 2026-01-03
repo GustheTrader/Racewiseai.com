@@ -40,14 +40,6 @@ const AnimatedRoutes = () => {
           } 
         />
         <Route 
-          path="/dashboard" 
-          element={
-            <RequireAuth>
-              <Index />
-            </RequireAuth>
-          } 
-        />
-        <Route 
           path="/results" 
           element={
             <RequireAuth>
