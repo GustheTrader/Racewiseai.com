@@ -25,19 +25,20 @@ import TrdModelUploadTab from '@/components/admin/TrdModelUploadTab';
 import OtcLiveScraperTab from '@/components/admin/OtcLiveScraperTab';
 import LiveModelReports from '@/components/dashboard/LiveModelReports';
 
-// OTB track configurations with their URL slugs
+// OTB track configurations with their URL codes and page names
 const OTB_TRACKS = [
-  { name: 'Turfway Park', slug: 'turfway-park', state: 'Kentucky', enabled: true },
-  { name: 'Santa Anita Park', slug: 'santa-anita', state: 'California', enabled: true },
-  { name: 'Gulfstream Park', slug: 'gulfstream-park', state: 'Florida', enabled: false },
-  { name: 'Churchill Downs', slug: 'churchill-downs', state: 'Kentucky', enabled: false },
-  { name: 'Aqueduct', slug: 'aqueduct', state: 'New York', enabled: false },
-  { name: 'Del Mar', slug: 'del-mar', state: 'California', enabled: false },
-  { name: 'Saratoga', slug: 'saratoga', state: 'New York', enabled: false },
-  { name: 'Belmont Park', slug: 'belmont-park', state: 'New York', enabled: false },
-  { name: 'Oaklawn Park', slug: 'oaklawn-park', state: 'Arkansas', enabled: false },
-  { name: 'Keeneland', slug: 'keeneland', state: 'Kentucky', enabled: false },
-  { name: 'Los Alamitos', slug: 'los-alamitos', state: 'California', enabled: false },
+  { name: 'Turfway Park', code: 'TP', page: 'turfway_park', state: 'Kentucky', enabled: true },
+  { name: 'Santa Anita Park', code: 'SA', page: 'santa_anita_park', state: 'California', enabled: true },
+  { name: 'Gulfstream Park', code: 'GP', page: 'gulfstream_park', state: 'Florida', enabled: false },
+  { name: 'Churchill Downs', code: 'CD', page: 'churchill_downs', state: 'Kentucky', enabled: false },
+  { name: 'Aqueduct', code: 'AQU', page: 'aqueduct', state: 'New York', enabled: false },
+  { name: 'Del Mar', code: 'DMR', page: 'del_mar', state: 'California', enabled: false },
+  { name: 'Saratoga', code: 'SAR', page: 'saratoga_race_course', state: 'New York', enabled: false },
+  { name: 'Belmont Park', code: 'BEL', page: 'belmont_park', state: 'New York', enabled: false },
+  { name: 'Oaklawn Park', code: 'OP', page: 'oaklawn_park', state: 'Arkansas', enabled: false },
+  { name: 'Keeneland', code: 'KEE', page: 'keeneland', state: 'Kentucky', enabled: false },
+  { name: 'Los Alamitos', code: 'LA', page: 'los_alamitos', state: 'California', enabled: false },
+  { name: 'Tampa Bay Downs', code: 'TAM', page: 'tampa_bay_downs', state: 'Florida', enabled: false },
 ];
 
 const AdminToolboxPage: React.FC = () => {
@@ -141,7 +142,8 @@ const AdminToolboxPage: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('firecrawl-morning-report', {
         body: { 
           trackName: selectedTrack,
-          trackSlug: trackConfig.slug
+          trackCode: trackConfig.code,
+          trackPage: trackConfig.page
         }
       });
 

@@ -56,7 +56,7 @@ serve(async (req) => {
   }
 
   try {
-    const { trackName, trackSlug, raceNumber } = await req.json();
+    const { trackName, trackCode, trackPage, raceNumber } = await req.json();
 
     if (!trackName) {
       return new Response(
@@ -75,15 +75,23 @@ serve(async (req) => {
       );
     }
 
-    // Build the URL for offtrackbetting.com using provided slug or generate from name
-    const slug = trackSlug || trackName.toLowerCase().replace(/\s+/g, '-');
-    let url = `https://www.offtrackbetting.com/tracks/${slug}`;
+    // Build the URL for offtrackbetting.com using code and page name
+    // Format: https://www.offtrackbetting.com/racetracks/{CODE}/{page_name}.html
+    let url: string;
+    if (trackCode && trackPage) {
+      url = `https://www.offtrackbetting.com/racetracks/${trackCode}/${trackPage}.html`;
+    } else {
+      // Fallback to old format
+      const slug = trackName.toLowerCase().replace(/\s+/g, '-');
+      url = `https://www.offtrackbetting.com/tracks/${slug}`;
+    }
+    
     if (raceNumber) {
-      url += `/race/${raceNumber}`;
+      url += `?race=${raceNumber}`;
     }
 
     console.log('Scraping morning report from:', url);
-    console.log('Track name:', trackName, 'Slug:', slug);
+    console.log('Track:', trackName, 'Code:', trackCode, 'Page:', trackPage);
 
     // Use Firecrawl to scrape the page with structured extraction
     const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
@@ -94,51 +102,48 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         url,
-        formats: [
-          'markdown',
-          {
-            type: 'json',
-            schema: {
-              type: 'object',
-              properties: {
-                trackName: { type: 'string', description: 'Name of the race track' },
-                raceDate: { type: 'string', description: 'Date of the races' },
-                races: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      raceNumber: { type: 'number' },
-                      postTime: { type: 'string' },
-                      distance: { type: 'string' },
-                      surface: { type: 'string' },
-                      raceType: { type: 'string' },
-                      purse: { type: 'string' },
-                      conditions: { type: 'string' },
-                      horses: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            programNumber: { type: 'string' },
-                            horseName: { type: 'string' },
-                            jockey: { type: 'string' },
-                            trainer: { type: 'string' },
-                            morningLineOdds: { type: 'string' },
-                            weight: { type: 'number' },
-                            medication: { type: 'string' },
-                            equipment: { type: 'string' }
-                          }
+        formats: ['markdown', 'extract'],
+        extract: {
+          schema: {
+            type: 'object',
+            properties: {
+              trackName: { type: 'string', description: 'Name of the race track' },
+              raceDate: { type: 'string', description: 'Date of the races in YYYY-MM-DD format' },
+              races: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    raceNumber: { type: 'number' },
+                    postTime: { type: 'string' },
+                    distance: { type: 'string' },
+                    surface: { type: 'string' },
+                    raceType: { type: 'string' },
+                    purse: { type: 'string' },
+                    conditions: { type: 'string' },
+                    horses: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          programNumber: { type: 'string' },
+                          horseName: { type: 'string' },
+                          jockey: { type: 'string' },
+                          trainer: { type: 'string' },
+                          morningLineOdds: { type: 'string' },
+                          weight: { type: 'number' },
+                          medication: { type: 'string' },
+                          equipment: { type: 'string' }
                         }
                       }
                     }
                   }
                 }
               }
-            },
-            prompt: 'Extract all horse racing information including race details and entries. For each race, get the race number, post time, distance, surface type, race conditions, purse amount, and all horse entries with their program numbers, names, jockeys, trainers, morning line odds, weight carried, medication, and equipment.'
-          }
-        ],
+            }
+          },
+          prompt: 'Extract all horse racing information including race details and entries. For each race, get the race number, post time, distance, surface type, race conditions, purse amount, and all horse entries with their program numbers, names, jockeys, trainers, morning line odds, weight carried, medication, and equipment.'
+        },
         onlyMainContent: true,
         waitFor: 3000,
       }),
@@ -155,10 +160,13 @@ serve(async (req) => {
     }
 
     console.log('Firecrawl scrape successful');
+    console.log('Response data keys:', Object.keys(data.data || data));
 
-    // Extract the structured data
-    const extractedData = data.data?.json || data.json || null;
+    // Extract the structured data from the extract format
+    const extractedData = data.data?.extract || data.extract || null;
     const markdown = data.data?.markdown || data.markdown || '';
+
+    console.log('Extracted data:', JSON.stringify(extractedData).substring(0, 500));
 
     const result: MorningReportData = {
       trackName: extractedData?.trackName || trackName,
