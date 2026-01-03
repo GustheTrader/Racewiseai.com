@@ -56,7 +56,7 @@ serve(async (req) => {
   }
 
   try {
-    const { trackName, raceNumber } = await req.json();
+    const { trackName, trackSlug, raceNumber } = await req.json();
 
     if (!trackName) {
       return new Response(
@@ -65,23 +65,25 @@ serve(async (req) => {
       );
     }
 
-    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    // Try both secret names (connector uses FIRECRAWL_API_KEY_1)
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY_1') || Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
       console.error('FIRECRAWL_API_KEY not configured');
       return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl API key not configured' }),
+        JSON.stringify({ success: false, error: 'Firecrawl API key not configured. Please connect Firecrawl in project settings.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Build the URL for offtrackbetting.com
-    const trackCode = trackName.toLowerCase().replace(/\s+/g, '-');
-    let url = `https://www.offtrackbetting.com/tracks/${trackCode}`;
+    // Build the URL for offtrackbetting.com using provided slug or generate from name
+    const slug = trackSlug || trackName.toLowerCase().replace(/\s+/g, '-');
+    let url = `https://www.offtrackbetting.com/tracks/${slug}`;
     if (raceNumber) {
       url += `/race/${raceNumber}`;
     }
 
     console.log('Scraping morning report from:', url);
+    console.log('Track name:', trackName, 'Slug:', slug);
 
     // Use Firecrawl to scrape the page with structured extraction
     const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
