@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut, Flame, ChevronDown, ChevronRight, User, Award, X } from 'lucide-react';
+import { Zap, Globe, CheckCircle2, Upload, RefreshCw, Loader2, Home, LogOut, Flame, ChevronDown, ChevronRight, User, Award, X, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -57,6 +57,7 @@ const AdminToolboxPage: React.FC = () => {
   const [allLiveOdds, setAllLiveOdds] = useState<Record<number, Record<string, any>>>({});
   const [isFetchingAllOdds, setIsFetchingAllOdds] = useState(false);
   const [lastOddsUpdate, setLastOddsUpdate] = useState<string | null>(null);
+  const [isSavingReport, setIsSavingReport] = useState(false);
   
   const toggleRaceExpanded = (raceNum: number) => {
     setExpandedRaces(prev => {
@@ -126,6 +127,62 @@ const AdminToolboxPage: React.FC = () => {
       toast.error('Failed to fetch live odds');
     } finally {
       setIsFetchingAllOdds(false);
+    }
+  };
+
+  const saveReportSnapshot = async () => {
+    if (!scrapeResult?.races?.length) {
+      toast.error('No scraped data to save');
+      return;
+    }
+
+    setIsSavingReport(true);
+    try {
+      const raceDate = scrapeResult.raceDate || new Date().toISOString().split('T')[0];
+      
+      // Merge live odds into the race data
+      const racesWithLiveOdds = scrapeResult.races.map((race: any) => ({
+        ...race,
+        horses: race.horses?.map((horse: any) => ({
+          ...horse,
+          liveOdds: allLiveOdds[race.raceNumber]?.[horse.programNumber]?.currentOdds || null
+        }))
+      }));
+
+      const reportData = {
+        trackName: scrapeResult.trackName,
+        raceDate,
+        races: racesWithLiveOdds,
+        scrapedAt: scrapeResult.scrapedAt,
+        liveOddsUpdatedAt: lastOddsUpdate,
+        snapshotAt: new Date().toISOString()
+      };
+
+      // Count totals
+      const totalHorses = racesWithLiveOdds.reduce((acc: number, race: any) => 
+        acc + (race.horses?.length || 0), 0
+      );
+
+      const { error } = await supabase
+        .from('morning_reports')
+        .insert({
+          track_name: scrapeResult.trackName,
+          race_date: raceDate,
+          races_found: scrapeResult.races.length,
+          horses_found: totalHorses,
+          raw_data: reportData,
+          status: 'success',
+          scraped_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast.success(`Saved morning report snapshot: ${scrapeResult.races.length} races, ${totalHorses} horses`);
+    } catch (err: any) {
+      console.error('Error saving report:', err);
+      toast.error(err.message || 'Failed to save report');
+    } finally {
+      setIsSavingReport(false);
     }
   };
   
@@ -565,6 +622,19 @@ const AdminToolboxPage: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={saveReportSnapshot}
+                        disabled={isSavingReport}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                      >
+                        {isSavingReport ? (
+                          <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                        ) : (
+                          <Save className="h-3 w-3 mr-1" />
+                        )}
+                        Save Report
+                      </Button>
                       <Button
                         size="sm"
                         onClick={fetchAllLiveOdds}
