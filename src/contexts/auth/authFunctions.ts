@@ -13,8 +13,8 @@ export const signInWithMagicLink = async (email: string): Promise<void> => {
     throw new Error('Invalid email format');
   }
 
-  // Always use production URL for magic link redirects
-  const redirectUrl = 'https://racewiseai.com/';
+  // Always redirect magic links back into the app auth route so the session can be established
+  const redirectUrl = 'https://racewiseai.com/auth';
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
