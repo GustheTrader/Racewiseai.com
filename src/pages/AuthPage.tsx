@@ -4,7 +4,7 @@ import logoAvif600 from '@/assets/racewise-logo@600.avif';
 import logoWebp from '@/assets/racewise-logo.webp';
 import logoAvif from '@/assets/racewise-logo.avif';
 import { useAuth } from '@/contexts/auth/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
 import { 
   TrendingUp, 
@@ -20,12 +20,15 @@ import {
 const AuthPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      // Redirect to the originally requested page, or dashboard as fallback
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, location.state]);
 
   const tools = [
     {
