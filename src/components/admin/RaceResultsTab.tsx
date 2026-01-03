@@ -74,7 +74,7 @@ export const RaceResultsTab = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setResults(data || []);
+      setResults((data || []) as RaceResult[]);
     } catch (error) {
       toast.error("Failed to load race results");
       console.error(error);

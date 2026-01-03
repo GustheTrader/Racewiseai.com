@@ -14,7 +14,10 @@ export const signInWithMagicLink = async (email: string): Promise<void> => {
   }
 
   // Get the redirect URL from the current environment
-  const redirectUrl = `${window.location.origin}/auth/callback`;
+  // Uses /auth/callback route to properly handle Supabase auth tokens
+  const redirectUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/auth/callback`
+    : 'https://www.racewiseai.com/auth/callback';
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -55,7 +58,10 @@ export const signIn = async (email: string, password: string): Promise<void> => 
  */
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
   // Get the redirect URL from the current environment
-  const redirectUrl = `${window.location.origin}/auth/callback`;
+  // Uses /auth/callback route to properly handle Supabase auth tokens
+  const redirectUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/auth/callback`
+    : 'https://www.racewiseai.com/auth/callback';
 
   const { data, error } = await supabase.auth.signUp({
     email,
