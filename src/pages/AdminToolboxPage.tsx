@@ -379,35 +379,6 @@ const AdminToolboxPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Input Area */}
-            <Card className="bg-[#131a2e] border-blue-900/30">
-              <CardContent className="p-4 space-y-4">
-                <Textarea
-                  value={cardData}
-                  onChange={(e) => setCardData(e.target.value)}
-                  placeholder="Paste race card data or upload PDF..."
-                  className="min-h-[100px] bg-[#0d1221] border-blue-900/30 text-white placeholder:text-gray-500 resize-none"
-                />
-                
-                {/* File Upload Zone */}
-                <label className="block cursor-pointer">
-                  <div className="border-2 border-dashed border-blue-900/50 rounded-lg p-6 text-center hover:border-blue-600/50 transition-colors">
-                    <Upload className="h-6 w-6 mx-auto mb-2 text-gray-500" />
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">
-                      Drop PDF or Click to Upload
-                    </p>
-                  </div>
-                  <input
-                    type="file"
-                    accept=".pdf,.txt"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={isProcessing}
-                  />
-                </label>
-              </CardContent>
-            </Card>
-
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button
