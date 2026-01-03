@@ -25,24 +25,28 @@ import TrdModelUploadTab from '@/components/admin/TrdModelUploadTab';
 import OtcLiveScraperTab from '@/components/admin/OtcLiveScraperTab';
 import LiveModelReports from '@/components/dashboard/LiveModelReports';
 
-const tracks = [
-  'Santa Anita Park',
-  'Gulfstream Park',
-  'Churchill Downs',
-  'Aqueduct',
-  'Del Mar',
-  'Saratoga',
-  'Belmont Park',
-  'Oaklawn Park',
-  'Keeneland',
-  'Los Alamitos',
+// OTB track configurations with their URL slugs
+const OTB_TRACKS = [
+  { name: 'Turfway Park', slug: 'turfway-park', state: 'Kentucky', enabled: true },
+  { name: 'Santa Anita Park', slug: 'santa-anita', state: 'California', enabled: true },
+  { name: 'Gulfstream Park', slug: 'gulfstream-park', state: 'Florida', enabled: false },
+  { name: 'Churchill Downs', slug: 'churchill-downs', state: 'Kentucky', enabled: false },
+  { name: 'Aqueduct', slug: 'aqueduct', state: 'New York', enabled: false },
+  { name: 'Del Mar', slug: 'del-mar', state: 'California', enabled: false },
+  { name: 'Saratoga', slug: 'saratoga', state: 'New York', enabled: false },
+  { name: 'Belmont Park', slug: 'belmont-park', state: 'New York', enabled: false },
+  { name: 'Oaklawn Park', slug: 'oaklawn-park', state: 'Arkansas', enabled: false },
+  { name: 'Keeneland', slug: 'keeneland', state: 'Kentucky', enabled: false },
+  { name: 'Los Alamitos', slug: 'los-alamitos', state: 'California', enabled: false },
 ];
 
 const AdminToolboxPage: React.FC = () => {
   const { user, isLoading: authLoading, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
-  const [selectedTrack, setSelectedTrack] = useState(tracks[0]);
-  const [cardData, setCardData] = useState('');
+  const [enabledTracks, setEnabledTracks] = useState<Set<string>>(
+    new Set(OTB_TRACKS.filter(t => t.enabled).map(t => t.name))
+  );
+  const [selectedTrack, setSelectedTrack] = useState(OTB_TRACKS[0].name);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState('ord');
   const [connectionStatus, setConnectionStatus] = useState<'ready' | 'syncing' | 'error'>('ready');
@@ -128,8 +132,17 @@ const AdminToolboxPage: React.FC = () => {
     setScrapeResult(null);
     
     try {
+      // Find the track config to get the slug
+      const trackConfig = OTB_TRACKS.find(t => t.name === selectedTrack);
+      if (!trackConfig) {
+        throw new Error('Track not found');
+      }
+
       const { data, error } = await supabase.functions.invoke('firecrawl-morning-report', {
-        body: { trackName: selectedTrack }
+        body: { 
+          trackName: selectedTrack,
+          trackSlug: trackConfig.slug
+        }
       });
 
       if (error) throw error;
@@ -360,22 +373,61 @@ const AdminToolboxPage: React.FC = () => {
               </TabsList>
             </Tabs>
 
-            {/* Track Selector */}
+            {/* Track Selector with Toggle */}
             <Card className="bg-[#131a2e] border-blue-900/30">
-              <CardContent className="p-4">
-                <label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block">Select Track</label>
-                <Select value={selectedTrack} onValueChange={setSelectedTrack}>
-                  <SelectTrigger className="bg-[#0d1221] border-blue-900/30 text-white">
-                    <SelectValue placeholder="Select Track" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#131a2e] border-blue-900/30">
-                    {tracks.map(track => (
-                      <SelectItem key={track} value={track} className="text-white hover:bg-blue-900/30">
-                        {track}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <CardContent className="p-4 space-y-4">
+                <div>
+                  <label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block">Select Track</label>
+                  <Select value={selectedTrack} onValueChange={setSelectedTrack}>
+                    <SelectTrigger className="bg-[#0d1221] border-blue-900/30 text-white">
+                      <SelectValue placeholder="Select Track" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#131a2e] border-blue-900/30">
+                      {OTB_TRACKS.filter(t => enabledTracks.has(t.name)).map(track => (
+                        <SelectItem key={track.name} value={track.name} className="text-white hover:bg-blue-900/30">
+                          {track.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Track Toggles */}
+                <Collapsible>
+                  <CollapsibleTrigger className="flex items-center gap-2 text-xs text-gray-400 hover:text-white w-full">
+                    <ChevronRight className="h-3 w-3" />
+                    <span>Manage Tracks</span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3">
+                    <ScrollArea className="h-48">
+                      <div className="space-y-2">
+                        {OTB_TRACKS.map(track => (
+                          <label key={track.name} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-blue-900/20 p-1 rounded">
+                            <input
+                              type="checkbox"
+                              checked={enabledTracks.has(track.name)}
+                              onChange={(e) => {
+                                const newSet = new Set(enabledTracks);
+                                if (e.target.checked) {
+                                  newSet.add(track.name);
+                                } else {
+                                  newSet.delete(track.name);
+                                  if (selectedTrack === track.name && newSet.size > 0) {
+                                    setSelectedTrack(Array.from(newSet)[0]);
+                                  }
+                                }
+                                setEnabledTracks(newSet);
+                              }}
+                              className="rounded border-blue-900/50 bg-[#0d1221] text-blue-600"
+                            />
+                            <span className="text-white">{track.name}</span>
+                            <span className="text-gray-500 text-xs ml-auto">{track.state}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CollapsibleContent>
+                </Collapsible>
               </CardContent>
             </Card>
 
