@@ -48,6 +48,7 @@ interface ScrapedRaceCardProps {
   trackCode?: string;
   trackPage?: string;
   trackName?: string;
+  initialLiveOdds?: Record<string, LiveOdds>;
 }
 
 const ScrapedRaceCard: React.FC<ScrapedRaceCardProps> = ({ 
@@ -56,13 +57,22 @@ const ScrapedRaceCard: React.FC<ScrapedRaceCardProps> = ({
   onToggle,
   trackCode,
   trackPage,
-  trackName 
+  trackName,
+  initialLiveOdds
 }) => {
   const [sortField, setSortField] = useState<'programNumber' | 'morningLineOdds' | 'currentOdds'>('programNumber');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [liveOdds, setLiveOdds] = useState<Record<string, LiveOdds>>({});
+  const [liveOdds, setLiveOdds] = useState<Record<string, LiveOdds>>(initialLiveOdds || {});
   const [isLoadingLive, setIsLoadingLive] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(initialLiveOdds ? 'Pre-loaded' : null);
+
+  // Update liveOdds when initialLiveOdds changes
+  React.useEffect(() => {
+    if (initialLiveOdds && Object.keys(initialLiveOdds).length > 0) {
+      setLiveOdds(initialLiveOdds);
+      setLastUpdated('Pre-loaded');
+    }
+  }, [initialLiveOdds]);
 
   const parseOdds = (odds: string | undefined): number => {
     if (!odds) return 999;

@@ -54,6 +54,9 @@ const AdminToolboxPage: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<'ready' | 'syncing' | 'error'>('ready');
   const [scrapeResult, setScrapeResult] = useState<any>(null);
   const [expandedRaces, setExpandedRaces] = useState<Set<number>>(new Set());
+  const [allLiveOdds, setAllLiveOdds] = useState<Record<number, Record<string, any>>>({});
+  const [isFetchingAllOdds, setIsFetchingAllOdds] = useState(false);
+  const [lastOddsUpdate, setLastOddsUpdate] = useState<string | null>(null);
   
   const toggleRaceExpanded = (raceNum: number) => {
     setExpandedRaces(prev => {
@@ -75,6 +78,55 @@ const AdminToolboxPage: React.FC = () => {
 
   const collapseAllRaces = () => {
     setExpandedRaces(new Set());
+  };
+
+  const fetchAllLiveOdds = async () => {
+    if (!scrapeResult?.races?.length) return;
+    
+    const trackConfig = OTB_TRACKS.find(t => t.name === selectedTrack);
+    if (!trackConfig) return;
+
+    setIsFetchingAllOdds(true);
+    const newOddsMap: Record<number, Record<string, any>> = {};
+    let successCount = 0;
+
+    try {
+      // Fetch odds for all races in parallel
+      const promises = scrapeResult.races.map(async (race: any) => {
+        try {
+          const { data, error } = await supabase.functions.invoke('firecrawl-live-odds', {
+            body: {
+              trackName: scrapeResult.trackName,
+              trackCode: trackConfig.code,
+              trackPage: trackConfig.page,
+              raceNumber: race.raceNumber
+            }
+          });
+
+          if (!error && data.success && data.data?.horses) {
+            const oddsMap: Record<string, any> = {};
+            data.data.horses.forEach((h: any) => {
+              oddsMap[h.programNumber] = h;
+            });
+            newOddsMap[race.raceNumber] = oddsMap;
+            successCount++;
+          }
+        } catch (err) {
+          console.error(`Error fetching odds for race ${race.raceNumber}:`, err);
+        }
+      });
+
+      await Promise.all(promises);
+      
+      setAllLiveOdds(newOddsMap);
+      setLastOddsUpdate(new Date().toLocaleTimeString());
+      toast.success(`Updated live odds for ${successCount}/${scrapeResult.races.length} races`);
+    } catch (err) {
+      console.error('Error fetching all live odds:', err);
+      toast.error('Failed to fetch live odds');
+    } finally {
+      setIsFetchingAllOdds(false);
+    }
   };
   
   const { 
@@ -507,9 +559,25 @@ const AdminToolboxPage: React.FC = () => {
                       </CardTitle>
                       <p className="text-sm text-gray-400 mt-1">
                         {scrapeResult.trackName} • {scrapeResult.raceDate} • {scrapeResult.races.length} races
+                        {lastOddsUpdate && (
+                          <span className="ml-2 text-green-400">• Odds: {lastOddsUpdate}</span>
+                        )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={fetchAllLiveOdds}
+                        disabled={isFetchingAllOdds}
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                      >
+                        {isFetchingAllOdds ? (
+                          <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                        ) : (
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                        )}
+                        Fetch All Live Odds
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -529,7 +597,11 @@ const AdminToolboxPage: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setScrapeResult(null)}
+                        onClick={() => {
+                          setScrapeResult(null);
+                          setAllLiveOdds({});
+                          setLastOddsUpdate(null);
+                        }}
                         className="text-gray-400 hover:text-white"
                       >
                         <X className="h-4 w-4" />
@@ -551,6 +623,7 @@ const AdminToolboxPage: React.FC = () => {
                             trackName={scrapeResult.trackName}
                             trackCode={trackConfig?.code}
                             trackPage={trackConfig?.page}
+                            initialLiveOdds={allLiveOdds[race.raceNumber]}
                           />
                         );
                       })}
