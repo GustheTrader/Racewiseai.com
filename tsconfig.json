@@ -29,8 +29,6 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules"]
-  "include": ["src/**/*", "types/**/*", "**/*.ts", "**/*.tsx", "**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*", "**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
