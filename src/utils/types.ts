@@ -163,7 +163,7 @@ export interface RaceData {
   track_name: string;
   race_number: number;
   race_date: string;
-  race_conditions?: string;
+  race_conditions?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -173,9 +173,9 @@ export interface RaceHorse {
   race_id: string;
   pp: number;
   name: string;
-  jockey?: string;
-  trainer?: string;
-  ml_odds?: number;
+  jockey?: string | null;
+  trainer?: string | null;
+  ml_odds?: number | null;
   created_at: string;
   updated_at: string;
 }

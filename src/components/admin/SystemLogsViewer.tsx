@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ interface SystemLog {
   component: string | null;
   log_level: string | null;
   message: string;
-  details: unknown;
+  details: Record<string, unknown> | null;
 }
 
 export const SystemLogsViewer = () => {
@@ -43,7 +43,7 @@ export const SystemLogsViewer = () => {
         return;
       }
 
-      setLogs(data || []);
+      setLogs((data || []) as SystemLog[]);
     } catch (err) {
       console.error('Failed to fetch logs:', err);
     } finally {
@@ -138,7 +138,7 @@ export const SystemLogsViewer = () => {
                       {getLogIcon(log.log_level)}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{log.message}</p>
-                        {log.details && typeof log.details === 'object' && (
+                        {log.details && typeof log.details === 'object' && log.details !== null && (
                           <pre className="mt-1 text-xs text-muted-foreground bg-muted p-2 rounded overflow-x-auto">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>

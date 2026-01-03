@@ -17,14 +17,14 @@ const QuantumRankingsPage: React.FC = () => {
   
   // Get available tracks and races
   const tracks = TRACK_OPTIONS.map(track => track.value);
-  const races = selectedTrack ? Object.keys(SAMPLE_RANKING_DATA[selectedTrack] || {}).map(Number) : [];
-  const rankings = selectedTrack && selectedRace && SAMPLE_RANKING_DATA[selectedTrack] ? 
-    SAMPLE_RANKING_DATA[selectedTrack][selectedRace] || [] : [];
+  const races = selectedTrack ? Object.keys((SAMPLE_RANKING_DATA as Record<string, Record<number, unknown>>)[selectedTrack] || {}).map(Number) : [];
+  const rankings = selectedTrack && selectedRace && (SAMPLE_RANKING_DATA as Record<string, Record<number, unknown>>)[selectedTrack] ? 
+    (SAMPLE_RANKING_DATA as Record<string, Record<number, any[]>>)[selectedTrack][selectedRace] || [] : [];
 
   const handleTrackChange = (track: string) => {
     setSelectedTrack(track);
     // Reset to the first available race when track changes
-    const firstRace = Object.keys(SAMPLE_RANKING_DATA[track] || {})[0];
+    const firstRace = Object.keys((SAMPLE_RANKING_DATA as Record<string, Record<number, unknown>>)[track] || {})[0];
     setSelectedRace(firstRace ? Number(firstRace) : 1);
   };
 

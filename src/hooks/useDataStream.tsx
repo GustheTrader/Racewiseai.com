@@ -95,7 +95,7 @@ export const useDataStream = ({ trackName, jobType = 'odds' }: UseDataStreamProp
     fetchData();
     
     // Set up real-time subscription
-    let channel;
+    let channel: ReturnType<typeof supabase.channel> | undefined;
     
     if (jobType === 'odds') {
       channel = supabase

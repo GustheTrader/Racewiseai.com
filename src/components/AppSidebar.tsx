@@ -1,3 +1,4 @@
+import React from "react";
 import { Home, TrendingUp, Video, Settings, ChevronLeft, ChevronRight, Trophy, Sun, Moon, Database, Cpu } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTheme } from "next-themes";

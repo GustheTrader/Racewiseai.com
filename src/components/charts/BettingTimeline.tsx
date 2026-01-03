@@ -153,10 +153,10 @@ const BettingTimeline: React.FC<BettingTimelineProps> = ({
                 yAxisId="volume"
                 stroke={standardColor}
                 strokeWidth={2}
-                dot={(props) => {
+                dot={(props: any) => {
                   const { cx, cy, payload } = props;
                   const value = payload[runner as keyof typeof payload];
-                  if (!value) return null;
+                  if (!value) return <g key={`empty-${cx}-${cy}`} />;
                   
                   return (
                     <RunnerPositionDot

@@ -35,7 +35,8 @@ interface RaceResult {
   track_name: string;
   race_number: number;
   race_date: string;
-  results_data: Record<string, unknown>;
+  results_data: Record<string, unknown> | null;
+  source_url?: string | null;
   created_at: string;
 }
 
@@ -114,7 +115,7 @@ const ScrapedDataViewer: React.FC = () => {
         
         const { data, error } = await query;
         if (error) throw error;
-        setResults(data || []);
+        setResults((data || []) as RaceResult[]);
       }
       
       toast.success(`Loaded ${dataType} data`);
