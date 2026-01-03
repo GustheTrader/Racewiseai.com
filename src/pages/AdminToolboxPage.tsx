@@ -540,14 +540,20 @@ const AdminToolboxPage: React.FC = () => {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[500px] px-4 pb-4">
                     <div className="space-y-3">
-                      {scrapeResult.races.map((race: any) => (
-                        <ScrapedRaceCard
-                          key={race.raceNumber}
-                          race={race}
-                          isExpanded={expandedRaces.has(race.raceNumber)}
-                          onToggle={() => toggleRaceExpanded(race.raceNumber)}
-                        />
-                      ))}
+                      {scrapeResult.races.map((race: any) => {
+                        const trackConfig = OTB_TRACKS.find(t => t.name === selectedTrack);
+                        return (
+                          <ScrapedRaceCard
+                            key={race.raceNumber}
+                            race={race}
+                            isExpanded={expandedRaces.has(race.raceNumber)}
+                            onToggle={() => toggleRaceExpanded(race.raceNumber)}
+                            trackName={scrapeResult.trackName}
+                            trackCode={trackConfig?.code}
+                            trackPage={trackConfig?.page}
+                          />
+                        );
+                      })}
                     </div>
                   </ScrollArea>
                 </CardContent>
