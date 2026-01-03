@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const LoginAfterConfirmation = () => {
-  const { signIn } = useAuth();
+  const { signInWithMagicLink } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
 
@@ -23,8 +23,8 @@ const LoginAfterConfirmation = () => {
     
     setIsLoading(true);
     try {
-      // Use a temporary password or magic link for confirmed users
-      await signIn(email, 'temp-password');
+      await signInWithMagicLink(email);
+      toast.success('Check your email for a secure login link!');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
