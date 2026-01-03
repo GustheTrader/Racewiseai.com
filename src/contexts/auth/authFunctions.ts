@@ -13,7 +13,8 @@ export const signInWithMagicLink = async (email: string): Promise<void> => {
     throw new Error('Invalid email format');
   }
 
-  const redirectUrl = 'https://www.racewiseai.com/';
+  // Get the redirect URL from the current environment
+  const redirectUrl = `${window.location.origin}/auth/callback`;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -53,7 +54,8 @@ export const signIn = async (email: string, password: string): Promise<void> => 
  * Requires email verification before access
  */
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
-  const redirectUrl = 'https://www.racewiseai.com/';
+  // Get the redirect URL from the current environment
+  const redirectUrl = `${window.location.origin}/auth/callback`;
 
   const { data, error } = await supabase.auth.signUp({
     email,

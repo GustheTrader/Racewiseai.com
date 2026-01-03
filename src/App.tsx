@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import AuthPage from "./pages/AuthPage";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import RaceResultsPage from "./pages/RaceResultsPage";
 import PublicResultsPage from "./pages/PublicResultsPage";
@@ -28,6 +29,7 @@ const AnimatedRoutes = () => {
       <Routes location={location}>
         {/* Public Routes */}
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/public-results" element={<PublicResultsPage />} />
         <Route path="/model-process" element={<ModelProcessPage />} />
 
