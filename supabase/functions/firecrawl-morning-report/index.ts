@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
@@ -16,6 +17,35 @@ function getCorsHeaders(origin?: string | null): Record<string, string> {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
+}
+
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return { userId: data.user.id };
 }
 
 interface Horse {
@@ -56,6 +86,15 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY FIX: Verify authentication
+    const auth = await verifyAuth(req);
+    if (!auth) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { trackName, trackCode, trackPage, raceNumber } = await req.json();
 
     if (!trackName) {
@@ -90,7 +129,7 @@ serve(async (req) => {
       url += `?race=${raceNumber}`;
     }
 
-    console.log('Scraping morning report from:', url);
+    console.log('Scraping morning report from:', url, 'for user:', auth.userId);
     console.log('Track:', trackName, 'Code:', trackCode, 'Page:', trackPage);
 
     // Use Firecrawl to scrape the page with structured extraction
