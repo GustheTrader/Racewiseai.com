@@ -1,6 +1,4 @@
-// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const ALLOWED_ORIGINS = [
@@ -9,17 +7,47 @@ const ALLOWED_ORIGINS = [
   "https://racewiseai.com",
   "https://www.racewiseai.com",
   "https://app.racewiseai.com",
+  "https://bqvavkzgmznjfirgfyhd.lovableproject.com",
 ];
 
-function getCorsHeaders(origin?: string): Record<string, string> {
+function getCorsHeaders(origin?: string | null): Record<string, string> {
   // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
   const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? origin! : "",
+    "Access-Control-Allow-Origin": isAllowed ? origin : "",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
+}
+
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return { userId: data.user.id };
 }
 
 interface RaceResult {
@@ -74,8 +102,9 @@ async function fetchWebPageContent(url: string): Promise<string> {
       .trim();
 
     return cleaned.substring(0, 15000); // Limit to 15k chars for API
-  } catch (error) {
-    throw new Error(`Failed to fetch page: ${error.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw new Error(`Failed to fetch page: ${message}`);
   }
 }
 
@@ -177,11 +206,19 @@ If no results found, return an empty array: []`;
   return Array.isArray(results) ? results : [];
 }
 
+interface SupabaseClientType {
+  from: (table: string) => {
+    upsert: (data: unknown, options?: { onConflict?: string }) => {
+      select: () => Promise<{ data: unknown; error: { message: string } | null }>;
+    };
+  };
+}
+
 /**
  * Save results to Supabase
  */
 async function saveResults(
-  supabase: any,
+  supabase: SupabaseClientType,
   results: RaceResult[],
   sourceUrl: string
 ): Promise<number> {
@@ -239,7 +276,7 @@ async function saveResults(
     throw new Error(`Failed to save results: ${error.message}`);
   }
 
-  return data ? data.length : 0;
+  return data ? (data as unknown[]).length : 0;
 }
 
 serve(async (req) => {
@@ -258,6 +295,15 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY FIX: Verify authentication
+    const auth = await verifyAuth(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
@@ -292,7 +338,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Scraping race results from ${trackName}`);
+    console.log(`Scraping race results from ${trackName} for user ${auth.userId}`);
 
     // Fetch webpage
     const htmlContent = await fetchWebPageContent(url);

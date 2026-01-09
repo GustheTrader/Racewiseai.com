@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
@@ -18,6 +19,35 @@ function getCorsHeaders(origin?: string | null): Record<string, string> {
   };
 }
 
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return { userId: data.user.id };
+}
+
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
@@ -29,6 +59,15 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY FIX: Verify authentication
+    const auth = await verifyAuth(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (req.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
@@ -53,7 +92,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Parsing PDF with Gemini (type: ${parserType}, track: ${trackName})`);
+    console.log(`Parsing PDF with Gemini (type: ${parserType}, track: ${trackName}) for user ${auth.userId}`);
 
     // Build prompt based on parser type
     let prompt = '';
@@ -395,8 +434,12 @@ Return as JSON with structure:
       );
     }
 
+    interface Race {
+      horses?: unknown[];
+    }
+
     const racesCount = parsedData.races?.length || 0;
-    const horsesCount = parsedData.races?.reduce((sum: number, r: any) => sum + (r.horses?.length || 0), 0) || 0;
+    const horsesCount = parsedData.races?.reduce((sum: number, r: Race) => sum + (r.horses?.length || 0), 0) || 0;
     
     console.log(`Parsed ${racesCount} races with ${horsesCount} horses`);
 
@@ -411,10 +454,11 @@ Return as JSON with structure:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('PDF parsing error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to parse PDF';
     return new Response(
-      JSON.stringify({ error: error.message || 'Failed to parse PDF' }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

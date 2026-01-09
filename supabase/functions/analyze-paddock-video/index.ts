@@ -20,6 +20,35 @@ function getCorsHeaders(origin?: string | null): Record<string, string> {
   };
 }
 
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return { userId: data.user.id };
+}
+
 const ANALYSIS_PROMPT = `You are an expert equine biomechanics analyst specializing in pre-race assessment for horse racing.
 
 Analyze this paddock/warm-up video or image and provide structured scores for the horse's physical condition:
@@ -126,7 +155,7 @@ const analysisTools = [{
   }
 }];
 
-function calculateRiskTier(scores: any): string {
+function calculateRiskTier(scores: { lameness_risk: number; gait_symmetry: number; nervousness_score: number }): string {
   const { lameness_risk, gait_symmetry, nervousness_score } = scores;
   
   // High risk if lameness is elevated or multiple concerning factors
@@ -142,7 +171,7 @@ function calculateRiskTier(scores: any): string {
   return 'LOW';
 }
 
-function calculateOverallRisk(scores: any): number {
+function calculateOverallRisk(scores: { lameness_risk: number; gait_symmetry: number; nervousness_score: number; warmup_intensity: number; eagerness_score: number }): number {
   const { lameness_risk, gait_symmetry, nervousness_score, warmup_intensity, eagerness_score } = scores;
   
   // Weighted formula: lameness is most important, then gait
@@ -173,6 +202,15 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY FIX: Verify authentication
+    const auth = await verifyAuth(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY is not configured');
@@ -194,10 +232,10 @@ serve(async (req) => {
       throw new Error('Either video_url or image_base64 must be provided');
     }
 
-    console.log(`Analyzing ${assessment_type} for horse: ${horse_id || 'unknown'}`);
+    console.log(`Analyzing ${assessment_type} for horse: ${horse_id || 'unknown'} by user ${auth.userId}`);
 
     // Build the content for Gemini Vision
-    const content: any[] = [{ type: "text", text: ANALYSIS_PROMPT }];
+    const content: { type: string; text?: string; image_url?: { url: string } }[] = [{ type: "text", text: ANALYSIS_PROMPT }];
 
     if (image_base64) {
       content.push({
@@ -227,7 +265,7 @@ serve(async (req) => {
           role: 'user',
           parts: content.map(c => {
             if (c.type === 'text') return { text: c.text };
-            if (c.type === 'image_url') {
+            if (c.type === 'image_url' && c.image_url) {
               if (c.image_url.url.startsWith('data:')) {
                 const [mimeMatch, data] = c.image_url.url.split(',');
                 const mimeType = mimeMatch?.match(/:(.*?);/)?.[1] || 'image/jpeg';
@@ -260,7 +298,22 @@ serve(async (req) => {
     console.log('Gemini response received');
 
     // Extract the function call from the response
-    let assessmentData: any = null;
+    interface AssessmentData {
+      lameness_risk: number;
+      gait_symmetry: number;
+      warmup_intensity: number;
+      nervousness_score: number;
+      eagerness_score: number;
+      head_position?: string;
+      ear_position?: string;
+      stride_frequency?: number;
+      stride_length?: number;
+      red_flags?: string[];
+      analysis_notes?: string;
+      confidence: number;
+    }
+    
+    let assessmentData: AssessmentData | null = null;
     const candidates = geminiResult.candidates || [];
     
     for (const candidate of candidates) {
@@ -348,7 +401,7 @@ serve(async (req) => {
         .single();
 
       if (history) {
-        const assessments = history.assessments || [];
+        const assessments = (history.assessments as { date: string; lameness_risk: number; gait_symmetry: number; overall_risk: number }[]) || [];
         assessments.push({
           date: new Date().toISOString(),
           lameness_risk: assessmentData.lameness_risk,
@@ -363,10 +416,10 @@ serve(async (req) => {
         let trendDirection = 'stable';
         if (recentAssessments.length >= 3) {
           const recent = recentAssessments.slice(-3);
-          const avgRecent = recent.reduce((a: number, b: any) => a + b.lameness_risk, 0) / 3;
+          const avgRecent = recent.reduce((a: number, b) => a + b.lameness_risk, 0) / 3;
           const older = recentAssessments.slice(-6, -3);
           if (older.length >= 3) {
-            const avgOlder = older.reduce((a: number, b: any) => a + b.lameness_risk, 0) / 3;
+            const avgOlder = older.reduce((a: number, b) => a + b.lameness_risk, 0) / 3;
             if (avgRecent > avgOlder + 10) trendDirection = 'worsening';
             else if (avgRecent < avgOlder - 10) trendDirection = 'improving';
           }
@@ -377,9 +430,9 @@ serve(async (req) => {
           .update({
             assessments: recentAssessments,
             trend_direction: trendDirection,
-            avg_lameness_risk: recentAssessments.reduce((a: number, b: any) => a + b.lameness_risk, 0) / recentAssessments.length,
-            avg_gait_symmetry: recentAssessments.reduce((a: number, b: any) => a + b.gait_symmetry, 0) / recentAssessments.length,
-            total_assessments: history.total_assessments + 1,
+            avg_lameness_risk: recentAssessments.reduce((a: number, b) => a + b.lameness_risk, 0) / recentAssessments.length,
+            avg_gait_symmetry: recentAssessments.reduce((a: number, b) => a + b.gait_symmetry, 0) / recentAssessments.length,
+            total_assessments: (history.total_assessments as number) + 1,
             last_updated: new Date().toISOString()
           })
           .eq('horse_id', horse_id);
@@ -447,7 +500,7 @@ serve(async (req) => {
 });
 
 function calculateModelAdjustment(
-  scores: any, 
+  scores: { lameness_risk: number; gait_symmetry: number; warmup_intensity: number; nervousness_score: number; eagerness_score: number }, 
   overallRisk: number, 
   isClassDrop: boolean, 
   isReturnFromLayoff: boolean
@@ -498,10 +551,10 @@ function calculateModelAdjustment(
   }
 
   // Cap adjustment
-  adjustment = Math.max(-0.30, Math.min(0.15, adjustment));
+  adjustment = Math.max(-0.3, Math.min(0.15, adjustment));
 
   return {
     adjustment: Math.round(adjustment * 100) / 100,
-    reason: reasons.join('; ') || 'No significant adjustment'
+    reason: reasons.join('; ') || 'No significant visual adjustment'
   };
 }
