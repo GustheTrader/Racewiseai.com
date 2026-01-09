@@ -134,9 +134,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <TrainingFigures figures={data.trainingFigures} />
       </div>
       
-      {/* Premium AI Tools Section - 3 Across */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <RiskAgentCard />
+      {/* Premium AI Tools Section - 2 Across */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <VideoPerformanceCard />
         <AIAgentsCard />
       </div>
@@ -145,6 +144,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <LivePaddockComments comments={data.paddockComments} />
         <AIThorianValue valuePicks={data.valuePicks} pick3Combos={data.pick3Combos} />
+      </div>
+
+      {/* Risk Agent - Full Width Bottom Card */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <RiskAgentCard />
       </div>
     </>
   );
