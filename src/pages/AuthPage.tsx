@@ -3,7 +3,8 @@ import fireLogoImg from '@/assets/racewise-fire-logo.png';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
-import { 
+import FireParticles from '@/components/auth/FireParticles';
+import {
   TrendingUp, 
   Brain, 
   Calculator, 
@@ -97,6 +98,9 @@ const AuthPage = () => {
       
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background/80" />
+
+      {/* Fire particle effect */}
+      <FireParticles />
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-6xl mx-auto">

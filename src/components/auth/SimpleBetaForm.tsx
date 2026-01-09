@@ -96,8 +96,12 @@ const SimpleBetaForm = () => {
       <div className="glass-card p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 mb-4">
-            <Lock className="h-8 w-8 text-blue-400" />
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 ${
+            isSignup 
+              ? 'bg-gradient-to-br from-orange-500/20 to-red-600/10' 
+              : 'bg-gradient-to-br from-blue-500/20 to-blue-600/10'
+          }`}>
+            <Lock className={`h-8 w-8 ${isSignup ? 'text-orange-400' : 'text-blue-400'}`} />
           </div>
           <h2 className="text-2xl font-semibold text-foreground mb-2">
             {isSignup ? 'Create Account' : 'Sign In'}
@@ -157,13 +161,16 @@ const SimpleBetaForm = () => {
           <button
             type="submit"
             disabled={isLoading || !email.trim() || !password.trim()}
-            className="
+            className={`
               w-full py-3 px-6 rounded-xl font-medium text-base mt-6
-              glass-button text-white
               disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
               flex items-center justify-center gap-2
-              hover:bg-blue-600/20 transition-all
-            "
+              transition-all duration-300
+              ${isSignup 
+                ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)]' 
+                : 'glass-button text-white hover:bg-blue-600/20'
+              }
+            `}
           >
             {isLoading ? (
               <>
@@ -199,10 +206,14 @@ const SimpleBetaForm = () => {
         </div>
 
         {/* Info */}
-        <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-          <p className="text-xs text-blue-300 text-center">
+        <div className={`mt-4 p-3 rounded-lg border ${
+          isSignup 
+            ? 'bg-orange-500/10 border-orange-500/20' 
+            : 'bg-blue-500/10 border-blue-500/20'
+        }`}>
+          <p className={`text-xs text-center ${isSignup ? 'text-orange-300' : 'text-blue-300'}`}>
             {isSignup
-              ? '✓ Confirmation email required to activate account'
+              ? '🔥 Confirmation email required to activate account'
               : '✓ Fast and secure authentication'}
           </p>
         </div>
