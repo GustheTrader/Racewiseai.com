@@ -118,7 +118,7 @@ const AuthPage = () => {
                 className="h-56 md:h-72 mx-auto mb-4 object-contain drop-shadow-[0_0_40px_rgba(249,115,22,0.5)]"
               />
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto bg-gradient-to-r from-muted-foreground via-foreground/70 to-muted-foreground bg-clip-text">
+            <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]">
               Professional handicapping tools powered by ML/AI quantum inspired models
             </p>
           </div>
