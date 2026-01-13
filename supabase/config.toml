@@ -32,6 +32,10 @@ jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 enable_signup = true
+# SECURITY FIX: Add password requirements
+password_min_length = 8
+# SECURITY FIX: Add session security
+enable_anonymous_sign_ins = false
 
 [realtime]
 enabled = true
@@ -43,38 +47,53 @@ file_size_limit = "50MiB"
 [edge_functions]
 enabled = true
 
+# SECURITY FIX: Enable JWT verification for user-facing functions
+# Scheduled/cron functions use service role key instead
+
 [functions.run-scrape-jobs]
 verify_jwt = false
+# Note: This is called by cron/service, requires Bearer token check in code
 
 [functions.scheduled-scrape]
 verify_jwt = false
+# Note: This is called by cron scheduler
 
 [functions.analyze-paddock-video]
-verify_jwt = false
+verify_jwt = true
+# SECURITY: User function - requires authentication
 
 [functions.firecrawl-morning-report]
 verify_jwt = false
+# Note: This is called by scheduled jobs
 
 [functions.scheduled-morning-scrape]
 verify_jwt = false
+# Note: This is called by cron scheduler
 
 [functions.scrape-with-gemini]
 verify_jwt = false
+# Note: Internal function called by run-scrape-jobs
 
 [functions.save-scraped-data]
 verify_jwt = false
+# Note: Internal function called by other scrapers
 
 [functions.scrape-race-results]
 verify_jwt = false
+# Note: Internal function called by run-scrape-jobs
 
 [functions.morning-report]
-verify_jwt = false
+verify_jwt = true
+# SECURITY: User function - requires authentication
 
 [functions.race-analyst-api]
-verify_jwt = false
+verify_jwt = true
+# SECURITY: User API - requires authentication
 
 [functions.parse-pdf-with-gemini]
-verify_jwt = false
+verify_jwt = true
+# SECURITY: User function - requires authentication
 
 [functions.firecrawl-live-odds]
-verify_jwt = false
+verify_jwt = true
+# SECURITY: User function - requires authentication

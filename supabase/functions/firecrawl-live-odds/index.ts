@@ -1,9 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// SECURITY FIX: Restrict CORS to allowed origins only (no wildcard)
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://racewiseai.com',
+  'https://www.racewiseai.com',
+  'https://app.racewiseai.com',
+];
+
+function getCorsHeaders(origin?: string | null): Record<string, string> {
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : '',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+}
 
 interface LiveOdds {
   programNumber: string;
@@ -26,16 +39,44 @@ interface LiveOddsData {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get('origin'));
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // SECURITY FIX: Input validation
+    if (req.method !== 'POST') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Method not allowed' }),
+        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { trackName, trackCode, trackPage, raceNumber } = await req.json();
 
+    // SECURITY FIX: Input validation and sanitization
     if (!trackName || !raceNumber) {
       return new Response(
         JSON.stringify({ success: false, error: 'Track name and race number are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate data types
+    if (typeof trackName !== 'string' || typeof raceNumber !== 'number') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid input types' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Sanitize track name to prevent injection
+    const sanitizedTrackName = trackName.replace(/[^\w\s-]/g, '').trim();
+    if (sanitizedTrackName.length === 0 || raceNumber < 1 || raceNumber > 50) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid track name or race number' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
