@@ -1,6 +1,4 @@
-// @ts-expect-error - Deno imports are not typed
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// @ts-expect-error - Supabase JS library typing issues
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -12,16 +10,44 @@ const ALLOWED_ORIGINS = [
   "https://racewiseai.com",
   "https://www.racewiseai.com",
   "https://app.racewiseai.com",
+  "https://bqvavkzgmznjfirgfyhd.lovableproject.com",
 ];
 
-function getCorsHeaders(origin?: string): Record<string, string> {
+function getCorsHeaders(origin?: string | null): Record<string, string> {
   const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? origin! : "",
+    "Access-Control-Allow-Origin": isAllowed ? origin : "",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
   };
+}
+
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return null;
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return { userId: data.user.id };
 }
 
 interface TrackSchedule {
@@ -45,6 +71,21 @@ const TRACK_SCHEDULE: TrackSchedule = {
   "SANTA ANITA": ["Friday", "Saturday", "Sunday"],
 };
 
+interface SupabaseClient {
+  from: (table: string) => {
+    select: (cols: string) => {
+      eq: (col: string, val: unknown) => {
+        eq: (col: string, val: unknown) => {
+          eq: (col: string, val: unknown) => {
+            maybeSingle: () => Promise<{ data: unknown; error: unknown }>;
+          };
+        };
+      };
+    };
+    insert: (data: unknown) => Promise<{ error: unknown }>;
+  };
+}
+
 /**
  * Generate morning report for racing activities
  * - Triggered at 8 AM PST daily via cron job
@@ -53,7 +94,7 @@ const TRACK_SCHEDULE: TrackSchedule = {
  * - Sends report to admin users
  */
 async function generateMorningReport(
-  supabase: { from: (table: string) => { select: (cols: string) => unknown; insert: (data: unknown) => unknown } }
+  supabase: SupabaseClient
 ): Promise<{ tracksRunning: string[]; jobsCreated: number; report: string }> {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
   const tracksRunning: string[] = [];
@@ -175,22 +216,6 @@ serve(async (req) => {
   }
 
   try {
-    // Verify Bearer token for POST requests
-    if (req.method === "POST") {
-      const authHeader = req.headers.get("authorization");
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return new Response(
-          JSON.stringify({ error: "Unauthorized - Bearer token required" }),
-          {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-    }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     // Check if this is a cron job request (has specific header)
     const isCronJob = req.headers.get("x-cron-job") === "true";
 
@@ -206,7 +231,21 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+    } else {
+      // SECURITY FIX: Non-cron requests require authentication
+      const auth = await verifyAuth(req);
+      if (!auth) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized - Bearer token required" }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Verify it's exactly 8 AM PST (or within 1 hour)
     const now = new Date();

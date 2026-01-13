@@ -1,4 +1,49 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://racewiseai.com',
+  'https://www.racewiseai.com',
+  'https://app.racewiseai.com',
+  'https://bqvavkzgmznjfirgfyhd.lovableproject.com'
+];
+
+function getCorsHeaders(origin?: string | null): Record<string, string> {
+  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin : '',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+}
+
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
 
 // SECURITY FIX: Restrict CORS to allowed origins only (no wildcard)
 const ALLOWED_ORIGINS = [
@@ -16,6 +61,7 @@ function getCorsHeaders(origin?: string | null): Record<string, string> {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
+  return { userId: data.user.id };
 }
 
 interface LiveOdds {
@@ -51,6 +97,12 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ success: false, error: 'Method not allowed' }),
         { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    // SECURITY FIX: Verify authentication
+    const auth = await verifyAuth(req);
+    if (!auth) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -99,7 +151,7 @@ serve(async (req) => {
       url = `https://www.offtrackbetting.com/tracks/${slug}`;
     }
 
-    console.log('Scraping live odds from:', url);
+    console.log('Scraping live odds from:', url, 'for user:', auth.userId);
     console.log('Track:', trackName, 'Race:', raceNumber);
 
     // Scrape with focus on live odds extraction
@@ -168,7 +220,15 @@ serve(async (req) => {
     const races = extractedData.races || [];
     
     // Find the specific race requested
-    const targetRace = races.find((r: any) => r.raceNumber === raceNumber) || races[0];
+    interface ExtractedRace {
+      raceNumber: number;
+      postTime?: string;
+      mtp?: string;
+      totalPool?: number;
+      horses?: LiveOdds[];
+    }
+    
+    const targetRace = races.find((r: ExtractedRace) => r.raceNumber === raceNumber) || races[0];
 
     const result: LiveOddsData = {
       trackName: extractedData.trackName || trackName,

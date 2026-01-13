@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import logoWebp600 from '@/assets/racewise-logo@600.webp';
-import logoAvif600 from '@/assets/racewise-logo@600.avif';
-import logoWebp from '@/assets/racewise-logo.webp';
-import logoAvif from '@/assets/racewise-logo.avif';
+import fireLogoImg from '@/assets/racewise-fire-logo.png';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
-import { 
+import FireParticles from '@/components/auth/FireParticles';
+import {
   TrendingUp, 
   Brain, 
   Calculator, 
@@ -89,7 +87,7 @@ const AuthPage = () => {
         loop
         muted
         playsInline
-        poster={logoWebp600}
+        poster={fireLogoImg}
         className="absolute inset-0 w-full h-full object-cover opacity-50"
       >
         <source src="/videos/horse-racing-bg.mp4" type="video/mp4" />
@@ -101,27 +99,26 @@ const AuthPage = () => {
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background/80" />
 
+      {/* Fire particle effect */}
+      <FireParticles />
+
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-6xl mx-auto">
           
-          {/* Header with gradient glow */}
+          {/* Header with fire glow */}
           <div className="text-center mb-12 animate-fade-in-up relative">
-            {/* Gradient glow behind logo */}
+            {/* Fire glow behind logo */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-80 h-80 bg-gradient-radial from-blue-500/20 via-purple-500/10 to-transparent blur-3xl" />
+              <div className="w-96 h-96 bg-gradient-radial from-orange-500/30 via-red-500/15 to-transparent blur-3xl animate-pulse" />
             </div>
             <div className="relative">
-              <picture>
-                <source srcSet={logoAvif} type="image/avif" />
-                <source srcSet={logoWebp} type="image/webp" />
-                <img 
-                  src={logoWebp} 
-                  alt="Racewise AI Toolbox" 
-                  className="h-48 md:h-64 mx-auto mb-4 object-contain drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]"
-                />
-              </picture>
+              <img 
+                src={fireLogoImg} 
+                alt="Racewise AI Toolbox" 
+                className="h-56 md:h-72 mx-auto mb-4 object-contain drop-shadow-[0_0_40px_rgba(249,115,22,0.5)]"
+              />
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto bg-gradient-to-r from-muted-foreground via-foreground/70 to-muted-foreground bg-clip-text">
+            <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]">
               Professional handicapping tools powered by ML/AI quantum inspired models
             </p>
           </div>
@@ -133,10 +130,10 @@ const AuthPage = () => {
               {tools.slice(0, 4).map((tool, index) => (
                 <div 
                   key={tool.id} 
-                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 1}`}
+                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 1} border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.15),inset_0_0_10px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.3),inset_0_0_15px_rgba(249,115,22,0.1)] transition-shadow duration-300`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/10 text-orange-400">
                       {tool.icon}
                     </div>
                     <div>
@@ -158,10 +155,10 @@ const AuthPage = () => {
               {tools.slice(4, 8).map((tool, index) => (
                 <div 
                   key={tool.id} 
-                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 5}`}
+                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 5} border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.15),inset_0_0_10px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.3),inset_0_0_15px_rgba(249,115,22,0.1)] transition-shadow duration-300`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/10 text-orange-400">
                       {tool.icon}
                     </div>
                     <div>
@@ -175,27 +172,27 @@ const AuthPage = () => {
           </div>
 
           {/* Bottom Features */}
-          <div className="mt-16 glass-card p-8 animate-fade-in-up stagger-8">
+          <div className="mt-16 glass-card p-8 animate-fade-in-up stagger-8 border border-orange-500/30 shadow-[0_0_20px_rgba(249,115,22,0.2),inset_0_0_15px_rgba(249,115,22,0.05)]">
             <h2 className="text-center text-lg font-medium text-foreground mb-6">
               Beta Access Features
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 mb-3">
                   <Brain className="h-5 w-5" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm">ML Algo Modeling</h3>
                 <p className="text-xs text-muted-foreground mt-1">Clean data with advanced algorithms</p>
               </div>
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-500/20 text-red-400 mb-3">
                   <Eye className="h-5 w-5" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm">AI Video Performance</h3>
                 <p className="text-xs text-muted-foreground mt-1">Grades with run-out notes</p>
               </div>
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-400 mb-3">
                   <Bot className="h-5 w-5" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm">AI Cosmic Bombs Agent</h3>

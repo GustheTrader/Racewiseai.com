@@ -1,5 +1,5 @@
-// @ts-expect-error - Deno imports are not typed
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 // CORS headers - restricted to specific origins
 const ALLOWED_ORIGINS = [
@@ -11,12 +11,11 @@ const ALLOWED_ORIGINS = [
   'https://bqvavkzgmznjfirgfyhd.lovableproject.com',
 ];
 
-function getCorsHeaders(origin?: string): Record<string, string> {
-  // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
+function getCorsHeaders(origin?: string | null): Record<string, string> {
   const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
-    'Access-Control-Allow-Origin': isAllowed ? origin! : "",
+    'Access-Control-Allow-Origin': isAllowed ? origin : "",
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
@@ -59,6 +58,35 @@ interface BettingPool {
   pool_count?: number;
 }
 
+/**
+ * Verify JWT token using Supabase auth
+ */
+async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    return null;
+  }
+
+  return { userId: data.user.id };
+}
+
 // Fetch webpage content
 async function fetchWebPageContent(url: string): Promise<string> {
   try {
@@ -80,8 +108,9 @@ async function fetchWebPageContent(url: string): Promise<string> {
       .trim();
 
     return cleaned.substring(0, 10000); // Limit to 10k chars for API
-  } catch (error) {
-    throw new Error(`Failed to fetch page: ${error.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw new Error(`Failed to fetch page: ${message}`);
   }
 }
 
@@ -202,8 +231,9 @@ IMPORTANT:
       horses: Array.isArray(extractedData.horses) ? extractedData.horses : [],
       betting_pools: Array.isArray(extractedData.betting_pools) ? extractedData.betting_pools : [],
     };
-  } catch (error) {
-    throw new Error(`Gemini extraction failed: ${error.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw new Error(`Gemini extraction failed: ${message}`);
   }
 }
 
@@ -217,8 +247,14 @@ serve(async (req) => {
   }
 
   try {
-    // Note: JWT verification is disabled in config.toml for this function
-    // Authentication is handled by allowed origins and domain restrictions
+    // SECURITY FIX: Verify authentication
+    const auth = await verifyAuth(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (req.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -250,14 +286,15 @@ serve(async (req) => {
     // Validate URL is from allowed domain
     try {
       const urlObj = new URL(url);
-      // BUGFIX: Use whitelist matching instead of includes() to prevent domain bypass
+      // SECURITY: Use whitelist matching to prevent domain bypass
       const allowedDomains = ['offtrackbetting.com', 'www.offtrackbetting.com', 'app.offtrackbetting.com'];
       if (!allowedDomains.includes(urlObj.hostname)) {
         throw new Error('Only offtrackbetting.com URLs are allowed');
       }
-    } catch (error) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid URL format';
       return new Response(
-        JSON.stringify({ error: `Invalid URL: ${error.message}` }),
+        JSON.stringify({ error: `Invalid URL: ${message}` }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -265,7 +302,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Scraping ${url} with Gemini...`);
+    console.log(`Scraping ${url} with Gemini for user ${auth.userId}...`);
 
     // Fetch the webpage
     const htmlContent = await fetchWebPageContent(url);
