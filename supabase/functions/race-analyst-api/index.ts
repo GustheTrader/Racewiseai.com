@@ -1,61 +1,16 @@
 // @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-// CORS headers - restricted to specific origins for security
-const ALLOWED_ORIGINS = [
-  'http://localhost:5173', // local development
-  'http://localhost:3000',  // alternative local port
-  'https://racewiseai.com',
-  'https://www.racewiseai.com',
-  'https://app.racewiseai.com',
-];
-
-function getCorsHeaders(origin?: string): Record<string, string> {
-  // SECURITY FIX: Use exact match instead of includes() to prevent domain confusion attacks
-  const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
-
-  return {
-    'Access-Control-Allow-Origin': isAllowed ? origin! : "",
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  };
-}
-
-// SECURITY FIX: Properly verify JWT token from Supabase
-async function verifyToken(req: Request): Promise<{ valid: boolean; error?: string; userId?: string }> {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { valid: false, error: 'Missing or invalid authorization header' };
-  }
-
-  const token = authHeader.substring(7);  // Remove "Bearer " prefix
-
-  try {
-    // Decode JWT and verify signature (basic validation)
-    // In production, should use Supabase's getUser() method
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return { valid: false, error: 'Invalid token format' };
-    }
-
-    // Decode payload (note: this doesn't verify signature, only format)
-    const payload = JSON.parse(atob(parts[1]));
-
-    // Check token expiration
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
-      return { valid: false, error: 'Token expired' };
-    }
-
-    // Verify token has user information
-    if (!payload.sub) {
-      return { valid: false, error: 'Invalid token: missing user ID' };
-    }
-
-    return { valid: true, userId: payload.sub };
-  } catch {
-    return { valid: false, error: 'Failed to validate token' };
-  }
-}
+// @ts-ignore
+import {
+  getCorsHeaders,
+  verifyAuth,
+  checkRateLimit,
+  validateTrackName,
+  validateRaceNumber,
+  errorResponse,
+  successResponse,
+  sanitizeError,
+} from "../_shared/security.ts";
 
 serve(async (req) => {
   const origin = req.headers.get('origin');
@@ -141,27 +96,28 @@ serve(async (req) => {
 
     // Analyze race data
     if (path === '/analyze' && method === 'POST') {
-      // Verify authentication
-      const tokenCheck = await verifyToken(req);
-      if (!tokenCheck.valid) {
-        return new Response(JSON.stringify({
-          error: "Unauthorized: " + tokenCheck.error
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      // SECURITY FIX: Proper authentication with Supabase
+      const authCheck = await verifyAuth(req);
+      if (!authCheck.authenticated) {
+        return errorResponse("Unauthorized: " + authCheck.error, 401, corsHeaders);
+      }
+
+      // SECURITY FIX: Rate limiting
+      const rateLimitCheck = await checkRateLimit(authCheck.userId!, '/analyze', 50, 60);
+      if (!rateLimitCheck.allowed) {
+        return errorResponse("Rate limit exceeded. Please try again later.", 429, corsHeaders);
       }
 
       const body = await req.json();
       const { track_name, race_number, analysis_type = "full", horses = [] } = body;
 
+      // SECURITY FIX: Input validation
       if (!track_name || !race_number) {
-        return new Response(JSON.stringify({
-          error: "Missing required fields"
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return errorResponse("Missing required fields", 400, corsHeaders);
+      }
+
+      if (!validateTrackName(track_name) || !validateRaceNumber(race_number)) {
+        return errorResponse("Invalid track name or race number", 400, corsHeaders);
       }
 
       const analysis = {
@@ -193,27 +149,28 @@ serve(async (req) => {
 
     // Generate predictions
     if (path === '/predictions' && method === 'POST') {
-      // Verify authentication
-      const tokenCheck = await verifyToken(req);
-      if (!tokenCheck.valid) {
-        return new Response(JSON.stringify({
-          error: "Unauthorized: " + tokenCheck.error
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      // SECURITY FIX: Proper authentication
+      const authCheck = await verifyAuth(req);
+      if (!authCheck.authenticated) {
+        return errorResponse("Unauthorized: " + authCheck.error, 401, corsHeaders);
+      }
+
+      // SECURITY FIX: Rate limiting
+      const rateLimitCheck = await checkRateLimit(authCheck.userId!, '/predictions', 50, 60);
+      if (!rateLimitCheck.allowed) {
+        return errorResponse("Rate limit exceeded. Please try again later.", 429, corsHeaders);
       }
 
       const body = await req.json();
       const { track_name, race_number, prediction_type = "win_probability", horses = [] } = body;
 
+      // SECURITY FIX: Input validation
       if (!track_name || !race_number) {
-        return new Response(JSON.stringify({
-          error: "Missing required fields"
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return errorResponse("Missing required fields", 400, corsHeaders);
+      }
+
+      if (!validateTrackName(track_name) || !validateRaceNumber(race_number)) {
+        return errorResponse("Invalid track name or race number", 400, corsHeaders);
       }
 
       // Generate sample predictions based on provided horses or default
@@ -262,27 +219,28 @@ serve(async (req) => {
 
     // Submit odds data
     if (path === '/odds' && method === 'POST') {
-      // Verify authentication
-      const tokenCheck = await verifyToken(req);
-      if (!tokenCheck.valid) {
-        return new Response(JSON.stringify({
-          error: "Unauthorized: " + tokenCheck.error
-        }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      // SECURITY FIX: Proper authentication
+      const authCheck = await verifyAuth(req);
+      if (!authCheck.authenticated) {
+        return errorResponse("Unauthorized: " + authCheck.error, 401, corsHeaders);
+      }
+
+      // SECURITY FIX: Rate limiting (higher limit for odds updates)
+      const rateLimitCheck = await checkRateLimit(authCheck.userId!, '/odds', 200, 60);
+      if (!rateLimitCheck.allowed) {
+        return errorResponse("Rate limit exceeded. Please try again later.", 429, corsHeaders);
       }
 
       const body = await req.json();
       const { track_name, race_number, odds_data, timestamp } = body;
 
+      // SECURITY FIX: Input validation
       if (!track_name || !race_number) {
-        return new Response(JSON.stringify({
-          error: "Missing required fields"
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        return errorResponse("Missing required fields", 400, corsHeaders);
+      }
+
+      if (!validateTrackName(track_name) || !validateRaceNumber(race_number)) {
+        return errorResponse("Invalid track name or race number", 400, corsHeaders);
       }
 
       return new Response(JSON.stringify({
@@ -311,14 +269,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in race-analyst-api:', error);
-    // Don't leak error details to clients
-    return new Response(JSON.stringify({
-      error: "Internal server error",
-      timestamp: new Date().toISOString(),
-      service: "race-analyst-api"
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // SECURITY FIX: Don't leak error details to clients
+    return errorResponse(sanitizeError(error), 500, corsHeaders);
   }
 });
