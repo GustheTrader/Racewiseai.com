@@ -134,9 +134,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <TrainingFigures figures={data.trainingFigures} />
       </div>
       
-      {/* Premium AI Tools Section - 2 Across */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <VideoPerformanceCard />
+      {/* Premium AI Tools Section - AI Agents Full Width */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
         <AIAgentsCard />
       </div>
       
@@ -149,6 +148,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       {/* Risk Agent - Full Width Bottom Card */}
       <div className="grid grid-cols-1 gap-4 mb-4">
         <RiskAgentCard />
+      </div>
+
+      {/* Video Performance - Full Width Bottom Card */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <VideoPerformanceCard />
       </div>
     </>
   );
