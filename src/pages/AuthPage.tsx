@@ -131,19 +131,21 @@ const AuthPage = () => {
               </span>
             </h1>
             
-            {/* Tagline with 3D depth */}
+            {/* Tagline with contrasting cyan/electric blue for flair */}
             <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto relative">
-              <span className="absolute inset-0 bg-gradient-to-r from-orange-800 via-red-700 to-orange-800 bg-clip-text text-transparent blur-[1px] translate-x-0.5 translate-y-0.5">
+              <span className="absolute inset-0 bg-gradient-to-r from-cyan-800 via-blue-700 to-cyan-800 bg-clip-text text-transparent blur-[1px] translate-x-0.5 translate-y-0.5">
                 Ignite Your Edge • ML-Powered Handicapping Intelligence
               </span>
-              <span className="relative bg-gradient-to-r from-orange-300 via-yellow-400 to-orange-300 bg-clip-text text-transparent" style={{ textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
+              <span className="relative bg-gradient-to-r from-cyan-300 via-sky-400 to-cyan-300 bg-clip-text text-transparent" style={{ textShadow: '0 0 25px rgba(34,211,238,0.6)' }}>
                 Ignite Your Edge • ML-Powered Handicapping Intelligence
               </span>
             </p>
             
-            {/* Subtitle with shimmer effect */}
-            <p className="mt-4 text-base md:text-lg text-orange-200/80 font-medium tracking-wider uppercase animate-[pulse_4s_ease-in-out_infinite]">
-              ⚡ Professional-Grade AI Racing Analytics Platform ⚡
+            {/* Subtitle with electric cyan accent */}
+            <p className="mt-4 text-base md:text-lg font-semibold tracking-wider uppercase">
+              <span className="bg-gradient-to-r from-cyan-400 via-white to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+                ⚡ Professional-Grade AI Racing Analytics Platform ⚡
+              </span>
             </p>
           </div>
 
