@@ -1222,7 +1222,7 @@ export type Database = {
           trainer_id: string | null
           trainer_name: string | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
           weight: string | null
           weight_lbs: number | null
         }
@@ -1243,7 +1243,7 @@ export type Database = {
           trainer_id?: string | null
           trainer_name?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
           weight?: string | null
           weight_lbs?: number | null
         }
@@ -1264,7 +1264,7 @@ export type Database = {
           trainer_id?: string | null
           trainer_name?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
           weight?: string | null
           weight_lbs?: number | null
         }
