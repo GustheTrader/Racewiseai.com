@@ -79,6 +79,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         onRaceChange={onRaceChange}
       />
 
+      {/* AI Agents - Top Priority Section */}
+      <div className="mb-4">
+        <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          AI Racing Agents
+        </h2>
+        <AIAgentsCard />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 mb-4">
         <OddsTable 
           horses={data.horses} 
@@ -88,7 +97,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
       </div>
 
-      {/* Personal Model Card - moved below AI Agents */}
+      {/* Personal Model Card */}
       <div className="grid grid-cols-1 gap-4 mb-4">
         <PersonalModelCard horses={data.horses} />
       </div>
@@ -132,11 +141,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <PaceAnalysis paceData={data.paceData} horses={availableHorses} />
         <TrainingFigures figures={data.trainingFigures} />
-      </div>
-      
-      {/* Premium AI Tools Section - AI Agents Full Width */}
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        <AIAgentsCard />
       </div>
       
       {/* Live Paddock Comments and AI-Thorian Value */}
