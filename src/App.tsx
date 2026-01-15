@@ -18,6 +18,14 @@ import QuantumRankingsPage from "./pages/QuantumRankingsPage";
 import ModelProcessPage from "./pages/ModelProcessPage";
 import VideoPerformancePage from "./pages/VideoPerformancePage";
 
+// Admin sub-pages
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminScrapingPage from "./pages/admin/AdminScrapingPage";
+import AdminSchedulePage from "./pages/admin/AdminSchedulePage";
+import AdminDataPage from "./pages/admin/AdminDataPage";
+import AdminModelsPage from "./pages/admin/AdminModelsPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+
 const queryClient = new QueryClient();
 
 // Animated route wrapper
@@ -67,9 +75,25 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* Admin Route - Single unified dashboard */}
+        {/* Admin Routes with sub-pages */}
         <Route 
           path="/admin" 
+          element={
+            <RequireAuth requireAdmin={true}>
+              <AdminLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<AdminScrapingPage />} />
+          <Route path="schedule" element={<AdminSchedulePage />} />
+          <Route path="data" element={<AdminDataPage />} />
+          <Route path="models" element={<AdminModelsPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
+        </Route>
+
+        {/* Legacy admin route - redirect to new admin */}
+        <Route 
+          path="/admin-toolbox" 
           element={
             <RequireAuth requireAdmin={true}>
               <AdminToolboxPage />
