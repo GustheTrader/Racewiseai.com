@@ -370,20 +370,21 @@
     50% { background-position: 100% 50%; }
   }
 
-  /* Floating orbs - subtle ambient light */
+  /* Floating orbs - subtle ambient light - reduced blur for performance */
   .floating-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.3;
+    filter: blur(80px);
+    opacity: 0.25;
     pointer-events: none;
     animation: float 25s ease-in-out infinite;
+    will-change: transform;
   }
 
   @keyframes float {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(20px, -20px) scale(1.05); }
-    66% { transform: translate(-15px, 15px) scale(0.95); }
+    33% { transform: translate(20px, -20px) scale(1.02); }
+    66% { transform: translate(-15px, 15px) scale(0.98); }
   }
 
   /* Fade in up animation */

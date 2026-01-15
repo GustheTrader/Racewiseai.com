@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getMockData } from '../../utils/mockData';
 
 interface DataUpdateManagerProps {
@@ -16,6 +16,10 @@ const useDataUpdateManager = ({
 }: DataUpdateManagerProps) => {
   const [nextUpdateIn, setNextUpdateIn] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Use ref to store the callback to avoid dependency issues
+  const onDataUpdateRef = useRef(onDataUpdate);
+  onDataUpdateRef.current = onDataUpdate;
 
   const refreshData = useCallback(async () => {
     setIsLoading(true);
@@ -23,14 +27,14 @@ const useDataUpdateManager = ({
       // In a real app, this would be an API call
       const newData = getMockData();
       const updatedTime = new Date().toLocaleTimeString();
-      onDataUpdate(newData, updatedTime);
+      onDataUpdateRef.current(newData, updatedTime);
       setNextUpdateIn(30);
     } catch (error) {
       console.error('Error refreshing data:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [onDataUpdate]);
+  }, []);
 
   useEffect(() => {
     // Reset the timer when track or race changes
