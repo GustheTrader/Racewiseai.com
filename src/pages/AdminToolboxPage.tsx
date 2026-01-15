@@ -201,9 +201,9 @@ const AdminToolboxPage: React.FC = () => {
     );
   }
 
-  // Allow jeffgus@gmail.com or any admin - temporarily relaxed for testing
-  if (!user) {
-    return <Navigate to="/auth" replace />;
+  // Require both authentication AND admin role
+  if (!user || !isAdmin) {
+    return <Navigate to="/" replace />;
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
