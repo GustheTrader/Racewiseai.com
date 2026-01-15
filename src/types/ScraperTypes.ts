@@ -11,6 +11,11 @@ export interface ScrapeJob {
   created_at: string;
   updated_at: string;
   created_by: string;
+  // New fields for AM/Live scheduling
+  job_mode?: "morning" | "live";
+  scheduled_time?: string;
+  race_window_start?: string;
+  race_window_end?: string;
 }
 
 export interface OddsData {
