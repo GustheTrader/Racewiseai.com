@@ -1,7 +1,19 @@
 
 import { BettingDataPoint } from '../types';
 
-// Generate betting timeline data
+// Default horse names for demo
+const defaultHorses = [
+  { pp: 1, name: "#1 Fast Lightning", baseOdds: 6.5 },
+  { pp: 2, name: "#2 Lucky Star", baseOdds: 4.2 },
+  { pp: 3, name: "#3 Thunder Bolt", baseOdds: 8.1 },
+  { pp: 4, name: "#4 Silver Streak", baseOdds: 12.0 },
+  { pp: 5, name: "#5 Golden Arrow", baseOdds: 5.8 },
+  { pp: 6, name: "#6 Midnight Runner", baseOdds: 3.5 },
+  { pp: 7, name: "#7 Wind Chaser", baseOdds: 7.2 },
+  { pp: 8, name: "#8 Dark Horse", baseOdds: 9.4 },
+];
+
+// Generate betting timeline data with dynamic mock stream
 export const generateBettingTimeline = (): BettingDataPoint[] => {
   const now = new Date();
   const data: BettingDataPoint[] = [];
@@ -12,55 +24,43 @@ export const generateBettingTimeline = (): BettingDataPoint[] => {
     const timestamp = time.getTime();
     const timeStr = `${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}`;
     
-    // Base volume with some randomness
-    const volume = Math.round(5000 + Math.random() * 15000);
+    // Base volume with some randomness - higher base for visibility
+    const volume = Math.round(8000 + Math.random() * 20000);
     
-    // Generate runner positions and odds
-    const runner1 = Math.floor(Math.random() * 6) + 1;
-    const runner2 = Math.floor(Math.random() * 6) + 1;
-    const runner3 = Math.floor(Math.random() * 6) + 1;
-    const runner4 = Math.floor(Math.random() * 6) + 1;
-    const runner5 = Math.floor(Math.random() * 6) + 1;
-    const runner6 = Math.floor(Math.random() * 6) + 1;
-    
-    // Generate odds (starting around 2.0-15.0 with small fluctuations)
-    const baseOdds = {
-      runner1: 8.0,
-      runner2: 4.5,
-      runner3: 11.0,
-      runner4: 15.0,
-      runner5: 9.0,
-      runner6: 2.2,
-    };
-    
-    const oddsVariation = 0.3; // Maximum variation per time period
-    
-    data.push({ 
+    // Generate dynamic odds for all 8 runners
+    const dataPoint: BettingDataPoint = {
       time: timeStr,
       volume,
       timestamp,
       isSpike: false,
-      runner1,
-      runner2,
-      runner3,
-      runner4,
-      runner5,
-      runner6,
-      runner1Odds: baseOdds.runner1 + (Math.random() * oddsVariation * 2 - oddsVariation) * i,
-      runner2Odds: baseOdds.runner2 + (Math.random() * oddsVariation * 2 - oddsVariation) * i,
-      runner3Odds: baseOdds.runner3 + (Math.random() * oddsVariation * 2 - oddsVariation) * i,
-      runner4Odds: baseOdds.runner4 + (Math.random() * oddsVariation * 2 - oddsVariation) * i,
-      runner5Odds: baseOdds.runner5 + (Math.random() * oddsVariation * 2 - oddsVariation) * i,
-      runner6Odds: baseOdds.runner6 + (Math.random() * oddsVariation * 2 - oddsVariation) * i,
+    };
+    
+    // Add runner positions and odds for each horse
+    defaultHorses.forEach((horse) => {
+      const runnerKey = `runner${horse.pp}`;
+      const oddsKey = `runner${horse.pp}Odds`;
+      
+      // Position value (1-8) for volume chart visualization
+      dataPoint[runnerKey] = Math.floor(Math.random() * 6) + 1;
+      
+      // Dynamic odds with wave patterns for visible chart movement
+      const primaryWave = Math.sin((i + horse.pp * 0.5) * 0.4) * 1.5;
+      const secondaryWave = Math.cos((i + horse.pp * 0.3) * 0.6) * 0.8;
+      const randomNoise = (Math.random() - 0.5) * 0.5;
+      const trendDrift = i * 0.1 * (horse.pp % 2 === 0 ? 1 : -1);
+      
+      dataPoint[oddsKey] = Math.max(1.5, horse.baseOdds + primaryWave + secondaryWave + randomNoise + trendDrift);
     });
+    
+    data.push(dataPoint);
   }
   
-  // Add spikes at specific points
-  const spikeIndices = [4, 9, 13]; // Spikes at these positions
+  // Add spikes (large bet markers) at specific points
+  const spikeIndices = [3, 7, 11];
   spikeIndices.forEach(index => {
     if (data[index]) {
       // Make this a spike with significantly higher volume
-      data[index].volume = Math.round(data[index].volume * (2 + Math.random()));
+      data[index].volume = Math.round(data[index].volume * (2.5 + Math.random()));
       data[index].isSpike = true;
     }
   });
