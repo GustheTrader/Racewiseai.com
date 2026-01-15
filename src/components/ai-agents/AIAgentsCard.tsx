@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bot, Cpu, Sparkles, Mic, MessageSquare, Settings2 } from 'lucide-react';
+import { Bot, Cpu, Sparkles, Mic, MessageSquare, Settings2, Shield } from 'lucide-react';
 import VoiceAgentDialog from './VoiceAgentDialog';
 
 const AIAgentsCard: React.FC = () => {
@@ -29,6 +29,17 @@ const AIAgentsCard: React.FC = () => {
       accentColor: 'bg-gradient-to-br from-orange-400 to-orange-500',
       glowEffect: true,
       fullDescription: 'Your AI specialist for identifying explosive betting opportunities and high-value longshots.'
+    },
+    {
+      id: 'risk-analysis',
+      name: 'Agent RW Risk Analysis',
+      description: 'Bet sizing, Kelly criterion & bankroll management',
+      icon: <Shield className="h-6 w-6" />,
+      cardGradient: 'bg-gradient-to-br from-yellow-500 via-amber-500 to-orange-600',
+      buttonGradient: 'bg-gradient-to-br from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400',
+      accentColor: 'bg-gradient-to-br from-yellow-500 to-amber-500',
+      glowEffect: false,
+      fullDescription: 'Your AI advisor for proper bet sizing using Kelly criterion, bankroll management strategies, and risk assessment to keep you in the game long-term.'
     }
   ];
 
@@ -46,7 +57,7 @@ const AIAgentsCard: React.FC = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {agents.map((agent) => (
           <Card 
             key={agent.id}
