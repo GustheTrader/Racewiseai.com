@@ -66,12 +66,17 @@ export interface BettingDataPoint {
   runner4?: number;
   runner5?: number;
   runner6?: number;
+  runner7?: number;
+  runner8?: number;
   runner1Odds?: number;
   runner2Odds?: number;
   runner3Odds?: number;
   runner4Odds?: number;
   runner5Odds?: number;
   runner6Odds?: number;
+  runner7Odds?: number;
+  runner8Odds?: number;
+  [key: string]: string | number | boolean | undefined; // Allow dynamic property access
 }
 
 export interface TrainingFigure {
