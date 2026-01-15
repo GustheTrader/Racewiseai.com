@@ -118,11 +118,32 @@ const AuthPage = () => {
                 className="h-64 md:h-80 mx-auto mb-6 object-contain drop-shadow-[0_0_60px_rgba(249,115,22,0.6)] animate-[pulse_3s_ease-in-out_infinite]"
               />
             </div>
-            <h1 className="text-3xl md:text-4xl font-black mb-3 bg-gradient-to-r from-yellow-300 via-orange-500 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
-              RACEWISE AI TOOLBOX
+            {/* 3D Title with layered shadows */}
+            <h1 className="text-4xl md:text-6xl font-black mb-4 relative">
+              <span className="absolute inset-0 bg-gradient-to-r from-red-900 via-orange-800 to-yellow-900 bg-clip-text text-transparent blur-[2px] translate-x-1 translate-y-1">
+                RACEWISE AI TOOLBOX
+              </span>
+              <span className="absolute inset-0 bg-gradient-to-r from-orange-700 via-red-600 to-orange-700 bg-clip-text text-transparent translate-x-0.5 translate-y-0.5">
+                RACEWISE AI TOOLBOX
+              </span>
+              <span className="relative bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(249,115,22,0.8)]" style={{ textShadow: '0 0 40px rgba(249,115,22,0.6), 0 0 80px rgba(234,88,12,0.4)' }}>
+                RACEWISE AI TOOLBOX
+              </span>
             </h1>
-            <p className="text-lg md:text-xl font-semibold max-w-2xl mx-auto bg-gradient-to-r from-orange-300 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
-              Ignite Your Edge • ML-Powered Handicapping Intelligence
+            
+            {/* Tagline with 3D depth */}
+            <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto relative">
+              <span className="absolute inset-0 bg-gradient-to-r from-orange-800 via-red-700 to-orange-800 bg-clip-text text-transparent blur-[1px] translate-x-0.5 translate-y-0.5">
+                Ignite Your Edge • ML-Powered Handicapping Intelligence
+              </span>
+              <span className="relative bg-gradient-to-r from-orange-300 via-yellow-400 to-orange-300 bg-clip-text text-transparent" style={{ textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
+                Ignite Your Edge • ML-Powered Handicapping Intelligence
+              </span>
+            </p>
+            
+            {/* Subtitle with shimmer effect */}
+            <p className="mt-4 text-base md:text-lg text-orange-200/80 font-medium tracking-wider uppercase animate-[pulse_4s_ease-in-out_infinite]">
+              ⚡ Professional-Grade AI Racing Analytics Platform ⚡
             </p>
           </div>
 
@@ -176,8 +197,10 @@ const AuthPage = () => {
 
           {/* Bottom Features */}
           <div className="mt-16 glass-card p-8 animate-fade-in-up stagger-8 border border-orange-500/30 shadow-[0_0_20px_rgba(249,115,22,0.2),inset_0_0_15px_rgba(249,115,22,0.05)]">
-            <h2 className="text-center text-lg font-medium text-foreground mb-6">
-              Beta Access Features
+            <h2 className="text-center text-xl md:text-2xl font-bold mb-6 relative inline-block w-full">
+              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" style={{ textShadow: '0 0 25px rgba(249,115,22,0.5)' }}>
+                🔥 Beta Access Features 🔥
+              </span>
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
