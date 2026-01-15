@@ -156,10 +156,10 @@ const AuthPage = () => {
               {tools.slice(0, 4).map((tool, index) => (
                 <div 
                   key={tool.id} 
-                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 1} border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.15),inset_0_0_10px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.3),inset_0_0_15px_rgba(249,115,22,0.1)] transition-shadow duration-300`}
+                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 1} border border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.15),inset_0_0_10px_rgba(34,211,238,0.05)] hover:shadow-[0_0_25px_rgba(34,211,238,0.3),inset_0_0_15px_rgba(34,211,238,0.1)] transition-all duration-300`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/10 text-orange-400">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-orange-500/10 to-red-600/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
                       {tool.icon}
                     </div>
                     <div>
@@ -181,10 +181,10 @@ const AuthPage = () => {
               {tools.slice(4, 8).map((tool, index) => (
                 <div 
                   key={tool.id} 
-                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 5} border border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.15),inset_0_0_10px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.3),inset_0_0_15px_rgba(249,115,22,0.1)] transition-shadow duration-300`}
+                  className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 5} border border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.15),inset_0_0_10px_rgba(34,211,238,0.05)] hover:shadow-[0_0_25px_rgba(34,211,238,0.3),inset_0_0_15px_rgba(34,211,238,0.1)] transition-all duration-300`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/10 text-orange-400">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-orange-500/10 to-red-600/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
                       {tool.icon}
                     </div>
                     <div>
@@ -198,29 +198,29 @@ const AuthPage = () => {
           </div>
 
           {/* Bottom Features */}
-          <div className="mt-16 glass-card p-8 animate-fade-in-up stagger-8 border border-orange-500/30 shadow-[0_0_20px_rgba(249,115,22,0.2),inset_0_0_15px_rgba(249,115,22,0.05)]">
+          <div className="mt-16 glass-card p-8 animate-fade-in-up stagger-8 border border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.2),inset_0_0_15px_rgba(34,211,238,0.05)]">
             <h2 className="text-center text-xl md:text-2xl font-bold mb-6 relative inline-block w-full">
-              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" style={{ textShadow: '0 0 25px rgba(249,115,22,0.5)' }}>
-                🔥 Beta Access Features 🔥
+              <span className="bg-gradient-to-r from-cyan-400 via-orange-500 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" style={{ textShadow: '0 0 25px rgba(34,211,238,0.5)' }}>
+                ⚡ Beta Access Features ⚡
               </span>
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-orange-500/20 text-cyan-400 mb-3 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
                   <Brain className="h-5 w-5" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm">ML Algo Modeling</h3>
                 <p className="text-xs text-muted-foreground mt-1">Clean data with advanced algorithms</p>
               </div>
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-500/20 text-red-400 mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/30 to-red-500/20 text-orange-400 mb-3 shadow-[0_0_15px_rgba(249,115,22,0.3)]">
                   <Eye className="h-5 w-5" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm">AI Video Performance</h3>
                 <p className="text-xs text-muted-foreground mt-1">Grades with run-out notes</p>
               </div>
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-400 mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-orange-500/20 text-cyan-400 mb-3 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
                   <Bot className="h-5 w-5" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm">AI Cosmic Bombs Agent</h3>
