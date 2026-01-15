@@ -26,8 +26,15 @@ pop3_port = 54326
 
 [auth]
 enabled = true
+# LOCAL DEVELOPMENT: Use localhost
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
+additional_redirect_urls = ["https://localhost:3000", "http://localhost:5173"]
+
+# PRODUCTION NOTE: Update these in Supabase Dashboard for production project
+# Production Site URL: https://www.racewiseai.com
+# Production Redirect URLs: https://www.racewiseai.com, https://www.racewiseai.com/auth/callback, https://racewiseai.com
+# Go to: Supabase Dashboard → Authentication → URL Configuration
+
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
