@@ -24,7 +24,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full animated-gradient-bg text-foreground relative overflow-hidden">
+      <div className="min-h-screen flex w-full animated-gradient-bg text-foreground relative overflow-hidden origin-top" style={{ transform: 'scale(0.75)', minHeight: '133.33vh' }}>
         {/* Ambient orbs */}
         <div className="floating-orb w-[600px] h-[600px] bg-blue-500/20 -top-64 -left-64" />
         <div className="floating-orb w-[500px] h-[500px] bg-purple-500/20 top-1/2 -right-48" style={{ animationDelay: '-10s' }} />
