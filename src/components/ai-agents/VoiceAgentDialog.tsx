@@ -264,6 +264,42 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     return 'border-orange-600/50';
   };
 
+  // Spiral animation component for listening mode
+  const SpiralAnimation = () => (
+    <div className="relative w-32 h-32 mx-auto">
+      {/* Outer spiral rings */}
+      {[0, 1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="absolute inset-0 rounded-full border-2 border-orange-500/40"
+          style={{
+            animation: `spin ${3 + i * 0.5}s linear infinite ${i % 2 === 0 ? '' : 'reverse'}`,
+            transform: `scale(${1 - i * 0.15})`,
+            borderTopColor: 'rgb(251 146 60)',
+            borderRightColor: 'transparent',
+            borderBottomColor: 'rgb(251 146 60 / 0.3)',
+            borderLeftColor: 'transparent',
+          }}
+        />
+      ))}
+      {/* Center pulse */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full animate-pulse flex items-center justify-center shadow-lg shadow-orange-500/50">
+          <Mic className="h-6 w-6 text-white" />
+        </div>
+      </div>
+    </div>
+  );
+
+  // Status message based on current state
+  const getStatusMessage = () => {
+    if (isListening) return "🎤 Listening... Speak your question!";
+    if (isLoading) return "🧠 Analyzing your query...";
+    if (isSpeaking) return "🔊 Speaking response...";
+    if (ttsLoading) return "⏳ Preparing audio...";
+    return "💬 Ready to help you win!";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-gray-900/98 backdrop-blur-xl border-gray-700/50 text-white max-w-2xl h-[85vh] flex flex-col p-0 gap-0">
@@ -308,19 +344,6 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
                 <Settings2 className="h-4 w-4" />
                 <span className="text-xs font-medium">Voice</span>
               </Button>
-              {/* Voice Status Indicator */}
-              {(isSpeaking || ttsLoading) && (
-                <div className="flex items-center gap-1 bg-green-500/20 border border-green-500/30 px-2 py-1 rounded-lg">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs text-green-400">{ttsLoading ? 'Loading...' : 'Speaking...'}</span>
-                </div>
-              )}
-              {isListening && (
-                <div className="flex items-center gap-1 bg-red-500/20 border border-red-500/30 px-2 py-1 rounded-lg">
-                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                  <span className="text-xs text-red-400">Listening...</span>
-                </div>
-              )}
             </div>
           </div>
           {/* Voice Selection Panel - Collapsible */}
@@ -344,9 +367,54 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
           )}
         </DialogHeader>
         
+        {/* Active Status Indicator Bar */}
+        <div className={`px-6 py-3 border-b border-gray-700/50 flex items-center justify-center gap-3 ${
+          isListening ? 'bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-500/20' :
+          isLoading ? 'bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20' :
+          isSpeaking ? 'bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-green-500/20' :
+          'bg-gray-800/50'
+        }`}>
+          {(isSpeaking || ttsLoading || isListening) && (
+            <div className={`w-2 h-2 rounded-full animate-pulse ${
+              isListening ? 'bg-red-400' : isSpeaking ? 'bg-green-400' : 'bg-blue-400'
+            }`} />
+          )}
+          <span className={`text-sm font-medium ${
+            isListening ? 'text-red-400' :
+            isLoading ? 'text-blue-400' :
+            isSpeaking ? 'text-green-400' :
+            'text-gray-400'
+          }`}>
+            {getStatusMessage()}
+          </span>
+        </div>
+
+        {/* Listening Mode - Spiral Animation */}
+        {isListening && (
+          <div className="px-6 py-8 bg-gradient-to-b from-gray-800/80 to-gray-900/80 border-b border-gray-700/50">
+            <SpiralAnimation />
+            <div className="text-center mt-4 space-y-2">
+              <p className="text-orange-400 font-bold text-lg animate-pulse">🎤 LISTENING MODE ACTIVE</p>
+              <p className="text-gray-400 text-sm">Speak clearly into your microphone...</p>
+              <p className="text-amber-400 text-xs font-medium mt-2">Ask me anything about the races!</p>
+            </div>
+          </div>
+        )}
+        
         {/* Messages */}
         <ScrollArea className="flex-1 px-6 py-4 bg-gray-900/50">
           <div className="space-y-4">
+            {/* Good Luck Banner */}
+            {messages.length <= 1 && !isListening && (
+              <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border border-amber-500/30 rounded-xl p-4 mb-4 text-center">
+                <p className="text-amber-400 font-bold text-lg">🍀 Good Luck Today! 🍀</p>
+                <p className="text-orange-300 text-sm mt-1">Let's bring home the cheddar! 🧀💰</p>
+                <div className="mt-3 text-gray-400 text-xs">
+                  <p>💡 <span className="text-gray-300">Ask me questions</span> about horses, odds, pace analysis, or betting strategies!</p>
+                </div>
+              </div>
+            )}
+
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -397,6 +465,15 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
         
         {/* Input Area */}
         <div className="border-t border-gray-700/50 p-4 bg-gray-800/50">
+          {/* Ask Questions Prompt - Center above input */}
+          {!isListening && !isLoading && (
+            <div className="text-center mb-3">
+              <p className="text-gray-400 text-sm">
+                🎯 <span className="text-orange-400 font-medium">Ask me questions</span> about today's races, or tap the mic to speak!
+              </p>
+            </div>
+          )}
+          
           <div className="flex items-center gap-2">
             {/* Voice Toggle */}
             <Button
@@ -409,21 +486,27 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               {voiceEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </Button>
             
-            {/* Microphone Button */}
+            {/* Microphone Button - Enhanced with spiral effect when active */}
             {speechSupported && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleMicClick}
                 disabled={isLoading}
-                className={`rounded-full transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 relative ${
                   isListening 
-                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                    ? 'bg-red-500 hover:bg-red-600 text-white scale-110' 
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
                 title={isListening ? 'Stop listening' : 'Start voice input'}
               >
-                {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                {isListening && (
+                  <>
+                    <span className="absolute inset-0 rounded-full border-2 border-red-400 animate-ping" />
+                    <span className="absolute inset-0 rounded-full border border-red-300 animate-pulse" />
+                  </>
+                )}
+                {isListening ? <MicOff className="h-5 w-5 relative z-10" /> : <Mic className="h-5 w-5" />}
               </Button>
             )}
             
@@ -432,7 +515,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isListening ? 'Listening...' : 'Type or speak your message...'}
+              placeholder={isListening ? '🎤 Listening...' : '💬 Type your question or tap the mic...'}
               disabled={isLoading || isListening}
               className="flex-1 bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-500 rounded-full px-4 focus:border-orange-500/50"
             />
@@ -450,6 +533,11 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
           {speechError && (
             <p className="text-xs text-red-400 mt-2">Speech recognition error: {speechError}</p>
           )}
+          
+          {/* Encouraging footer message */}
+          <div className="text-center mt-3 text-xs text-gray-500">
+            🏇 May the odds be ever in your favor! Bring home that cheddar! 🧀
+          </div>
         </div>
       </DialogContent>
     </Dialog>
