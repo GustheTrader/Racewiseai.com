@@ -159,7 +159,7 @@ const AuthPage = () => {
                   className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 1} border border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.15),inset_0_0_10px_rgba(34,211,238,0.05)] hover:shadow-[0_0_25px_rgba(34,211,238,0.3),inset_0_0_15px_rgba(34,211,238,0.1)] transition-all duration-300`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-orange-500/10 to-red-600/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-orange-500/10 to-red-600/10 animate-glow-pulse">
                       {tool.icon}
                     </div>
                     <div>
@@ -184,7 +184,7 @@ const AuthPage = () => {
                   className={`glass-card-hover p-5 animate-fade-in-up stagger-${index + 5} border border-cyan-500/30 hover:border-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.15),inset_0_0_10px_rgba(34,211,238,0.05)] hover:shadow-[0_0_25px_rgba(34,211,238,0.3),inset_0_0_15px_rgba(34,211,238,0.1)] transition-all duration-300`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-orange-500/10 to-red-600/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-orange-500/10 to-red-600/10 animate-glow-pulse">
                       {tool.icon}
                     </div>
                     <div>
