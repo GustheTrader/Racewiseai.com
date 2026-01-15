@@ -13,11 +13,11 @@ export const signInWithMagicLink = async (email: string): Promise<void> => {
     throw new Error('Invalid email format');
   }
 
-  // Get the redirect URL from the current environment
-  // Uses /auth/callback route to properly handle Supabase auth tokens
-  const redirectUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback`
-    : 'https://www.racewiseai.com/auth/callback';
+  // Use production domain for email redirects
+  const productionDomain = 'https://racewiseai.lovable.app';
+  const redirectUrl = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
+    ? `${productionDomain}/auth/callback`
+    : `${window.location.origin}/auth/callback`;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -57,11 +57,11 @@ export const signIn = async (email: string, password: string): Promise<void> => 
  * Requires email verification before access
  */
 export const signUp = async (email: string, password: string, fullName: string): Promise<void> => {
-  // Get the redirect URL from the current environment
-  // Uses /auth/callback route to properly handle Supabase auth tokens
-  const redirectUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback`
-    : 'https://www.racewiseai.com/auth/callback';
+  // Use production domain for email redirects, fallback to current origin for dev
+  const productionDomain = 'https://racewiseai.lovable.app';
+  const redirectUrl = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
+    ? `${productionDomain}/auth/callback`
+    : `${window.location.origin}/auth/callback`;
 
   const { data, error } = await supabase.auth.signUp({
     email,
