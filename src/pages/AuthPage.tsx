@@ -102,7 +102,7 @@ const AuthPage = () => {
       {/* Fire particle effect */}
       <FireParticles />
 
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 origin-top" style={{ transform: 'scale(0.75)', minHeight: '133.33vh' }}>
         <div className="w-full max-w-6xl mx-auto">
           
           {/* Header with fire glow */}
