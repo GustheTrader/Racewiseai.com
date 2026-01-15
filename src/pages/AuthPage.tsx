@@ -118,23 +118,23 @@ const AuthPage = () => {
                 className="h-64 md:h-80 mx-auto mb-6 object-contain drop-shadow-[0_0_60px_rgba(249,115,22,0.6)] animate-[pulse_3s_ease-in-out_infinite]"
               />
             </div>
-            {/* 3D Title with enhanced contrast and gradient */}
+            {/* 3D Title with teal-to-coral gradient */}
             <h1 className="text-4xl md:text-7xl font-black mb-4 relative tracking-tight">
               {/* Deep shadow layer */}
               <span className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 bg-clip-text text-transparent blur-[3px] translate-x-2 translate-y-2">
-                RACEWISE AI TOOLBOX
+                ⚡ RACEWISE AI TOOLBOX ⚡
               </span>
-              {/* Mid shadow with fire tones */}
-              <span className="absolute inset-0 bg-gradient-to-r from-red-950 via-orange-900 to-red-950 bg-clip-text text-transparent blur-[1px] translate-x-1 translate-y-1">
-                RACEWISE AI TOOLBOX
+              {/* Mid shadow with teal tones */}
+              <span className="absolute inset-0 bg-gradient-to-r from-teal-900 via-orange-900 to-teal-900 bg-clip-text text-transparent blur-[1px] translate-x-1 translate-y-1">
+                ⚡ RACEWISE AI TOOLBOX ⚡
               </span>
-              {/* Orange/red underlayer */}
-              <span className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-500 to-orange-600 bg-clip-text text-transparent translate-x-0.5 translate-y-0.5">
-                RACEWISE AI TOOLBOX
+              {/* Teal/coral underlayer */}
+              <span className="absolute inset-0 bg-gradient-to-r from-teal-600 via-orange-500 to-teal-600 bg-clip-text text-transparent translate-x-0.5 translate-y-0.5">
+                ⚡ RACEWISE AI TOOLBOX ⚡
               </span>
-              {/* Main gradient - white to cyan to white for max contrast */}
-              <span className="relative bg-gradient-to-r from-white via-cyan-300 to-white bg-clip-text text-transparent" style={{ textShadow: '0 0 60px rgba(34,211,238,0.8), 0 0 120px rgba(249,115,22,0.5), 0 4px 0 rgba(0,0,0,0.3)' }}>
-                RACEWISE AI TOOLBOX
+              {/* Main gradient - teal to coral/orange to teal */}
+              <span className="relative bg-gradient-to-r from-teal-400 via-orange-400 to-teal-400 bg-clip-text text-transparent" style={{ textShadow: '0 0 60px rgba(45,212,191,0.6), 0 0 120px rgba(251,146,60,0.5), 0 4px 0 rgba(0,0,0,0.3)' }}>
+                ⚡ RACEWISE AI TOOLBOX ⚡
               </span>
             </h1>
             
