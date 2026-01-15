@@ -187,29 +187,42 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     }
   };
 
+  // Get agent-specific icon color for dark theme
+  const getAgentAccentClass = () => {
+    if (agentType === 'cosmic-bombs') return 'text-orange-400';
+    if (agentType === 'risk-analysis') return 'text-amber-400';
+    return 'text-orange-500';
+  };
+
+  const getAgentBorderClass = () => {
+    if (agentType === 'cosmic-bombs') return 'border-orange-500/50';
+    if (agentType === 'risk-analysis') return 'border-amber-500/50';
+    return 'border-orange-600/50';
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900/95 backdrop-blur-xl border-gray-700/50 text-white max-w-2xl h-[85vh] flex flex-col p-0 gap-0">
-        {/* Header */}
-        <DialogHeader className={`${accentColor} px-6 py-4 rounded-t-lg`}>
+      <DialogContent className="bg-gray-900/98 backdrop-blur-xl border-gray-700/50 text-white max-w-2xl h-[85vh] flex flex-col p-0 gap-0">
+        {/* Header - Dark theme with orange accent border */}
+        <DialogHeader className={`bg-gray-800/90 border-b-2 ${getAgentBorderClass()} px-6 py-4 rounded-t-lg`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <Bot className="h-6 w-6 text-white" />
+              <div className={`p-2.5 bg-gray-700/80 rounded-xl border ${getAgentBorderClass()}`}>
+                <Bot className={`h-6 w-6 ${getAgentAccentClass()}`} />
               </div>
               <div>
-                <DialogTitle className="text-xl font-bold text-white">{agentName}</DialogTitle>
-                <p className="text-white/80 text-sm">{agentDescription}</p>
+                <DialogTitle className={`text-xl font-bold ${getAgentAccentClass()}`}>{agentName}</DialogTitle>
+                <p className="text-gray-400 text-sm max-w-md">{agentDescription}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Voice Settings Toggle - Always visible gear */}
+              {/* Voice Settings Toggle */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-                className={`text-white hover:text-white hover:bg-white/20 rounded-full flex items-center gap-1.5 px-3 ${
-                  showVoiceSettings ? 'bg-white/20' : ''
+                className={`text-gray-300 hover:text-orange-400 hover:bg-gray-700/50 rounded-lg flex items-center gap-1.5 px-3 border border-gray-600/50 ${
+                  showVoiceSettings ? 'bg-gray-700/50 text-orange-400' : ''
                 }`}
                 title="Voice settings"
               >
@@ -218,25 +231,25 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               </Button>
               {/* Voice Status Indicator */}
               {(isSpeaking || ttsLoading) && (
-                <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-1 bg-green-500/20 border border-green-500/30 px-2 py-1 rounded-lg">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs">{ttsLoading ? 'Loading...' : 'Speaking...'}</span>
+                  <span className="text-xs text-green-400">{ttsLoading ? 'Loading...' : 'Speaking...'}</span>
                 </div>
               )}
               {isListening && (
-                <div className="flex items-center gap-1 bg-red-500/30 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-1 bg-red-500/20 border border-red-500/30 px-2 py-1 rounded-lg">
                   <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                  <span className="text-xs">Listening...</span>
+                  <span className="text-xs text-red-400">Listening...</span>
                 </div>
               )}
             </div>
           </div>
           {/* Voice Selection Panel - Collapsible */}
           {showVoiceSettings && (
-            <div className="mt-3 p-3 bg-white/10 rounded-lg border border-white/20">
-              <p className="text-xs text-white/70 mb-2 font-medium">🎙️ Select AI Voice (Confident Male SME)</p>
+            <div className="mt-3 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
+              <p className="text-xs text-gray-400 mb-2 font-medium">🎙️ Select AI Voice (Confident Male SME)</p>
               <Select value={currentVoice} onValueChange={(v) => setVoice(v as MaleVoiceId)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white text-sm">
+                <SelectTrigger className="bg-gray-800/80 border-gray-600/50 text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700 z-50">
@@ -253,7 +266,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
         </DialogHeader>
         
         {/* Messages */}
-        <ScrollArea className="flex-1 px-6 py-4">
+        <ScrollArea className="flex-1 px-6 py-4 bg-gray-900/50">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -264,18 +277,18 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                   message.role === 'user' 
-                    ? 'bg-gradient-to-br from-orange-500 to-red-500' 
-                    : accentColor
+                    ? 'bg-gradient-to-br from-orange-500 to-amber-600' 
+                    : 'bg-gray-700 border border-gray-600'
                 }`}>
                   {message.role === 'user' 
                     ? <User className="h-5 w-5 text-white" />
-                    : <Bot className="h-5 w-5 text-white" />
+                    : <Bot className={`h-5 w-5 ${getAgentAccentClass()}`} />
                   }
                 </div>
                 <div
                   className={`max-w-[75%] p-4 rounded-2xl ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30'
+                      ? 'bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/30'
                       : 'bg-gray-800/80 border border-gray-700/50'
                   }`}
                 >
@@ -288,12 +301,12 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
             ))}
             {isLoading && (
               <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${accentColor}`}>
-                  <Bot className="h-5 w-5 text-white" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-700 border border-gray-600">
+                  <Bot className={`h-5 w-5 ${getAgentAccentClass()}`} />
                 </div>
                 <div className="bg-gray-800/80 border border-gray-700/50 p-4 rounded-2xl">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin text-orange-400" />
                     <span className="text-sm text-gray-400">Thinking...</span>
                   </div>
                 </div>
@@ -304,14 +317,14 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
         </ScrollArea>
         
         {/* Input Area */}
-        <div className="border-t border-gray-700/50 p-4 bg-gray-900/50">
+        <div className="border-t border-gray-700/50 p-4 bg-gray-800/50">
           <div className="flex items-center gap-2">
             {/* Voice Toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleVoice}
-              className={`rounded-full ${voiceEnabled ? 'text-green-400 hover:text-green-300' : 'text-gray-500 hover:text-gray-400'}`}
+              className={`rounded-full ${voiceEnabled ? 'text-green-400 hover:text-green-300 hover:bg-green-500/10' : 'text-gray-500 hover:text-gray-400 hover:bg-gray-700/50'}`}
               title={voiceEnabled ? 'Disable voice responses' : 'Enable voice responses'}
             >
               {voiceEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
@@ -342,14 +355,14 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               onKeyPress={handleKeyPress}
               placeholder={isListening ? 'Listening...' : 'Type or speak your message...'}
               disabled={isLoading || isListening}
-              className="flex-1 bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-500 rounded-full px-4"
+              className="flex-1 bg-gray-700/50 border-gray-600/50 text-white placeholder-gray-500 rounded-full px-4 focus:border-orange-500/50"
             />
             
             {/* Send Button */}
             <Button
               onClick={() => handleSendMessage()}
               disabled={!inputValue.trim() || isLoading}
-              className={`rounded-full ${accentColor} hover:opacity-90`}
+              className="rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white shadow-lg shadow-orange-500/20"
             >
               <Send className="h-4 w-4" />
             </Button>
