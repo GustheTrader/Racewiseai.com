@@ -191,15 +191,18 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Voice Settings */}
+              {/* Voice Settings Toggle - Always visible gear */}
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                className={`text-white hover:text-white hover:bg-white/20 rounded-full flex items-center gap-1.5 px-3 ${
+                  showVoiceSettings ? 'bg-white/20' : ''
+                }`}
                 title="Voice settings"
               >
                 <Settings2 className="h-4 w-4" />
+                <span className="text-xs font-medium">Voice</span>
               </Button>
               {/* Voice Status Indicator */}
               {(isSpeaking || ttsLoading) && (
@@ -216,15 +219,15 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               )}
             </div>
           </div>
-          {/* Voice Selection Panel */}
+          {/* Voice Selection Panel - Collapsible */}
           {showVoiceSettings && (
-            <div className="mt-3 p-3 bg-white/10 rounded-lg">
-              <p className="text-xs text-white/70 mb-2">Select Voice (Confident Male SME)</p>
+            <div className="mt-3 p-3 bg-white/10 rounded-lg border border-white/20">
+              <p className="text-xs text-white/70 mb-2 font-medium">🎙️ Select AI Voice (Confident Male SME)</p>
               <Select value={currentVoice} onValueChange={(v) => setVoice(v as MaleVoiceId)}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-gray-800 border-gray-700 z-50">
                   {Object.entries(availableVoices).map(([id, { label, accent }]) => (
                     <SelectItem key={id} value={id} className="text-white hover:bg-gray-700">
                       <span>{label}</span>
