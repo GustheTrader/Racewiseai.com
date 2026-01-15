@@ -4,45 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 const BettingTimeline = React.lazy(() => import('./charts/BettingTimeline'));
 import ChartInfoPanel from './charts/ChartInfoPanel';
 import RunnerLegend from './charts/RunnerLegend';
-import { Horse } from '../utils/types';
+import { Horse, BettingDataPoint } from '../utils/types';
 import { getRunnerColorByPosition } from './charts/constants/postPositionColors';
-import { TrendingUp } from 'lucide-react';
-
-interface BettingDataPoint {
-  time: string;
-  volume: number;
-  timestamp: number;
-  isSpike?: boolean;
-  runner1?: number;
-  runner2?: number;
-  runner3?: number;
-  runner4?: number;
-  runner5?: number;
-  runner6?: number;
-  runner7?: number;
-  runner8?: number;
-  runner9?: number;
-  runner10?: number;
-  runner11?: number;
-  runner12?: number;
-  runner1Odds?: number;
-  runner2Odds?: number;
-  runner3Odds?: number;
-  runner4Odds?: number;
-  runner5Odds?: number;
-  runner6Odds?: number;
-  runner7Odds?: number;
-  runner8Odds?: number;
-  runner9Odds?: number;
-  runner10Odds?: number;
-  runner11Odds?: number;
-  runner12Odds?: number;
-  [key: string]: any; // Allow dynamic properties
-}
+import { TrendingUp, Wifi, WifiOff } from 'lucide-react';
+import { useLiveOddsTimeline } from '@/hooks/useLiveOddsTimeline';
+import { Badge } from '@/components/ui/badge';
 
 interface SharpBettorTimelineProps {
-  bettingData: BettingDataPoint[];
+  bettingData?: BettingDataPoint[];
   horses?: Horse[];
+  trackName?: string;
+  raceNumber?: number;
 }
 
 // Enhanced function to create more complex dynamic odds variations with multiple wave patterns
@@ -82,7 +54,23 @@ const generateNextTimePoint = (currentTime: string): string => {
   return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
 };
 
-const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, horses = [] }) => {
+const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ 
+  bettingData: propsBettingData, 
+  horses = [],
+  trackName,
+  raceNumber 
+}) => {
+  // Use live data hook
+  const { 
+    bettingData: liveData, 
+    isLiveData, 
+    isLoading,
+    lastUpdate 
+  } = useLiveOddsTimeline({ trackName, raceNumber });
+
+  // Use prop data if provided, otherwise use live/mock data from hook
+  const bettingData = propsBettingData && propsBettingData.length > 0 ? propsBettingData : liveData;
+
   const [timeOffset, setTimeOffset] = useState(0);
   const [enhancedData, setEnhancedData] = useState<BettingDataPoint[]>([]);
   
@@ -105,14 +93,14 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
   } else {
     // Fallback to default horse names for demo purposes
     const defaultHorses = [
-      { pp: 1, name: "Gold Search", odds: 6.5 },
-      { pp: 2, name: "Rivalry", odds: 4.2 },
-      { pp: 3, name: "Beer With Ice", odds: 8.1 },
-      { pp: 4, name: "Quebrancho", odds: 12.0 },
-      { pp: 5, name: "Dancing Noah", odds: 5.8 },
-      { pp: 6, name: "More Than Five", odds: 3.5 },
-      { pp: 7, name: "Speed Demon", odds: 7.2 },
-      { pp: 8, name: "Pink Lightning", odds: 9.4 },
+      { pp: 1, name: "Fast Lightning", odds: 6.5 },
+      { pp: 2, name: "Lucky Star", odds: 4.2 },
+      { pp: 3, name: "Thunder Bolt", odds: 8.1 },
+      { pp: 4, name: "Silver Streak", odds: 12.0 },
+      { pp: 5, name: "Golden Arrow", odds: 5.8 },
+      { pp: 6, name: "Midnight Runner", odds: 3.5 },
+      { pp: 7, name: "Wind Chaser", odds: 7.2 },
+      { pp: 8, name: "Dark Horse", odds: 9.4 },
     ];
     
     defaultHorses.forEach((horse) => {
@@ -126,6 +114,8 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
   // Update enhanced data with time progression and wave animations
   useEffect(() => {
     const updateData = () => {
+      if (!bettingData || bettingData.length === 0) return;
+      
       const updatedData = bettingData.map((dataPoint, timeIndex) => {
         const enhanced: BettingDataPoint = { 
           ...dataPoint,
@@ -135,15 +125,17 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
           timestamp: dataPoint.timestamp + (timeOffset * 60000) // Add offset in milliseconds
         };
         
-        // Generate dynamic odds for all runners that have colors
-        Object.keys(runnerColors).forEach(runnerKey => {
-          const runnerNumber = parseInt(runnerKey.replace('runner', ''));
-          const oddsKey = `${runnerKey}Odds`;
-          const baseOdds = baseOddsMap[runnerKey] || (Math.random() * 8 + 2);
-          
-          // Create dynamic odds that vary over time with wave offset
-          enhanced[oddsKey] = parseFloat(createDynamicOdds(baseOdds, timeIndex, runnerNumber, timeOffset).toFixed(2));
-        });
+        // Generate dynamic odds for all runners that have colors (only if not live data)
+        if (!isLiveData) {
+          Object.keys(runnerColors).forEach(runnerKey => {
+            const runnerNumber = parseInt(runnerKey.replace('runner', ''));
+            const oddsKey = `${runnerKey}Odds`;
+            const baseOdds = baseOddsMap[runnerKey] || (Math.random() * 8 + 2);
+            
+            // Create dynamic odds that vary over time with wave offset
+            enhanced[oddsKey] = parseFloat(createDynamicOdds(baseOdds, timeIndex, runnerNumber, timeOffset).toFixed(2));
+          });
+        }
         
         return enhanced;
       });
@@ -152,16 +144,18 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
     };
 
     updateData();
-  }, [timeOffset, bettingData, runnerColors, baseOddsMap]);
+  }, [timeOffset, bettingData, isLiveData]);
 
-  // Time progression effect - updates every 3 seconds
+  // Time progression effect - updates every 3 seconds (only for mock data)
   useEffect(() => {
+    if (isLiveData) return; // Don't animate if using live data
+    
     const interval = setInterval(() => {
       setTimeOffset(prev => prev + 1);
-    }, 3000); // Update every 3 seconds for slow movement
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isLiveData]);
 
   console.log('SharpBettorTimeline - Generated runnerColors:', runnerColors);
   console.log('SharpBettorTimeline - Generated runnerNames:', runnerNames);
@@ -169,22 +163,23 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
   console.log('SharpBettorTimeline - Enhanced betting data sample:', enhancedData[0]);
 
   // Calculate max values for chart scaling
-  const maxVolume = Math.max(...enhancedData.map(item => item.volume));
+  const maxVolume = Math.max(...enhancedData.map(item => item.volume), 1);
   const maxOdds = Math.max(
     ...enhancedData.flatMap(item => [
-      item.runner1Odds || 0,
-      item.runner2Odds || 0,
-      item.runner3Odds || 0,
-      item.runner4Odds || 0,
-      item.runner5Odds || 0,
-      item.runner6Odds || 0,
-      item.runner7Odds || 0,
-      item.runner8Odds || 0,
-      item.runner9Odds || 0,
-      item.runner10Odds || 0,
-      item.runner11Odds || 0,
-      item.runner12Odds || 0,
-    ])
+      Number(item.runner1Odds) || 0,
+      Number(item.runner2Odds) || 0,
+      Number(item.runner3Odds) || 0,
+      Number(item.runner4Odds) || 0,
+      Number(item.runner5Odds) || 0,
+      Number(item.runner6Odds) || 0,
+      Number(item.runner7Odds) || 0,
+      Number(item.runner8Odds) || 0,
+      Number(item.runner9Odds) || 0,
+      Number(item.runner10Odds) || 0,
+      Number(item.runner11Odds) || 0,
+      Number(item.runner12Odds) || 0,
+    ]),
+    1
   );
   
   // Find spike points
@@ -199,7 +194,20 @@ const SharpBettorTimeline: React.FC<SharpBettorTimelineProps> = ({ bettingData, 
             <TrendingUp className="h-5 w-5 text-purple-300" />
           </div>
           Sharp Bettor Timeline
-          <div className="ml-auto w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+          <div className="ml-auto flex items-center gap-2">
+            {isLiveData ? (
+              <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/50 text-xs flex items-center gap-1">
+                <Wifi className="h-3 w-3" />
+                LIVE
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/50 text-xs flex items-center gap-1">
+                <WifiOff className="h-3 w-3" />
+                DEMO
+              </Badge>
+            )}
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+          </div>
         </CardTitle>
       </CardHeader>
       
