@@ -280,6 +280,11 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Message Count Indicator */}
+              <div className="flex items-center gap-1.5 bg-gray-700/60 border border-gray-600/50 px-2.5 py-1 rounded-lg">
+                <span className="text-xs text-gray-400">Messages:</span>
+                <span className="text-xs font-semibold text-orange-400">{messages.length}</span>
+              </div>
               {/* Clear History Button */}
               <Button
                 variant="ghost"
