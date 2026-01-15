@@ -41,6 +41,12 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   
+  // Load saved voice preference for this agent
+  const getSavedVoice = (): MaleVoiceId => {
+    const saved = localStorage.getItem(`voice-preference-${agentType}`);
+    return (saved as MaleVoiceId) || 'en-US-Neural2-D';
+  };
+
   // Google TTS hook for confident male voices
   const { 
     speak, 
@@ -48,9 +54,15 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     isSpeaking, 
     isLoading: ttsLoading,
     currentVoice,
-    setVoice,
+    setVoice: setTTSVoice,
     availableVoices
-  } = useGoogleTTS({ defaultVoice: 'en-US-Neural2-D' });
+  } = useGoogleTTS({ defaultVoice: getSavedVoice() });
+
+  // Save voice preference when changed
+  const setVoice = (voiceId: MaleVoiceId) => {
+    localStorage.setItem(`voice-preference-${agentType}`, voiceId);
+    setTTSVoice(voiceId);
+  };
   
   const { 
     isListening, 
