@@ -1082,9 +1082,13 @@ export type Database = {
           id: string
           interval_seconds: number
           is_active: boolean
+          job_mode: string | null
           job_type: string
           last_run_at: string | null
           next_run_at: string
+          race_window_end: string | null
+          race_window_start: string | null
+          scheduled_time: string | null
           status: string
           track_name: string
           updated_at: string
@@ -1096,9 +1100,13 @@ export type Database = {
           id?: string
           interval_seconds?: number
           is_active?: boolean
+          job_mode?: string | null
           job_type: string
           last_run_at?: string | null
           next_run_at?: string
+          race_window_end?: string | null
+          race_window_start?: string | null
+          scheduled_time?: string | null
           status?: string
           track_name: string
           updated_at?: string
@@ -1110,9 +1118,13 @@ export type Database = {
           id?: string
           interval_seconds?: number
           is_active?: boolean
+          job_mode?: string | null
           job_type?: string
           last_run_at?: string | null
           next_run_at?: string
+          race_window_end?: string | null
+          race_window_start?: string | null
+          scheduled_time?: string | null
           status?: string
           track_name?: string
           updated_at?: string
