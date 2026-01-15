@@ -182,16 +182,7 @@ const ModelTrainingTab: React.FC = () => {
   }, {} as Record<string, typeof AVAILABLE_FEATURES>);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-          <Brain className="h-6 w-6 text-purple-400" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-foreground">Model Training</h2>
-          <p className="text-sm text-muted-foreground">Build and manage AI prediction models</p>
-        </div>
-      </div>
+    <div className="space-y-4">
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-muted/50">

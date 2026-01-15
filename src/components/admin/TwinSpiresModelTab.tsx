@@ -367,17 +367,7 @@ const TwinSpiresModelTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-red-500/20">
-          <Flame className="h-6 w-6 text-orange-400" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-foreground">TwinSpires Model</h2>
-          <p className="text-sm text-muted-foreground">AI-powered PDF parsing with ensemble scoring</p>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-muted/50">
           <TabsTrigger value="upload" className="gap-2">
@@ -442,22 +432,22 @@ const TwinSpiresModelTab: React.FC = () => {
                 />
               </label>
 
-              {/* Feature highlights */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                  <Zap className="h-6 w-6 text-yellow-400 mb-2" />
-                  <h4 className="font-semibold text-foreground">Speed Figures</h4>
-                  <p className="text-xs text-muted-foreground">BSR, Prime Power, Class ratings</p>
+              {/* Feature highlights - Compact grid */}
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                <div className="p-3 rounded-lg bg-muted/30 border border-border text-center">
+                  <Zap className="h-5 w-5 text-yellow-400 mx-auto mb-1" />
+                  <h4 className="font-medium text-sm text-foreground">Speed Figures</h4>
+                  <p className="text-xs text-muted-foreground">BSR, Prime Power</p>
                 </div>
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                  <TrendingUp className="h-6 w-6 text-green-400 mb-2" />
-                  <h4 className="font-semibold text-foreground">Pace Analysis</h4>
-                  <p className="text-xs text-muted-foreground">E1, E2, LP figures & running styles</p>
+                <div className="p-3 rounded-lg bg-muted/30 border border-border text-center">
+                  <TrendingUp className="h-5 w-5 text-green-400 mx-auto mb-1" />
+                  <h4 className="font-medium text-sm text-foreground">Pace Analysis</h4>
+                  <p className="text-xs text-muted-foreground">E1, E2, LP figures</p>
                 </div>
-                <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                  <Trophy className="h-6 w-6 text-orange-400 mb-2" />
-                  <h4 className="font-semibold text-foreground">Ensemble Score</h4>
-                  <p className="text-xs text-muted-foreground">Weighted model combining all factors</p>
+                <div className="p-3 rounded-lg bg-muted/30 border border-border text-center">
+                  <Trophy className="h-5 w-5 text-orange-400 mx-auto mb-1" />
+                  <h4 className="font-medium text-sm text-foreground">Ensemble Score</h4>
+                  <p className="text-xs text-muted-foreground">Combined model</p>
                 </div>
               </div>
             </CardContent>
