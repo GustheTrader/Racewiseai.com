@@ -96,89 +96,91 @@ const VideoPerformanceCard = () => {
 
   return (
     <Card className="w-full h-full">
-      <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-        <CardTitle className="text-center text-3xl">Video Performance Summary Grade</CardTitle>
+      <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 sm:px-6">
+        <CardTitle className="text-center text-xl sm:text-2xl md:text-3xl">Video Performance Summary Grade</CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-betting-tertiaryPurple/50">
-                <th className="text-left p-4 text-lg font-bold">PP</th>
-                <th className="text-left p-4 text-lg font-bold">Horse</th>
-                <th className="text-center p-4 text-lg font-bold" colSpan={5}>Last 5 Video Grades</th>
-                <th className="text-center p-4 text-lg font-bold">Runout Grade</th>
-                <th className="text-left p-4 text-lg font-bold">Runout Notes</th>
-              </tr>
-              <tr className="border-b border-betting-tertiaryPurple/30">
-                <th></th>
-                <th></th>
-                <th className="text-center p-2 text-sm">Most Recent</th>
-                <th className="text-center p-2 text-sm">2nd Back</th>
-                <th className="text-center p-2 text-sm">3rd Back</th>
-                <th className="text-center p-2 text-sm">4th Back</th>
-                <th className="text-center p-2 text-sm">5th Back</th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockData.map((horse, index) => (
-                <tr key={index} className="border-b border-betting-tertiaryPurple/20 hover:bg-betting-darkPurple/30">
-                  <td className="p-4 text-center font-bold text-xl">{horse.pp}</td>
-                  <td className="p-4 font-bold text-lg">{horse.horseName}</td>
-                  {horse.lastFiveGrades.map((grade, gradeIndex) => (
-                    <td key={gradeIndex} className="p-2 text-center">
-                      <div className="space-y-2">
-                        <Badge className={`${getGradeColor(grade.grade)} text-lg font-bold px-3 py-1`}>
-                          {grade.grade}
-                        </Badge>
-                        <div className="text-xs text-gray-400">
-                          <div>{grade.race}</div>
-                          <div>{grade.date}</div>
-                        </div>
-                        <div className="text-xs text-yellow-400 italic">
-                          {grade.troubleNotes}
-                        </div>
-                      </div>
-                    </td>
-                  ))}
-                  <td className="p-4 text-center">
-                    <Badge className={`${getGradeColor(horse.runoutGrade)} text-xl font-bold px-4 py-2`}>
-                      {horse.runoutGrade}
-                    </Badge>
-                  </td>
-                  <td className="p-4 text-sm text-yellow-400 italic max-w-xs">
-                    {horse.runoutNotes}
-                  </td>
+      <CardContent className="p-3 sm:p-4 md:p-6">
+        <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6">
+          <div className="min-w-[900px]">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2 border-betting-tertiaryPurple/50">
+                  <th className="text-left p-2 sm:p-3 md:p-4 text-sm sm:text-base md:text-lg font-bold whitespace-nowrap">PP</th>
+                  <th className="text-left p-2 sm:p-3 md:p-4 text-sm sm:text-base md:text-lg font-bold whitespace-nowrap">Horse</th>
+                  <th className="text-center p-2 sm:p-3 md:p-4 text-sm sm:text-base md:text-lg font-bold" colSpan={5}>Last 5 Video Grades</th>
+                  <th className="text-center p-2 sm:p-3 md:p-4 text-sm sm:text-base md:text-lg font-bold whitespace-nowrap">Runout Grade</th>
+                  <th className="text-left p-2 sm:p-3 md:p-4 text-sm sm:text-base md:text-lg font-bold whitespace-nowrap">Runout Notes</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+                <tr className="border-b border-betting-tertiaryPurple/30">
+                  <th></th>
+                  <th></th>
+                  <th className="text-center p-1 sm:p-2 text-xs sm:text-sm whitespace-nowrap">Most Recent</th>
+                  <th className="text-center p-1 sm:p-2 text-xs sm:text-sm whitespace-nowrap">2nd Back</th>
+                  <th className="text-center p-1 sm:p-2 text-xs sm:text-sm whitespace-nowrap">3rd Back</th>
+                  <th className="text-center p-1 sm:p-2 text-xs sm:text-sm whitespace-nowrap">4th Back</th>
+                  <th className="text-center p-1 sm:p-2 text-xs sm:text-sm whitespace-nowrap">5th Back</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockData.map((horse, index) => (
+                  <tr key={index} className="border-b border-betting-tertiaryPurple/20 hover:bg-betting-darkPurple/30">
+                    <td className="p-2 sm:p-3 md:p-4 text-center font-bold text-base sm:text-lg md:text-xl">{horse.pp}</td>
+                    <td className="p-2 sm:p-3 md:p-4 font-bold text-sm sm:text-base md:text-lg whitespace-nowrap">{horse.horseName}</td>
+                    {horse.lastFiveGrades.map((grade, gradeIndex) => (
+                      <td key={gradeIndex} className="p-1 sm:p-2 text-center">
+                        <div className="space-y-1 sm:space-y-2">
+                          <Badge className={`${getGradeColor(grade.grade)} text-sm sm:text-base md:text-lg font-bold px-2 sm:px-3 py-0.5 sm:py-1`}>
+                            {grade.grade}
+                          </Badge>
+                          <div className="text-[10px] sm:text-xs text-gray-400">
+                            <div>{grade.race}</div>
+                            <div>{grade.date}</div>
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-yellow-400 italic">
+                            {grade.troubleNotes}
+                          </div>
+                        </div>
+                      </td>
+                    ))}
+                    <td className="p-2 sm:p-3 md:p-4 text-center">
+                      <Badge className={`${getGradeColor(horse.runoutGrade)} text-base sm:text-lg md:text-xl font-bold px-2 sm:px-3 md:px-4 py-1 sm:py-2`}>
+                        {horse.runoutGrade}
+                      </Badge>
+                    </td>
+                    <td className="p-2 sm:p-3 md:p-4 text-xs sm:text-sm text-yellow-400 italic max-w-[150px] sm:max-w-xs">
+                      {horse.runoutNotes}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         
-        <div className="mt-8 p-4 bg-betting-darkPurple/50 rounded-lg border border-betting-tertiaryPurple/30">
-          <h3 className="text-lg font-bold mb-3">Grade Scale:</h3>
-          <div className="grid grid-cols-5 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-green-600 text-white">A</Badge>
-              <span>Excellent Performance</span>
+        <div className="mt-4 sm:mt-6 md:mt-8 p-3 sm:p-4 bg-betting-darkPurple/50 rounded-lg border border-betting-tertiaryPurple/30">
+          <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">Grade Scale:</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className="bg-green-600 text-white text-xs sm:text-sm">A</Badge>
+              <span>Excellent</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-blue-600 text-white">B</Badge>
-              <span>Good Performance</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className="bg-blue-600 text-white text-xs sm:text-sm">B</Badge>
+              <span>Good</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-yellow-600 text-white">C</Badge>
-              <span>Average Performance</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className="bg-yellow-600 text-white text-xs sm:text-sm">C</Badge>
+              <span>Average</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-orange-600 text-white">D</Badge>
-              <span>Below Average</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className="bg-orange-600 text-white text-xs sm:text-sm">D</Badge>
+              <span>Below Avg</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-red-600 text-white">F</Badge>
-              <span>Poor Performance</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className="bg-red-600 text-white text-xs sm:text-sm">F</Badge>
+              <span>Poor</span>
             </div>
           </div>
         </div>
