@@ -108,3 +108,7 @@ verify_jwt = true
 [functions.agent-chat]
 verify_jwt = false
 # Note: Public agent chat function
+
+[functions.google-tts]
+verify_jwt = false
+# Note: Text-to-speech for voice agents
