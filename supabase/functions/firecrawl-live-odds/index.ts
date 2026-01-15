@@ -96,7 +96,7 @@ serve(async (req) => {
     const { trackName, trackCode, trackPage, raceNumber } = await req.json();
 
     // SECURITY FIX: Input validation and sanitization
-    if (!trackName || !raceNumber) {
+    if (!trackName || raceNumber === undefined || raceNumber === null) {
       return new Response(
         JSON.stringify({ success: false, error: 'Track name and race number are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -104,18 +104,45 @@ serve(async (req) => {
     }
 
     // Validate data types
-    if (typeof trackName !== 'string' || typeof raceNumber !== 'number') {
+    if (typeof trackName !== 'string') {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid input types' }),
+        JSON.stringify({ success: false, error: 'Track name must be a string' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Sanitize track name to prevent injection
-    const sanitizedTrackName = trackName.replace(/[^\w\s-]/g, '').trim();
-    if (sanitizedTrackName.length === 0 || raceNumber < 1 || raceNumber > 50) {
+    const raceNum = Number(raceNumber);
+    if (!Number.isInteger(raceNum) || raceNum < 1 || raceNum > 50) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid track name or race number' }),
+        JSON.stringify({ success: false, error: 'Race number must be an integer between 1 and 50' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY FIX: Validate path components to prevent path traversal
+    const validatePathComponent = (input: string): boolean => {
+      return typeof input === 'string' && /^[a-zA-Z0-9_-]+$/.test(input) && input.length <= 50;
+    };
+
+    if (trackCode && !validatePathComponent(trackCode)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid track code format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (trackPage && !validatePathComponent(trackPage)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid page name format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Sanitize track name
+    const sanitizedTrackName = trackName.replace(/[^\w\s-]/g, '').trim().slice(0, 100);
+    if (sanitizedTrackName.length === 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid track name' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -129,13 +156,13 @@ serve(async (req) => {
       );
     }
 
-    // Build URL for live odds page - OTB shows live odds on the same page
+    // Build URL for live odds page with proper encoding
     let url: string;
     if (trackCode && trackPage) {
-      url = `https://www.offtrackbetting.com/racetracks/${trackCode}/${trackPage}.html`;
+      url = `https://www.offtrackbetting.com/racetracks/${encodeURIComponent(trackCode)}/${encodeURIComponent(trackPage)}.html`;
     } else {
-      const slug = trackName.toLowerCase().replace(/\s+/g, '-');
-      url = `https://www.offtrackbetting.com/tracks/${slug}`;
+      const slug = sanitizedTrackName.toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
+      url = `https://www.offtrackbetting.com/tracks/${encodeURIComponent(slug)}`;
     }
 
     console.log('Scraping live odds from:', url, 'for user:', auth.userId);
