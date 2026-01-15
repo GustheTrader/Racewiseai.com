@@ -73,18 +73,18 @@ const RaceNavBar: React.FC<RaceNavBarProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between bg-gradient-to-r from-purple-600/90 to-blue-600/90 p-4 rounded-xl shadow-lg mb-4 border-2 border-betting-tertiaryPurple/50 backdrop-blur-sm hover:shadow-purple-500/20 transition-all duration-300 relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <div className="flex items-center justify-between bg-gradient-to-r from-teal-600 via-cyan-600 to-purple-600 p-4 rounded-xl shadow-lg mb-4 border-2 border-cyan-400/50 backdrop-blur-sm hover:shadow-cyan-500/30 transition-all duration-300 relative overflow-hidden group">
+      <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       <div className="flex items-center space-x-3 relative z-10">
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-white/80" />
           <Select value={track} onValueChange={handleTrackChange}>
-            <SelectTrigger className="w-[200px] bg-gradient-to-r from-betting-darkPurple/80 to-betting-darkPurple/60 text-white border border-betting-tertiaryPurple/50 backdrop-blur-sm hover:border-purple-400/70 transition-all duration-300">
+            <SelectTrigger className="w-[200px] bg-gradient-to-r from-gray-900/80 to-gray-800/60 text-white border border-cyan-400/50 backdrop-blur-sm hover:border-teal-400/70 transition-all duration-300">
               <SelectValue placeholder="Select Track" />
             </SelectTrigger>
-            <SelectContent className="bg-gradient-to-br from-betting-darkPurple/95 to-betting-darkPurple/90 text-white border-2 border-betting-tertiaryPurple/50 backdrop-blur-lg">
+            <SelectContent className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 text-white border-2 border-cyan-400/50 backdrop-blur-lg">
               {TRACK_OPTIONS.map((trackOption) => (
-                <SelectItem key={trackOption.value} value={trackOption.value} className="hover:bg-purple-500/20">
+                <SelectItem key={trackOption.value} value={trackOption.value} className="hover:bg-cyan-500/20">
                   {trackOption.label}
                 </SelectItem>
               ))}
@@ -98,19 +98,19 @@ const RaceNavBar: React.FC<RaceNavBarProps> = ({
             size="icon"
             onClick={navigateToPreviousRace}
             disabled={race <= 1}
-            className="bg-gradient-to-r from-betting-darkPurple/80 to-betting-darkPurple/60 text-white border border-betting-tertiaryPurple/50 backdrop-blur-sm hover:border-purple-400/70 disabled:opacity-50 transition-all duration-300"
+            className="bg-gradient-to-r from-gray-900/80 to-gray-800/60 text-white border border-cyan-400/50 backdrop-blur-sm hover:border-teal-400/70 disabled:opacity-50 transition-all duration-300"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
           
           <div className="mx-2">
             <Select value={race.toString()} onValueChange={handleRaceChange}>
-              <SelectTrigger className="w-[120px] bg-gradient-to-r from-betting-darkPurple/80 to-betting-darkPurple/60 text-white border border-betting-tertiaryPurple/50 backdrop-blur-sm hover:border-purple-400/70 transition-all duration-300">
+              <SelectTrigger className="w-[120px] bg-gradient-to-r from-gray-900/80 to-gray-800/60 text-white border border-cyan-400/50 backdrop-blur-sm hover:border-teal-400/70 transition-all duration-300">
                 <SelectValue placeholder="Race" />
               </SelectTrigger>
-              <SelectContent className="bg-gradient-to-br from-betting-darkPurple/95 to-betting-darkPurple/90 text-white border-2 border-betting-tertiaryPurple/50 backdrop-blur-lg">
+              <SelectContent className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 text-white border-2 border-cyan-400/50 backdrop-blur-lg">
                 {races.map((raceNumber) => (
-                  <SelectItem key={raceNumber} value={raceNumber.toString()} className="hover:bg-purple-500/20">
+                  <SelectItem key={raceNumber} value={raceNumber.toString()} className="hover:bg-cyan-500/20">
                     RACE {raceNumber}
                   </SelectItem>
                 ))}
@@ -123,22 +123,22 @@ const RaceNavBar: React.FC<RaceNavBarProps> = ({
             size="icon"
             onClick={navigateToNextRace}
             disabled={race >= 12}
-            className="bg-gradient-to-r from-betting-darkPurple/80 to-betting-darkPurple/60 text-white border border-betting-tertiaryPurple/50 backdrop-blur-sm hover:border-purple-400/70 disabled:opacity-50 transition-all duration-300"
+            className="bg-gradient-to-r from-gray-900/80 to-gray-800/60 text-white border border-cyan-400/50 backdrop-blur-sm hover:border-teal-400/70 disabled:opacity-50 transition-all duration-300"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
         
-        <div className="ml-3 rounded-xl bg-gradient-to-r from-betting-darkPurple/80 to-betting-darkPurple/60 text-white px-4 py-2 font-bold border border-betting-tertiaryPurple/50 backdrop-blur-sm shadow-lg flex items-center gap-2">
-          <Clock className="h-4 w-4 text-yellow-400" />
-          <span className="bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">{mtp} MTP</span>
+        <div className="ml-3 rounded-xl bg-gradient-to-r from-gray-900/80 to-gray-800/60 text-white px-4 py-2 font-bold border border-cyan-400/50 backdrop-blur-sm shadow-lg flex items-center gap-2">
+          <Clock className="h-4 w-4 text-cyan-300" />
+          <span className="bg-gradient-to-r from-cyan-300 to-teal-300 bg-clip-text text-transparent">{mtp} MTP</span>
         </div>
       </div>
 
       <div className="text-white flex items-center space-x-3 relative z-10">
-        <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/30 rounded-lg px-4 py-2 border border-white/10 backdrop-blur-sm">
-          <span className="font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">ALLOWANCE</span>
-          <span className="ml-2 text-gray-300">Purse: {allowanceInfo.purse} | {allowanceInfo.age} | {allowanceInfo.distance} | Dirt: {allowanceInfo.surface}</span>
+        <div className="bg-gradient-to-r from-gray-900/60 to-gray-800/40 rounded-lg px-4 py-2 border border-cyan-400/30 backdrop-blur-sm">
+          <span className="font-semibold bg-gradient-to-r from-cyan-300 to-purple-300 bg-clip-text text-transparent">ALLOWANCE</span>
+          <span className="ml-2 text-gray-200">Purse: {allowanceInfo.purse} | {allowanceInfo.age} | {allowanceInfo.distance} | Dirt: {allowanceInfo.surface}</span>
         </div>
         <Button 
           onClick={() => navigate('/model-process')}
