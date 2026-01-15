@@ -3,8 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Loader2, X } from 'lucide-react';
-import { useSpeechRecognition, speakText, stopSpeaking } from '@/hooks/useSpeechRecognition';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Loader2, Settings2 } from 'lucide-react';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { useGoogleTTS, MALE_VOICES, MaleVoiceId } from '@/hooks/useGoogleTTS';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -35,9 +37,20 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Google TTS hook for confident male voices
+  const { 
+    speak, 
+    stop: stopTTS, 
+    isSpeaking, 
+    isLoading: ttsLoading,
+    currentVoice,
+    setVoice,
+    availableVoices
+  } = useGoogleTTS({ defaultVoice: 'en-US-Neural2-D' });
   
   const { 
     isListening, 
@@ -59,11 +72,10 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
         timestamp: new Date()
       }]);
       if (voiceEnabled) {
-        setIsSpeaking(true);
-        speakText(greeting, () => setIsSpeaking(false));
+        speak(greeting);
       }
     }
-  }, [isOpen, agentName, agentDescription, messages.length, voiceEnabled]);
+  }, [isOpen, agentName, agentDescription, messages.length, voiceEnabled, speak]);
 
   // Handle transcript from speech recognition
   useEffect(() => {
@@ -82,11 +94,10 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   // Cleanup on close
   useEffect(() => {
     if (!isOpen) {
-      stopSpeaking();
+      stopTTS();
       stopListening();
-      setIsSpeaking(false);
     }
-  }, [isOpen, stopListening]);
+  }, [isOpen, stopListening, stopTTS]);
 
   const handleSendMessage = async (text?: string) => {
     const messageText = text || inputValue;
@@ -102,7 +113,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
-    stopSpeaking();
+    stopTTS();
 
     try {
       const conversationHistory = [...messages, userMessage].map(m => ({
@@ -131,8 +142,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
       setMessages(prev => [...prev, assistantMessage]);
 
       if (voiceEnabled) {
-        setIsSpeaking(true);
-        speakText(aiResponse, () => setIsSpeaking(false));
+        speak(aiResponse);
       }
     } catch (err) {
       console.error('Chat error:', err);
@@ -151,8 +161,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
 
   const toggleVoice = () => {
     if (isSpeaking) {
-      stopSpeaking();
-      setIsSpeaking(false);
+      stopTTS();
     }
     setVoiceEnabled(!voiceEnabled);
   };
@@ -161,8 +170,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     if (isListening) {
       stopListening();
     } else {
-      stopSpeaking();
-      setIsSpeaking(false);
+      stopTTS();
       startListening();
     }
   };
@@ -183,11 +191,21 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Voice Settings */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                title="Voice settings"
+              >
+                <Settings2 className="h-4 w-4" />
+              </Button>
               {/* Voice Status Indicator */}
-              {isSpeaking && (
+              {(isSpeaking || ttsLoading) && (
                 <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs">Speaking...</span>
+                  <span className="text-xs">{ttsLoading ? 'Loading...' : 'Speaking...'}</span>
                 </div>
               )}
               {isListening && (
@@ -198,6 +216,25 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               )}
             </div>
           </div>
+          {/* Voice Selection Panel */}
+          {showVoiceSettings && (
+            <div className="mt-3 p-3 bg-white/10 rounded-lg">
+              <p className="text-xs text-white/70 mb-2">Select Voice (Confident Male SME)</p>
+              <Select value={currentVoice} onValueChange={(v) => setVoice(v as MaleVoiceId)}>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {Object.entries(availableVoices).map(([id, { label, accent }]) => (
+                    <SelectItem key={id} value={id} className="text-white hover:bg-gray-700">
+                      <span>{label}</span>
+                      <span className="ml-2 text-xs text-gray-400">({accent})</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </DialogHeader>
         
         {/* Messages */}
