@@ -126,13 +126,24 @@ export default {
           '100%': {
             opacity: '1',
           }
+        },
+        'glow-pulse': {
+          '0%, 100%': {
+            boxShadow: '0 0 15px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2)',
+            color: 'rgb(34, 211, 238)'
+          },
+          '50%': {
+            boxShadow: '0 0 15px rgba(249, 115, 22, 0.4), 0 0 30px rgba(249, 115, 22, 0.2)',
+            color: 'rgb(251, 146, 60)'
+          }
         }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
         'pulse-update': 'pulse-update 1s ease-in-out',
-        'fade-in': 'fade-in 0.5s ease-out'
+        'fade-in': 'fade-in 0.5s ease-out',
+        'glow-pulse': 'glow-pulse 3s ease-in-out infinite'
 			},
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
