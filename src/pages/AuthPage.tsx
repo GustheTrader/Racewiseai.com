@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import fireLogoImg from '@/assets/racewise-fire-logo.png';
+import fireHorseImg from '@/assets/racewise-fire-horse.png';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
@@ -87,8 +87,8 @@ const AuthPage = () => {
         loop
         muted
         playsInline
-        poster={fireLogoImg}
-        className="absolute inset-0 w-full h-full object-cover opacity-50"
+        poster={fireHorseImg}
+        className="absolute inset-0 w-full h-full object-cover opacity-40"
       >
         <source src="/videos/horse-racing-bg.mp4" type="video/mp4" />
       </video>
@@ -109,17 +109,20 @@ const AuthPage = () => {
           <div className="text-center mb-12 animate-fade-in-up relative">
             {/* Fire glow behind logo */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-96 h-96 bg-gradient-radial from-orange-500/30 via-red-500/15 to-transparent blur-3xl animate-pulse" />
+              <div className="w-[500px] h-[500px] bg-gradient-radial from-orange-600/40 via-red-600/20 to-transparent blur-3xl animate-pulse" />
             </div>
             <div className="relative">
               <img 
-                src={fireLogoImg} 
-                alt="Racewise AI Toolbox" 
-                className="h-56 md:h-72 mx-auto mb-4 object-contain drop-shadow-[0_0_40px_rgba(249,115,22,0.5)]"
+                src={fireHorseImg} 
+                alt="Racewise AI - Fire Horse" 
+                className="h-64 md:h-80 mx-auto mb-6 object-contain drop-shadow-[0_0_60px_rgba(249,115,22,0.6)] animate-[pulse_3s_ease-in-out_infinite]"
               />
             </div>
-            <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]">
-              Professional handicapping tools powered by ML/AI quantum inspired models
+            <h1 className="text-3xl md:text-4xl font-black mb-3 bg-gradient-to-r from-yellow-300 via-orange-500 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+              RACEWISE AI TOOLBOX
+            </h1>
+            <p className="text-lg md:text-xl font-semibold max-w-2xl mx-auto bg-gradient-to-r from-orange-300 via-yellow-400 to-orange-400 bg-clip-text text-transparent">
+              Ignite Your Edge • ML-Powered Handicapping Intelligence
             </p>
           </div>
 
