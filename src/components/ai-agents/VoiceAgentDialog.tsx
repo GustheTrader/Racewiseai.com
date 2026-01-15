@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Loader2, Settings2 } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Loader2, Settings2, Trash2, RotateCcw } from 'lucide-react';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useGoogleTTS, MALE_VOICES, MaleVoiceId } from '@/hooks/useGoogleTTS';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +39,54 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Storage key for this agent's chat history
+  const chatStorageKey = `chat-history-${agentType}`;
+
+  // Load saved chat history
+  const loadChatHistory = (): Message[] => {
+    try {
+      const saved = localStorage.getItem(chatStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to load chat history:', e);
+    }
+    return [];
+  };
+
+  // Save chat history
+  const saveChatHistory = (msgs: Message[]) => {
+    try {
+      // Keep last 50 messages to avoid storage limits
+      const toSave = msgs.slice(-50);
+      localStorage.setItem(chatStorageKey, JSON.stringify(toSave));
+    } catch (e) {
+      console.error('Failed to save chat history:', e);
+    }
+  };
+
+  // Clear chat history
+  const clearChatHistory = () => {
+    localStorage.removeItem(chatStorageKey);
+    const greeting = `Hello! I'm ${agentName}. ${agentDescription} How can I help you today?`;
+    const newMessages = [{
+      id: Date.now().toString(),
+      content: greeting,
+      role: 'assistant' as const,
+      timestamp: new Date()
+    }];
+    setMessages(newMessages);
+    saveChatHistory(newMessages);
+    toast.success('Chat history cleared');
+  };
   
   // Load saved voice preference for this agent
   const getSavedVoice = (): MaleVoiceId => {
@@ -73,21 +120,37 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     error: speechError
   } = useSpeechRecognition();
 
-  // Initialize with greeting
+  // Initialize with saved history or greeting
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      const greeting = `Hello! I'm ${agentName}. ${agentDescription} How can I help you today?`;
-      setMessages([{
-        id: '1',
-        content: greeting,
-        role: 'assistant',
-        timestamp: new Date()
-      }]);
-      if (voiceEnabled) {
-        speak(greeting);
+    if (isOpen && !isInitialized) {
+      const savedHistory = loadChatHistory();
+      if (savedHistory.length > 0) {
+        setMessages(savedHistory);
+        toast.success(`Resumed ${savedHistory.length} previous messages`);
+      } else {
+        const greeting = `Hello! I'm ${agentName}. ${agentDescription} How can I help you today?`;
+        const newMessages = [{
+          id: '1',
+          content: greeting,
+          role: 'assistant' as const,
+          timestamp: new Date()
+        }];
+        setMessages(newMessages);
+        saveChatHistory(newMessages);
+        if (voiceEnabled) {
+          speak(greeting);
+        }
       }
+      setIsInitialized(true);
     }
-  }, [isOpen, agentName, agentDescription, messages.length, voiceEnabled, speak]);
+  }, [isOpen, isInitialized, agentName, agentDescription, voiceEnabled, speak]);
+
+  // Save messages whenever they change
+  useEffect(() => {
+    if (messages.length > 0 && isInitialized) {
+      saveChatHistory(messages);
+    }
+  }, [messages, isInitialized]);
 
   // Handle transcript from speech recognition
   useEffect(() => {
@@ -103,11 +166,12 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Cleanup on close
+  // Cleanup on close - reset initialized flag
   useEffect(() => {
     if (!isOpen) {
       stopTTS();
       stopListening();
+      setIsInitialized(false);
     }
   }, [isOpen, stopListening, stopTTS]);
 
@@ -216,6 +280,16 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Clear History Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChatHistory}
+                className="text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-1.5 px-2 border border-gray-600/50"
+                title="Clear chat history"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
               {/* Voice Settings Toggle */}
               <Button
                 variant="ghost"
