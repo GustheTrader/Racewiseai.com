@@ -104,6 +104,35 @@ serve(async (req) => {
       );
     }
 
+    // SECURITY FIX: Validate and sanitize path components
+    const validatePathComponent = (input: string): boolean => {
+      return typeof input === 'string' && /^[a-zA-Z0-9_-]+$/.test(input) && input.length <= 50;
+    };
+
+    if (trackCode && !validatePathComponent(trackCode)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid track code format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (trackPage && !validatePathComponent(trackPage)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid page name format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (raceNumber !== undefined && raceNumber !== null) {
+      const raceNum = Number(raceNumber);
+      if (!Number.isInteger(raceNum) || raceNum < 1 || raceNum > 50) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Invalid race number (must be 1-50)' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // Try both secret names (connector uses FIRECRAWL_API_KEY_1)
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY_1') || Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
@@ -114,19 +143,20 @@ serve(async (req) => {
       );
     }
 
-    // Build the URL for offtrackbetting.com using code and page name
+    // Build the URL for offtrackbetting.com using validated code and page name
     // Format: https://www.offtrackbetting.com/racetracks/{CODE}/{page_name}.html
     let url: string;
     if (trackCode && trackPage) {
-      url = `https://www.offtrackbetting.com/racetracks/${trackCode}/${trackPage}.html`;
+      // Path components already validated above
+      url = `https://www.offtrackbetting.com/racetracks/${encodeURIComponent(trackCode)}/${encodeURIComponent(trackPage)}.html`;
     } else {
-      // Fallback to old format
-      const slug = trackName.toLowerCase().replace(/\s+/g, '-');
-      url = `https://www.offtrackbetting.com/tracks/${slug}`;
+      // Fallback to old format with sanitized slug
+      const slug = trackName.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 50);
+      url = `https://www.offtrackbetting.com/tracks/${encodeURIComponent(slug)}`;
     }
     
     if (raceNumber) {
-      url += `?race=${raceNumber}`;
+      url += `?race=${encodeURIComponent(String(raceNumber))}`;
     }
 
     console.log('Scraping morning report from:', url, 'for user:', auth.userId);
