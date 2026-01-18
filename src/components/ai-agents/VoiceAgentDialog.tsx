@@ -175,6 +175,23 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Auto-restart listening after agent finishes speaking for continuous conversation
+  const wasSpeakingRef = useRef(false);
+  useEffect(() => {
+    if (isSpeaking) {
+      wasSpeakingRef.current = true;
+    } else if (wasSpeakingRef.current && !isSpeaking && !isLoading && isOpen && speechSupported) {
+      // Agent just finished speaking - restart listening
+      wasSpeakingRef.current = false;
+      const restartTimer = setTimeout(() => {
+        if (!isListening && isOpen) {
+          startListening();
+        }
+      }, 500); // Brief pause before restarting
+      return () => clearTimeout(restartTimer);
+    }
+  }, [isSpeaking, isLoading, isOpen, speechSupported, isListening, startListening]);
+
   // Cleanup on close - reset initialized flag
   useEffect(() => {
     if (!isOpen) {
