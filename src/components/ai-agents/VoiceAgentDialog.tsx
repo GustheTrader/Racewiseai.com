@@ -317,6 +317,29 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     </div>
   );
 
+  // Audio waveform visualization for speaking mode
+  const SpeakingWaveform = () => (
+    <div className="flex items-center justify-center gap-1 h-8">
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          className="w-1 bg-gradient-to-t from-green-500 to-emerald-400 rounded-full"
+          style={{
+            animation: `waveform 0.8s ease-in-out infinite`,
+            animationDelay: `${i * 0.05}s`,
+            height: '100%',
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes waveform {
+          0%, 100% { transform: scaleY(0.3); opacity: 0.5; }
+          50% { transform: scaleY(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+
   // Status message based on current state
   const getStatusMessage = () => {
     if (isListening) return "🎤 Listening... Speak your question!";
@@ -400,9 +423,13 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
           isSpeaking ? 'bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-green-500/20' :
           'bg-gray-800/50'
         }`}>
-          {(isSpeaking || ttsLoading || isListening) && (
+          {/* Waveform for speaking mode */}
+          {isSpeaking && <SpeakingWaveform />}
+          
+          {/* Pulse dot for other states */}
+          {(ttsLoading || isListening) && !isSpeaking && (
             <div className={`w-2 h-2 rounded-full animate-pulse ${
-              isListening ? 'bg-red-400' : isSpeaking ? 'bg-green-400' : 'bg-blue-400'
+              isListening ? 'bg-red-400' : 'bg-blue-400'
             }`} />
           )}
           <span className={`text-sm font-medium ${
@@ -413,6 +440,9 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
           }`}>
             {getStatusMessage()}
           </span>
+          
+          {/* Additional waveform on right side when speaking */}
+          {isSpeaking && <SpeakingWaveform />}
         </div>
 
         {/* Listening Mode - Spiral Animation */}
