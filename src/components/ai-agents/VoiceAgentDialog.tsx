@@ -120,7 +120,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     error: speechError
   } = useSpeechRecognition();
 
-  // Initialize with saved history or greeting
+  // Initialize with saved history or greeting, then auto-start listening
   useEffect(() => {
     if (isOpen && !isInitialized) {
       const savedHistory = loadChatHistory();
@@ -142,8 +142,17 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
         }
       }
       setIsInitialized(true);
+      
+      // Auto-start listening after a brief delay to let speech finish
+      if (speechSupported) {
+        const autoListenTimer = setTimeout(() => {
+          startListening();
+        }, savedHistory.length > 0 ? 500 : 3000); // Quick start if resuming, wait for greeting otherwise
+        
+        return () => clearTimeout(autoListenTimer);
+      }
     }
-  }, [isOpen, isInitialized, agentName, agentDescription, voiceEnabled, speak]);
+  }, [isOpen, isInitialized, agentName, agentDescription, voiceEnabled, speak, speechSupported, startListening]);
 
   // Save messages whenever they change
   useEffect(() => {
