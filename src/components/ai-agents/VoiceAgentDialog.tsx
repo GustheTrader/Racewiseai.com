@@ -161,14 +161,49 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     }
   }, [messages, isInitialized]);
 
-  // Handle transcript from speech recognition
+  // Auto-send timer ref for detecting when user stops talking
+  const autoSendTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTranscriptRef = useRef<string>('');
+
+  // Handle transcript from speech recognition with 2-second auto-send delay
   useEffect(() => {
-    if (transcript && !isListening) {
-      setInputValue(transcript);
-      // Auto-send after voice input
-      handleSendMessage(transcript);
+    // Clear any existing timer when transcript changes
+    if (autoSendTimerRef.current) {
+      clearTimeout(autoSendTimerRef.current);
+      autoSendTimerRef.current = null;
     }
-  }, [transcript, isListening]);
+
+    if (transcript && transcript !== lastTranscriptRef.current) {
+      lastTranscriptRef.current = transcript;
+      setInputValue(transcript);
+      
+      // Set a 2-second timer to auto-send when user stops talking
+      if (isListening && !isLoading) {
+        autoSendTimerRef.current = setTimeout(() => {
+          if (transcript.trim()) {
+            stopListening();
+            handleSendMessage(transcript);
+            lastTranscriptRef.current = '';
+          }
+        }, 2000); // 2 second delay after last speech detected
+      }
+    }
+
+    return () => {
+      if (autoSendTimerRef.current) {
+        clearTimeout(autoSendTimerRef.current);
+      }
+    };
+  }, [transcript, isListening, isLoading, stopListening]);
+
+  // Also send if user manually stops listening with content
+  useEffect(() => {
+    if (!isListening && lastTranscriptRef.current.trim() && !isLoading) {
+      const textToSend = lastTranscriptRef.current;
+      lastTranscriptRef.current = '';
+      handleSendMessage(textToSend);
+    }
+  }, [isListening, isLoading]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
