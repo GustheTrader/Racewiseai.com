@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Loader2, Settings2, Trash2, RotateCcw } from 'lucide-react';
+import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX, Loader2, Settings2, Trash2, RotateCcw, Pause, Play } from 'lucide-react';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useGoogleTTS, MALE_VOICES, MaleVoiceId } from '@/hooks/useGoogleTTS';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +40,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [continuousModeEnabled, setContinuousModeEnabled] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Storage key for this agent's chat history
@@ -215,17 +216,27 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   useEffect(() => {
     if (isSpeaking) {
       wasSpeakingRef.current = true;
-    } else if (wasSpeakingRef.current && !isSpeaking && !isLoading && isOpen && speechSupported) {
-      // Agent just finished speaking - restart listening
+    } else if (wasSpeakingRef.current && !isSpeaking && !isLoading && isOpen && speechSupported && continuousModeEnabled) {
+      // Agent just finished speaking - restart listening (only if continuous mode is enabled)
       wasSpeakingRef.current = false;
       const restartTimer = setTimeout(() => {
-        if (!isListening && isOpen) {
+        if (!isListening && isOpen && continuousModeEnabled) {
           startListening();
         }
       }, 500); // Brief pause before restarting
       return () => clearTimeout(restartTimer);
     }
-  }, [isSpeaking, isLoading, isOpen, speechSupported, isListening, startListening]);
+  }, [isSpeaking, isLoading, isOpen, speechSupported, isListening, startListening, continuousModeEnabled]);
+
+  // Toggle continuous mode
+  const toggleContinuousMode = () => {
+    const newValue = !continuousModeEnabled;
+    setContinuousModeEnabled(newValue);
+    if (!newValue && isListening) {
+      stopListening(); // Stop listening when pausing continuous mode
+    }
+    toast.success(newValue ? 'Continuous mode enabled' : 'Continuous mode paused');
+  };
 
   // Cleanup on close - reset initialized flag
   useEffect(() => {
@@ -381,6 +392,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     if (isLoading) return "🧠 Analyzing your query...";
     if (isSpeaking) return "🔊 Speaking response...";
     if (ttsLoading) return "⏳ Preparing audio...";
+    if (!continuousModeEnabled) return "⏸️ Continuous mode paused - Click mic to speak";
     return "💬 Ready to help you win!";
   };
 
@@ -414,6 +426,21 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
                 title="Clear chat history"
               >
                 <RotateCcw className="h-4 w-4" />
+              </Button>
+              {/* Continuous Mode Toggle */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleContinuousMode}
+                className={`rounded-lg flex items-center gap-1.5 px-2.5 border ${
+                  continuousModeEnabled 
+                    ? 'text-green-400 hover:text-green-300 border-green-500/50 bg-green-500/10 hover:bg-green-500/20' 
+                    : 'text-yellow-400 hover:text-yellow-300 border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/20'
+                }`}
+                title={continuousModeEnabled ? 'Pause continuous listening' : 'Resume continuous listening'}
+              >
+                {continuousModeEnabled ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                <span className="text-xs font-medium">{continuousModeEnabled ? 'Auto' : 'Paused'}</span>
               </Button>
               {/* Voice Settings Toggle */}
               <Button
