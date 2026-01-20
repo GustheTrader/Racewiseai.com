@@ -57,61 +57,6 @@ export function useGoogleTTS(options: UseGoogleTTSOptions = {}): UseGoogleTTSRet
     }
   }, []);
 
-  const speak = useCallback(async (text: string, voiceId?: MaleVoiceId) => {
-    if (!text.trim()) return;
-    
-    stop();
-    setIsLoading(true);
-    setError(null);
-
-    const selectedVoice = voiceId || currentVoice;
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke('google-tts', {
-        body: {
-          text,
-          voiceId: selectedVoice,
-          speakingRate,
-          pitch
-        }
-      });
-
-      if (fnError) throw fnError;
-
-      if (data.fallback || !data.audioContent) {
-        // Fallback to browser TTS with male voice settings
-        console.log('Using browser TTS fallback');
-        fallbackSpeak(text);
-        return;
-      }
-
-      // Play the audio
-      const audioBlob = base64ToBlob(data.audioContent, 'audio/mp3');
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.onplay = () => setIsSpeaking(true);
-      audioRef.current.onended = () => {
-        setIsSpeaking(false);
-        URL.revokeObjectURL(audioUrl);
-      };
-      audioRef.current.onerror = () => {
-        setError('Audio playback failed');
-        setIsSpeaking(false);
-        fallbackSpeak(text);
-      };
-
-      await audioRef.current.play();
-    } catch (err) {
-      console.error('Google TTS error:', err);
-      setError(err instanceof Error ? err.message : 'TTS failed');
-      // Fallback to browser TTS
-      fallbackSpeak(text);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentVoice, speakingRate, pitch, stop]);
-
   // Browser TTS fallback with male voice settings
   const fallbackSpeak = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) {
@@ -155,19 +100,32 @@ export function useGoogleTTS(options: UseGoogleTTSOptions = {}): UseGoogleTTSRet
     if (voices.length > 0) {
       speakWithVoice();
     } else {
-      // Wait for voices to load
       window.speechSynthesis.onvoiceschanged = () => {
         speakWithVoice();
         window.speechSynthesis.onvoiceschanged = null;
       };
-      // Fallback timeout in case onvoiceschanged doesn't fire
-      setTimeout(() => {
-        if (window.speechSynthesis.getVoices().length > 0 || true) {
-          speakWithVoice();
-        }
-      }, 100);
+      setTimeout(() => speakWithVoice(), 100);
     }
   }, []);
+
+  const speak = useCallback(async (text: string, voiceId?: MaleVoiceId) => {
+    if (!text.trim()) return;
+    
+    stop();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Use free browser-based Web Speech API directly (no API key needed)
+      fallbackSpeak(text);
+    } catch (err) {
+      console.error('TTS error:', err);
+      setError(err instanceof Error ? err.message : 'Speech failed');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [stop, fallbackSpeak]);
+
 
   const setVoice = useCallback((voiceId: MaleVoiceId) => {
     setCurrentVoice(voiceId);
@@ -196,37 +154,24 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
   return new Blob([byteArray], { type: mimeType });
 }
 
-// Export a simple speak function for quick use
+// Export a simple speak function for quick use (uses free browser TTS)
 export async function speakWithGoogleTTS(text: string, voiceId: MaleVoiceId = 'en-US-Neural2-D'): Promise<void> {
-  try {
-    const { data, error } = await supabase.functions.invoke('google-tts', {
-      body: { text, voiceId }
-    });
-
-    if (error || data.fallback) {
-      // Fallback to browser TTS
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 0.8;
-        window.speechSynthesis.speak(utterance);
-      }
-      return;
-    }
-
-    const audioBlob = base64ToBlob(data.audioContent, 'audio/mp3');
-    const audio = new Audio(URL.createObjectURL(audioBlob));
-    await audio.play();
-  } catch (err) {
-    console.error('TTS error:', err);
-    // Final fallback
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 0.8;
-      window.speechSynthesis.speak(utterance);
-    }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 0.8;
+    
+    const voices = window.speechSynthesis.getVoices();
+    const maleVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.toLowerCase().includes('david') ||
+       v.name.toLowerCase().includes('james') ||
+       v.name.toLowerCase().includes('mark'))
+    ) || voices.find(v => v.lang.startsWith('en'));
+    
+    if (maleVoice) utterance.voice = maleVoice;
+    window.speechSynthesis.speak(utterance);
   }
 }
 
