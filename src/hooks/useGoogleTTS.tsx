@@ -121,30 +121,52 @@ export function useGoogleTTS(options: UseGoogleTTSOptions = {}): UseGoogleTTSRet
 
     window.speechSynthesis.cancel();
     
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9; // Slightly slower for confidence
-    utterance.pitch = 0.8; // Lower pitch for male voice
-    utterance.volume = 1.0;
+    const speakWithVoice = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9; // Slightly slower for confidence
+      utterance.pitch = 0.8; // Lower pitch for male voice
+      utterance.volume = 1.0;
 
-    // Try to find a male voice
+      // Try to find a male voice
+      const voices = window.speechSynthesis.getVoices();
+      const maleVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.toLowerCase().includes('male') || 
+         v.name.toLowerCase().includes('david') ||
+         v.name.toLowerCase().includes('james') ||
+         v.name.toLowerCase().includes('mark') ||
+         v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('us'))
+      ) || voices.find(v => v.lang.startsWith('en-US')) 
+        || voices.find(v => v.lang.startsWith('en'));
+      
+      if (maleVoice) {
+        utterance.voice = maleVoice;
+      }
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // Voices may not be loaded yet - wait for them
     const voices = window.speechSynthesis.getVoices();
-    const maleVoice = voices.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.toLowerCase().includes('male') || 
-       v.name.toLowerCase().includes('david') ||
-       v.name.toLowerCase().includes('james') ||
-       v.name.toLowerCase().includes('mark'))
-    ) || voices.find(v => v.lang.startsWith('en'));
-    
-    if (maleVoice) {
-      utterance.voice = maleVoice;
+    if (voices.length > 0) {
+      speakWithVoice();
+    } else {
+      // Wait for voices to load
+      window.speechSynthesis.onvoiceschanged = () => {
+        speakWithVoice();
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+      // Fallback timeout in case onvoiceschanged doesn't fire
+      setTimeout(() => {
+        if (window.speechSynthesis.getVoices().length > 0 || true) {
+          speakWithVoice();
+        }
+      }, 100);
     }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
   }, []);
 
   const setVoice = useCallback((voiceId: MaleVoiceId) => {
