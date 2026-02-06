@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import fireHorseImg from '@/assets/racewise-fire-horse.png';
+import etherealHorseImg from '@/assets/racewise-ethereal-horse.png';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
@@ -87,7 +87,7 @@ const AuthPage = () => {
         loop
         muted
         playsInline
-        poster={fireHorseImg}
+        poster={etherealHorseImg}
         className="absolute inset-0 w-full h-full object-cover opacity-40"
       >
         <source src="/videos/horse-racing-bg.mp4" type="video/mp4" />
@@ -111,12 +111,16 @@ const AuthPage = () => {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-[500px] h-[500px] bg-gradient-radial from-orange-600/40 via-red-600/20 to-transparent blur-3xl animate-pulse" />
             </div>
-            <div className="relative">
+            <div className="relative group">
               <img 
-                src={fireHorseImg} 
-                alt="Racewise AI - Fire Horse" 
-                className="h-64 md:h-80 mx-auto mb-6 object-contain drop-shadow-[0_0_60px_rgba(249,115,22,0.6)] animate-[pulse_3s_ease-in-out_infinite]"
+                src={etherealHorseImg} 
+                alt="Racewise AI - Ethereal Horse" 
+                className="h-72 md:h-96 mx-auto mb-6 object-contain drop-shadow-[0_0_80px_rgba(249,115,22,0.5)] drop-shadow-[0_0_120px_rgba(34,211,238,0.3)] animate-float"
               />
+              {/* Enhanced glow effect on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-radial from-cyan-400/20 via-transparent to-transparent blur-2xl" />
+              </div>
             </div>
             {/* 3D Title with teal-to-coral gradient */}
             <h1 className="text-4xl md:text-7xl font-black mb-4 relative tracking-tight">
