@@ -1931,7 +1931,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      api_connections_safe: {
+        Row: {
+          api_key_masked: string | null
+          api_url: string | null
+          created_at: string | null
+          id: string | null
+          is_test_mode: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_key_masked?: never
+          api_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_test_mode?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_key_masked?: never
+          api_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_test_mode?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

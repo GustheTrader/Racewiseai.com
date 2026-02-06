@@ -60,9 +60,10 @@ const DataScraperTab = () => {
     const loadApiSettings = async () => {
       if (user) {
         try {
+          // Use secure view that masks API keys for display
           const { data, error } = await supabase
-            .from('api_connections')
-            .select('api_url, api_key, is_test_mode')
+            .from('api_connections_safe')
+            .select('api_url, api_key_masked, is_test_mode')
             .eq('user_id', user.id)
             .maybeSingle();
 
@@ -73,7 +74,8 @@ const DataScraperTab = () => {
 
           if (data) {
             setApiUrl(data.api_url || '');
-            setApiKey(data.api_key || '');
+            // API key is masked in the safe view for security
+            setApiKey(data.api_key_masked || '');
             setIsTestMode(data.is_test_mode !== false);  // Default to true if null
           }
         } catch (err) {
