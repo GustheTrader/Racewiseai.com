@@ -165,6 +165,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   // Auto-send timer ref for detecting when user stops talking
   const autoSendTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastTranscriptRef = useRef<string>('');
+  const hasSentRef = useRef(false); // Prevent double-sending
 
   // Handle transcript from speech recognition with 2-second auto-send delay
   useEffect(() => {
@@ -176,17 +177,19 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
 
     if (transcript && transcript !== lastTranscriptRef.current) {
       lastTranscriptRef.current = transcript;
+      hasSentRef.current = false; // Reset sent flag on new transcript
       setInputValue(transcript);
       
-      // Set a 2-second timer to auto-send when user stops talking
+      // Set a 2.5-second timer to auto-send when user stops talking
       if (isListening && !isLoading) {
         autoSendTimerRef.current = setTimeout(() => {
-          if (transcript.trim()) {
+          if (transcript.trim() && !hasSentRef.current) {
+            hasSentRef.current = true;
             stopListening();
             handleSendMessage(transcript);
             lastTranscriptRef.current = '';
           }
-        }, 2000); // 2 second delay after last speech detected
+        }, 2500); // 2.5 second delay to prevent premature sends
       }
     }
 
@@ -195,11 +198,12 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
         clearTimeout(autoSendTimerRef.current);
       }
     };
-  }, [transcript, isListening, isLoading, stopListening]);
+  }, [transcript, isListening, isLoading]);
 
-  // Also send if user manually stops listening with content
+  // Handle manual stop - only send if we haven't already
   useEffect(() => {
-    if (!isListening && lastTranscriptRef.current.trim() && !isLoading) {
+    if (!isListening && lastTranscriptRef.current.trim() && !isLoading && !hasSentRef.current) {
+      hasSentRef.current = true;
       const textToSend = lastTranscriptRef.current;
       lastTranscriptRef.current = '';
       handleSendMessage(textToSend);
@@ -211,29 +215,49 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-restart listening after agent finishes speaking for continuous conversation
+  // Auto-restart listening after agent finishes speaking - with debounce to prevent loops
   const wasSpeakingRef = useRef(false);
+  const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
+    // Clear any pending restart timer
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+    
     if (isSpeaking) {
       wasSpeakingRef.current = true;
     } else if (wasSpeakingRef.current && !isSpeaking && !isLoading && isOpen && speechSupported && continuousModeEnabled) {
-      // Agent just finished speaking - restart listening (only if continuous mode is enabled)
+      // Agent just finished speaking - restart listening with longer delay
       wasSpeakingRef.current = false;
-      const restartTimer = setTimeout(() => {
-        if (!isListening && isOpen && continuousModeEnabled) {
+      restartTimerRef.current = setTimeout(() => {
+        // Double-check conditions before restarting
+        if (!isListening && isOpen && continuousModeEnabled && !isLoading) {
           startListening();
         }
-      }, 500); // Brief pause before restarting
-      return () => clearTimeout(restartTimer);
+        restartTimerRef.current = null;
+      }, 1500); // Longer pause to prevent rapid loops
     }
-  }, [isSpeaking, isLoading, isOpen, speechSupported, isListening, startListening, continuousModeEnabled]);
+    
+    return () => {
+      if (restartTimerRef.current) {
+        clearTimeout(restartTimerRef.current);
+      }
+    };
+  }, [isSpeaking, isLoading, isOpen, speechSupported, continuousModeEnabled]);
 
   // Toggle continuous mode
   const toggleContinuousMode = () => {
     const newValue = !continuousModeEnabled;
     setContinuousModeEnabled(newValue);
-    if (!newValue && isListening) {
+    if (!newValue) {
       stopListening(); // Stop listening when pausing continuous mode
+      // Clear any pending restart
+      if (restartTimerRef.current) {
+        clearTimeout(restartTimerRef.current);
+        restartTimerRef.current = null;
+      }
     }
     toast.success(newValue ? 'Continuous mode enabled' : 'Continuous mode paused');
   };
