@@ -123,7 +123,7 @@ const AuthPage = () => {
               </div>
             </div>
             {/* 3D Title with multicolored gradient - 10% smaller */}
-            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black mb-4 relative tracking-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-4 relative tracking-tight whitespace-nowrap">
               {/* Dark stroke outline for max contrast */}
               <span className="absolute inset-0 text-black blur-[4px] translate-x-3 translate-y-3" style={{ WebkitTextStroke: '5px black' }}>
                 ⚡ RACEWISE AI TOOLBOX ⚡
