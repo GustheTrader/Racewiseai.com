@@ -122,22 +122,25 @@ const AuthPage = () => {
                 <div className="absolute inset-0 bg-gradient-radial from-cyan-400/20 via-transparent to-transparent blur-2xl" />
               </div>
             </div>
-            {/* 3D Title with high contrast - 33% larger */}
-            <h1 className="text-5xl md:text-8xl lg:text-9xl font-black mb-4 relative tracking-tight">
+            {/* 3D Title with multicolored gradient - 10% smaller */}
+            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black mb-4 relative tracking-tight">
               {/* Dark stroke outline for max contrast */}
-              <span className="absolute inset-0 text-black blur-[4px] translate-x-3 translate-y-3" style={{ WebkitTextStroke: '6px black' }}>
+              <span className="absolute inset-0 text-black blur-[4px] translate-x-3 translate-y-3" style={{ WebkitTextStroke: '5px black' }}>
                 ⚡ RACEWISE AI TOOLBOX ⚡
               </span>
               {/* Secondary dark layer */}
-              <span className="absolute inset-0 text-slate-950 blur-[2px] translate-x-2 translate-y-2" style={{ WebkitTextStroke: '4px rgba(0,0,0,0.8)' }}>
+              <span className="absolute inset-0 text-slate-950 blur-[2px] translate-x-2 translate-y-2" style={{ WebkitTextStroke: '3px rgba(0,0,0,0.8)' }}>
                 ⚡ RACEWISE AI TOOLBOX ⚡
               </span>
-              {/* Bright white core for maximum pop */}
+              {/* Multicolored gradient core */}
               <span 
-                className="relative bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent"
+                className="relative bg-clip-text text-transparent"
                 style={{ 
-                  WebkitTextStroke: '1px rgba(255,255,255,0.3)',
-                  textShadow: '0 0 40px rgba(255,255,255,0.9), 0 0 80px rgba(34,211,238,0.7), 0 0 120px rgba(249,115,22,0.5), 0 6px 0 rgba(0,0,0,0.5)' 
+                  backgroundImage: 'linear-gradient(90deg, #f97316, #facc15, #4ade80, #22d3ee, #a78bfa, #f472b6, #f97316)',
+                  backgroundSize: '200% 100%',
+                  animation: 'gradient-scroll 4s linear infinite',
+                  WebkitTextStroke: '1px rgba(255,255,255,0.2)',
+                  textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 80px rgba(34,211,238,0.5), 0 0 120px rgba(249,115,22,0.4), 0 5px 0 rgba(0,0,0,0.5)' 
                 }}
               >
                 ⚡ RACEWISE AI TOOLBOX ⚡
