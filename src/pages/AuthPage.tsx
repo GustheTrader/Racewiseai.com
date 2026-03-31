@@ -12,7 +12,8 @@ import {
   BarChart3, 
   Bot,
   Eye,
-  Target
+  Target,
+  Shield
 } from 'lucide-react';
 
 const AuthPage = () => {
@@ -188,8 +189,21 @@ const AuthPage = () => {
             </div>
 
             {/* Center Column - Form */}
-            <div className="flex items-center justify-center animate-fade-in-up stagger-3">
+            <div className="flex items-center justify-center animate-fade-in-up stagger-3 space-y-4">
               <SimpleBetaForm />
+              <div className="w-full max-w-md">
+                <button
+                  type="button"
+                  className="w-full py-3 px-6 rounded-xl font-medium text-base
+                    bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400
+                    text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)]
+                    flex items-center justify-center gap-2 transition-all duration-300"
+                  onClick={() => navigate('/admin')}
+                >
+                  <Shield className="h-5 w-5" />
+                  Admin Portal
+                </button>
+              </div>
             </div>
 
             {/* Right Column - Tools 5-8 */}
