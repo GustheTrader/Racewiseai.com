@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { Loader2, Mail, Lock, ArrowRight, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, ArrowRight, CheckCircle, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SimpleBetaForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +11,7 @@ const SimpleBetaForm = () => {
   const [isSignup, setIsSignup] = useState(true);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const { signUp, signIn } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,6 +218,24 @@ const SimpleBetaForm = () => {
               ? '🔥 Confirmation email required to activate account'
               : '✓ Fast and secure authentication'}
           </p>
+        </div>
+
+        {/* Admin Portal Button */}
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => navigate('/admin')}
+            className="w-full py-2.5 px-4 rounded-xl text-sm font-medium
+              bg-gradient-to-r from-amber-600/20 to-amber-500/10 
+              border border-amber-500/30 hover:border-amber-400/50
+              text-amber-400 hover:text-amber-300
+              flex items-center justify-center gap-2
+              transition-all duration-300
+              hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+          >
+            <Shield className="h-4 w-4" />
+            Admin Portal
+          </button>
         </div>
       </div>
     </div>
