@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Navigate, useNavigate, Outlet, NavLink } from 'react-router-dom';
-import { Loader2, Home, LogOut, Calendar, Zap, Database, Settings, Activity, FileText } from 'lucide-react';
+import { Loader2, Home, LogOut, Calendar, Zap, Database, Settings, FileText, Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import racewiseLogo from '@/assets/racewise-logo.webp';
@@ -32,6 +32,8 @@ const AdminLayout: React.FC = () => {
     { to: '/admin/schedule', label: 'Schedule', icon: Calendar },
     { to: '/admin/data', label: 'Data Viewer', icon: Database },
     { to: '/admin/models', label: 'Models', icon: FileText },
+    { to: '/admin/email', label: 'Email', icon: Mail },
+    { to: '/admin/broadcast', label: 'Broadcast', icon: Send },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 

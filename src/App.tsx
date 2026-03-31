@@ -25,6 +25,8 @@ import AdminSchedulePage from "./pages/admin/AdminSchedulePage";
 import AdminDataPage from "./pages/admin/AdminDataPage";
 import AdminModelsPage from "./pages/admin/AdminModelsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminEmailPage from "./pages/admin/AdminEmailPage";
+import AdminEmailBroadcastPage from "./pages/admin/AdminEmailBroadcastPage";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +90,8 @@ const AnimatedRoutes = () => {
           <Route path="schedule" element={<AdminSchedulePage />} />
           <Route path="data" element={<AdminDataPage />} />
           <Route path="models" element={<AdminModelsPage />} />
+          <Route path="email" element={<AdminEmailPage />} />
+          <Route path="broadcast" element={<AdminEmailBroadcastPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
 
