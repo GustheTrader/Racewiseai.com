@@ -77,14 +77,10 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* Admin Routes with sub-pages */}
+        {/* Admin Routes with sub-pages - No auth required */}
         <Route 
           path="/admin" 
-          element={
-            <RequireAuth requireAdmin={true}>
-              <AdminLayout />
-            </RequireAuth>
-          }
+          element={<AdminLayout />}
         >
           <Route index element={<AdminScrapingPage />} />
           <Route path="schedule" element={<AdminSchedulePage />} />

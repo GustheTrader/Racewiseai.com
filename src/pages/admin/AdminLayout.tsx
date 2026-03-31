@@ -1,31 +1,12 @@
 import React from 'react';
-import { useAuth } from '@/contexts/auth/AuthContext';
-import { Navigate, useNavigate, Outlet, NavLink } from 'react-router-dom';
-import { Loader2, Home, LogOut, Calendar, Zap, Database, Settings, FileText, Mail, Send } from 'lucide-react';
+import { useNavigate, Outlet, NavLink } from 'react-router-dom';
+import { Home, Calendar, Zap, Database, Settings, FileText, Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import racewiseLogo from '@/assets/racewise-logo.webp';
 
 const AdminLayout: React.FC = () => {
-  const { user, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
-  };
 
   const navItems = [
     { to: '/admin', label: 'Scraping', icon: Zap, end: true },
@@ -67,19 +48,7 @@ const AdminLayout: React.FC = () => {
               Main Dashboard
             </Button>
             
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card">
-              <span className="text-sm text-muted-foreground">{user.email}</span>
-              <Badge className="bg-amber-600/20 text-amber-400 border-amber-600/30">Admin</Badge>
-            </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            <Badge className="bg-amber-600/20 text-amber-400 border-amber-600/30">Admin</Badge>
           </div>
         </div>
       </header>

@@ -1,27 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const SUPABASE_URL = "https://pejlrhevvoxpkmrdwens.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlamxyaGV2dm94cGttcmR3ZW5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5ODMzODYsImV4cCI6MjA2MjU1OTM4Nn0.zUP_m3-q4H3qW8siAd1M_XqSgYSJ-gFNDl1Y-IgevKg";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
-
-async function getAuthToken(): Promise<string | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session?.access_token || null;
-}
 
 async function callEmailFunction(payload: Record<string, unknown>): Promise<{
   success: boolean;
   data?: unknown;
   error?: string;
 }> {
-  const token = await getAuthToken();
-  if (!token) {
-    return { success: false, error: "Not authenticated" };
-  }
-
   try {
     const response = await fetch(
       `${SUPABASE_URL}/functions/v1/send-email`,
@@ -29,7 +18,8 @@ async function callEmailFunction(payload: Record<string, unknown>): Promise<{
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "apikey": SUPABASE_ANON_KEY,
         },
         body: JSON.stringify(payload),
       }
