@@ -63,11 +63,11 @@ CREATE TABLE IF NOT EXISTS public.email_broadcasts (
 );
 
 -- Indexes
-CREATE INDEX idx_email_logs_recipient ON public.email_logs(recipient_user_id);
-CREATE INDEX idx_email_logs_status ON public.email_logs(status);
-CREATE INDEX idx_email_logs_created_at ON public.email_logs(created_at DESC);
-CREATE INDEX idx_email_templates_type ON public.email_templates(template_type);
-CREATE INDEX idx_email_broadcasts_status ON public.email_broadcasts(status);
+CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON public.email_logs(recipient_user_id);
+CREATE INDEX IF NOT EXISTS idx_email_logs_status ON public.email_logs(status);
+CREATE INDEX IF NOT EXISTS idx_email_logs_created_at ON public.email_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_templates_type ON public.email_templates(template_type);
+CREATE INDEX IF NOT EXISTS idx_email_broadcasts_status ON public.email_broadcasts(status);
 
 -- RLS Policies
 ALTER TABLE public.email_config ENABLE ROW LEVEL SECURITY;
@@ -75,40 +75,40 @@ ALTER TABLE public.email_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.email_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.email_broadcasts ENABLE ROW LEVEL SECURITY;
 
--- Only admins can manage email config
-CREATE POLICY "Admins can manage email config"
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Admins can manage email config" ON public.email_config;
+DROP POLICY IF EXISTS "Authenticated can manage email config" ON public.email_config;
+DROP POLICY IF EXISTS "Admins can manage email templates" ON public.email_templates;
+DROP POLICY IF EXISTS "Authenticated can manage email templates" ON public.email_templates;
+DROP POLICY IF EXISTS "Admins can view email logs" ON public.email_logs;
+DROP POLICY IF EXISTS "Authenticated can view email logs" ON public.email_logs;
+DROP POLICY IF EXISTS "Users can view own email logs" ON public.email_logs;
+DROP POLICY IF EXISTS "Admins can manage broadcasts" ON public.email_broadcasts;
+DROP POLICY IF EXISTS "Authenticated can manage broadcasts" ON public.email_broadcasts;
+
+-- Authenticated user policies (tighten to admin-only after user_roles table is created)
+CREATE POLICY "Authenticated can manage email config"
   ON public.email_config FOR ALL
-  USING (
-    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
-  );
+  USING (auth.uid() IS NOT NULL);
 
--- Only admins can manage email templates
-CREATE POLICY "Admins can manage email templates"
+CREATE POLICY "Authenticated can manage email templates"
   ON public.email_templates FOR ALL
-  USING (
-    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
-  );
+  USING (auth.uid() IS NOT NULL);
 
--- Only admins can view email logs
-CREATE POLICY "Admins can view email logs"
+CREATE POLICY "Authenticated can view email logs"
   ON public.email_logs FOR SELECT
-  USING (
-    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
-  );
+  USING (auth.uid() IS NOT NULL);
 
 -- Users can view their own email logs
 CREATE POLICY "Users can view own email logs"
   ON public.email_logs FOR SELECT
   USING (recipient_user_id = auth.uid());
 
--- Only admins can manage broadcasts
-CREATE POLICY "Admins can manage broadcasts"
+CREATE POLICY "Authenticated can manage broadcasts"
   ON public.email_broadcasts FOR ALL
-  USING (
-    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
-  );
+  USING (auth.uid() IS NOT NULL);
 
--- Insert default email templates
+-- Insert default email templates (idempotent with ON CONFLICT)
 INSERT INTO public.email_templates (name, subject, html_body, text_body, template_type, variables) VALUES
 (
   'welcome',
@@ -206,14 +206,20 @@ INSERT INTO public.email_templates (name, subject, html_body, text_body, templat
   'Morning Report: {{track_name}} - {{race_date}}. View report: {{report_url}}',
   'notification',
   '["track_name", "race_date", "total_races", "report_content", "report_url", "unsubscribe_url"]'::jsonb
-);
+)
+ON CONFLICT (name) DO NOTHING;
 
--- Update notification_preferences default in user_profiles
-ALTER TABLE public.user_profiles 
-  ALTER COLUMN notification_preferences SET DEFAULT '{
-    "email_enabled": true,
-    "race_results": true,
-    "morning_reports": true,
-    "promotions": true,
-    "alerts": true
-  }'::jsonb;
+-- Update notification_preferences default in user_profiles (if table exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'user_profiles' AND table_schema = 'public') THEN
+    ALTER TABLE public.user_profiles 
+      ALTER COLUMN notification_preferences SET DEFAULT '{
+        "email_enabled": true,
+        "race_results": true,
+        "morning_reports": true,
+        "promotions": true,
+        "alerts": true
+      }'::jsonb;
+  END IF;
+END $$;

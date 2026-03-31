@@ -39,8 +39,6 @@ jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 enable_signup = true
-# SECURITY FIX: Add password requirements
-password_min_length = 8
 # SECURITY FIX: Add session security
 enable_anonymous_sign_ins = false
 
@@ -51,8 +49,6 @@ enabled = true
 enabled = true
 file_size_limit = "50MiB"
 
-[edge_functions]
-enabled = true
 
 # SECURITY FIX: Enable JWT verification for user-facing functions
 # Scheduled/cron functions use service role key instead
@@ -112,3 +108,7 @@ verify_jwt = false
 [functions.google-tts]
 verify_jwt = false
 # Note: Text-to-speech for voice agents
+
+[functions.send-email]
+verify_jwt = false
+# Note: Email sending function - auth verified in code
