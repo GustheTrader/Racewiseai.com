@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { Loader2, Mail, Lock, ArrowRight, CheckCircle, Shield } from 'lucide-react';
+import { Loader2, Lock, ArrowRight, CheckCircle, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -159,33 +159,47 @@ const SimpleBetaForm = () => {
             />
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading || !email.trim() || !password.trim()}
-            className={`
-              w-full py-3 px-6 rounded-xl font-medium text-base mt-6
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-              flex items-center justify-center gap-2
-              transition-all duration-300
-              ${isSignup 
-                ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)]' 
-                : 'glass-button text-white hover:bg-blue-600/20'
-              }
-            `}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                {isSignup ? 'Creating account...' : 'Signing in...'}
-              </>
-            ) : (
-              <>
-                {isSignup ? 'Create Account' : 'Sign In'}
-                <ArrowRight className="h-5 w-5" />
-              </>
-            )}
-          </button>
+          {/* Submit Buttons */}
+          <div className="flex gap-3 mt-6">
+            <button
+              type="submit"
+              disabled={isLoading || !email.trim() || !password.trim()}
+              className={`
+                flex-1 py-3 px-6 rounded-xl font-medium text-base
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                flex items-center justify-center gap-2
+                transition-all duration-300
+                ${isSignup 
+                  ? 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)]' 
+                  : 'glass-button text-white hover:bg-blue-600/20'
+                }
+              `}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  {isSignup ? 'Creating...' : 'Signing in...'}
+                </>
+              ) : (
+                <>
+                  {isSignup ? 'Create Account' : 'Sign In'}
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              className="py-3 px-6 rounded-xl font-medium text-base
+                bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400
+                text-white shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)]
+                flex items-center justify-center gap-2 transition-all duration-300"
+            >
+              <Shield className="h-5 w-5" />
+              Admin
+            </button>
+          </div>
         </form>
 
         {/* Toggle Between Signup/Signin */}
