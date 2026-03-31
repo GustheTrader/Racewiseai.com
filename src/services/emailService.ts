@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const SUPABASE_URL = "https://bqvavkzgmznjfirgfyhd.supabase.co";
+const SUPABASE_URL = "https://pejlrhevvoxpkmrdwens.supabase.co";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
