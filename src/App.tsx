@@ -25,6 +25,7 @@ import AdminSchedulePage from "./pages/admin/AdminSchedulePage";
 import AdminDataPage from "./pages/admin/AdminDataPage";
 import AdminModelsPage from "./pages/admin/AdminModelsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminPipelinePage from "./pages/admin/AdminPipelinePage";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const AnimatedRoutes = () => {
           <Route path="schedule" element={<AdminSchedulePage />} />
           <Route path="data" element={<AdminDataPage />} />
           <Route path="models" element={<AdminModelsPage />} />
+          <Route path="pipeline" element={<AdminPipelinePage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
 
