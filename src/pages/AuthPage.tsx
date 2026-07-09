@@ -131,30 +131,12 @@ const AuthPage = () => {
                 <div className="absolute inset-0 bg-gradient-radial from-cyan-400/20 via-transparent to-transparent blur-2xl" />
               </div>
             </div>
-            {/* 3D Title with multicolored gradient - 10% smaller */}
-            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-4 relative tracking-tight whitespace-nowrap">
-              {/* Dark stroke outline for max contrast */}
-              <span className="absolute inset-0 text-black blur-[4px] translate-x-3 translate-y-3" style={{ WebkitTextStroke: '5px black' }}>
-                ⚡ RACEWISE AI TOOLBOX ⚡
-              </span>
-              {/* Secondary dark layer */}
-              <span className="absolute inset-0 text-slate-950 blur-[2px] translate-x-2 translate-y-2" style={{ WebkitTextStroke: '3px rgba(0,0,0,0.8)' }}>
-                ⚡ RACEWISE AI TOOLBOX ⚡
-              </span>
-              {/* Multicolored gradient core */}
-              <span 
-                className="relative bg-clip-text text-transparent"
-                style={{ 
-                  backgroundImage: 'linear-gradient(90deg, #f97316, #facc15, #4ade80, #22d3ee, #a78bfa, #f472b6, #f97316)',
-                  backgroundSize: '200% 100%',
-                  animation: 'gradient-scroll 4s linear infinite',
-                  WebkitTextStroke: '1px rgba(255,255,255,0.2)',
-                  textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 80px rgba(34,211,238,0.5), 0 0 120px rgba(249,115,22,0.4), 0 5px 0 rgba(0,0,0,0.5)' 
-                }}
-              >
-                ⚡ RACEWISE AI TOOLBOX ⚡
-              </span>
+            {/* Editorial wordmark — clean, high contrast */}
+            <h1 className="mb-4 whitespace-nowrap font-serif font-semibold tracking-tight text-white text-3xl sm:text-5xl md:text-6xl lg:text-7xl"
+                style={{ textShadow: '0 2px 24px rgba(0,0,0,0.75)' }}>
+              Gnoesis <span className="italic font-light text-amber-300">Agentic</span> Toolbox
             </h1>
+            <div className="mx-auto mb-4 h-px w-40 bg-amber-300/70" />
             
             {/* Tagline with contrasting cyan/electric blue for flair */}
             <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto relative">
