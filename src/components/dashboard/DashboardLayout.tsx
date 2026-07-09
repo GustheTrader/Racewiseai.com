@@ -34,6 +34,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         
         <div className="flex-1 flex flex-col relative z-10">
           <header className="m-4 mb-0 glass-header p-5">
+            <h1 className="sr-only">{title}</h1>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <RacewiseLogo />
