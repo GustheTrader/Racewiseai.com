@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import etherealHorseImg from '@/assets/racewise-ethereal-horse.png';
 import firehorseVideo from '@/assets/firehorse-logo.mp4.asset.json';
+import firehorsePoster from '@/assets/firehorse-poster.jpg.asset.json';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SimpleBetaForm from '@/components/auth/SimpleBetaForm';
@@ -114,15 +115,17 @@ const AuthPage = () => {
             </div>
             <div className="relative group">
               <video
-                src={firehorseVideo.url}
-                poster={etherealHorseImg}
+                poster={firehorsePoster.url}
                 autoPlay
                 loop
                 muted
                 playsInline
+                preload="metadata"
                 aria-label="Racewise AI - Fire Horse"
                 className="h-72 md:h-96 mx-auto mb-6 object-contain drop-shadow-[0_0_80px_rgba(249,115,22,0.5)] drop-shadow-[0_0_120px_rgba(34,211,238,0.3)] animate-float"
-              />
+              >
+                <source src={firehorseVideo.url} type="video/mp4" />
+              </video>
               {/* Enhanced glow effect on hover */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-radial from-cyan-400/20 via-transparent to-transparent blur-2xl" />
