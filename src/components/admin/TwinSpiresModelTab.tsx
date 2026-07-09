@@ -32,6 +32,7 @@ import { parseTwinSpires, TwinSpiresResult, TwinSpiresRace, TwinSpiresHorse } fr
 import { fileToBase64 } from '@/utils/dataToolboxUtils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { supabase } from '@/integrations/supabase/client';
+import { parseFractionalOdds } from '@/utils/oddsUtils';
 
 interface TrdHorse {
   name: string;
@@ -64,74 +65,43 @@ const TwinSpiresModelTab: React.FC = () => {
     
     setIsLoadingTrd(true);
     try {
-      // Fetch race_data with horses for the same track/date
-      const { data: races, error: racesError } = await supabase
-        .from('race_data')
-        .select('*')
+      // Pull the real TRD consensus reports for the same track/date.
+      // No mocks — if nothing is uploaded, show nothing and tell the user.
+      const { data: trdReports, error: trdErr } = await supabase
+        .from('model_reports')
+        .select('track_name, race_date, race_number, ensemble_scores, report_data')
+        .eq('model_type', 'trd_consensus')
         .eq('track_name', parsedData.track)
-        .gte('race_date', parsedData.date)
-        .lte('race_date', parsedData.date + 'T23:59:59');
+        .eq('race_date', parsedData.date)
+        .order('race_number', { ascending: true });
 
-      if (racesError) throw racesError;
+      if (trdErr) throw trdErr;
 
-      if (races && races.length > 0) {
-        // Fetch horses for each race
-        const racesWithHorses: TrdRaceData[] = await Promise.all(
-          races.map(async (race) => {
-            const { data: horses } = await supabase
-              .from('race_horses')
-              .select('*')
-              .eq('race_id', race.id);
-            
-            return {
-              ...race,
-              horses: horses?.map(h => ({
-                name: h.name,
-                pp: h.pp,
-                ml_odds: h.ml_odds,
-                consensus: Math.floor(Math.random() * 40 + 60) // Mock consensus for demo
-              })) || []
-            };
-          })
-        );
-        setTrdData(racesWithHorses);
-        toast.success(`Loaded ${racesWithHorses.length} TRD races for comparison`);
-      } else {
-        // Try fetching from odds_data as fallback
-        const { data: oddsData } = await supabase
-          .from('odds_data')
-          .select('*')
-          .eq('track_name', parsedData.track)
-          .eq('race_date', parsedData.date);
-
-        if (oddsData && oddsData.length > 0) {
-          // Group by race number
-          const raceMap = new Map<number, TrdHorse[]>();
-          oddsData.forEach(od => {
-            if (!raceMap.has(od.race_number)) {
-              raceMap.set(od.race_number, []);
-            }
-            raceMap.get(od.race_number)!.push({
-              name: od.horse_name,
-              pp: od.horse_number,
-              consensus: Math.floor(Math.random() * 40 + 60)
-            });
-          });
-
-          const racesFromOdds: TrdRaceData[] = Array.from(raceMap.entries()).map(([raceNum, horses]) => ({
-            id: `odds-${raceNum}`,
-            track_name: parsedData.track,
-            race_number: raceNum,
-            race_date: parsedData.date,
-            horses
-          }));
-          
-          setTrdData(racesFromOdds);
-          toast.success(`Loaded ${racesFromOdds.length} races from odds data`);
-        } else {
-          toast.info('No TRD data found for this track/date');
-        }
+      if (!trdReports || trdReports.length === 0) {
+        setTrdData([]);
+        toast.info('No TRD consensus report uploaded for this track/date yet');
+        return;
       }
+
+      const races: TrdRaceData[] = trdReports.map((rep) => {
+        const scores = (rep.ensemble_scores || {}) as Record<string, any>;
+        const horses: TrdHorse[] = Object.entries(scores).map(([programNumber, s]: [string, any]) => ({
+          name: s?.name ?? '',
+          pp: parseInt(programNumber, 10) || 0,
+          ml_odds: parseFractionalOdds(s?.mlOdds),
+          consensus: typeof s?.consensusScore === 'number' ? s.consensusScore : undefined,
+        }));
+        return {
+          id: `trd-${rep.track_name}-${rep.race_date}-${rep.race_number}`,
+          track_name: rep.track_name,
+          race_date: rep.race_date,
+          race_number: rep.race_number,
+          horses,
+        };
+      });
+
+      setTrdData(races);
+      toast.success(`Loaded ${races.length} TRD consensus race(s) for comparison`);
     } catch (err: any) {
       console.error('Error fetching TRD data:', err);
       toast.error('Failed to load TRD data');
@@ -324,7 +294,7 @@ const TwinSpiresModelTab: React.FC = () => {
               pp: horse.postPosition || parseInt(horse.programNumber) || 0,
               jockey: horse.jockey?.name || null,
               trainer: horse.trainer?.name || null,
-              ml_odds: parseFloat(horse.morningLine?.replace(/[^0-9.]/g, '')) || null,
+              ml_odds: parseFractionalOdds(horse.morningLine),
             }, { onConflict: 'race_id,pp' });
 
           if (!horseError) horsesInserted++;
