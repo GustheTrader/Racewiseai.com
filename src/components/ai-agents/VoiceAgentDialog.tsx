@@ -163,7 +163,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
   }, [messages, isInitialized]);
 
   // Auto-send timer ref for detecting when user stops talking
-  const autoSendTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTranscriptRef = useRef<string>('');
   const hasSentRef = useRef(false); // Prevent double-sending
 
@@ -217,7 +217,7 @@ const VoiceAgentDialog: React.FC<VoiceAgentDialogProps> = ({
 
   // Auto-restart listening after agent finishes speaking - with debounce to prevent loops
   const wasSpeakingRef = useRef(false);
-  const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   useEffect(() => {
     // Clear any pending restart timer

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_reports: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: number
+          jobs_created: number | null
+          report_date: string
+          report_type: string
+          tracks_running: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: number
+          jobs_created?: number | null
+          report_date: string
+          report_type?: string
+          tracks_running?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: number
+          jobs_created?: number | null
+          report_date?: string
+          report_type?: string
+          tracks_running?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       agent_analyses: {
         Row: {
           agent_name: string
@@ -109,6 +142,47 @@ export type Database = {
           total_pool?: number | null
         }
         Relationships: []
+      }
+      betting_probables: {
+        Row: {
+          captured_at: string | null
+          id: string
+          payoff_amount: number | null
+          probability: number | null
+          race_card_id: string
+          updated_at: string | null
+          wager_type: string
+          winning_combination: string
+        }
+        Insert: {
+          captured_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          probability?: number | null
+          race_card_id: string
+          updated_at?: string | null
+          wager_type: string
+          winning_combination: string
+        }
+        Update: {
+          captured_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          probability?: number | null
+          race_card_id?: string
+          updated_at?: string | null
+          wager_type?: string
+          winning_combination?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "betting_probables_race_card_id_fkey"
+            columns: ["race_card_id"]
+            isOneToOne: false
+            referencedRelation: "race_cards"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cosmic_bombs: {
         Row: {
@@ -761,6 +835,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payoff_results: {
+        Row: {
+          bet_type: string
+          created_at: string | null
+          id: string
+          payoff_amount: number | null
+          pool_total: number | null
+          race_date: string
+          race_number: number
+          race_result_id: string | null
+          track_name: string
+          updated_at: string | null
+          winning_numbers: string[] | null
+        }
+        Insert: {
+          bet_type: string
+          created_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          pool_total?: number | null
+          race_date: string
+          race_number: number
+          race_result_id?: string | null
+          track_name: string
+          updated_at?: string | null
+          winning_numbers?: string[] | null
+        }
+        Update: {
+          bet_type?: string
+          created_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          pool_total?: number | null
+          race_date?: string
+          race_number?: number
+          race_result_id?: string | null
+          track_name?: string
+          updated_at?: string | null
+          winning_numbers?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payoff_results_race_result_id_fkey"
+            columns: ["race_result_id"]
+            isOneToOne: false
+            referencedRelation: "race_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -791,8 +915,63 @@ export type Database = {
         }
         Relationships: []
       }
+      race_cards: {
+        Row: {
+          conditions: string | null
+          created_at: string | null
+          distance: string | null
+          id: string
+          post_time: string | null
+          purse: string | null
+          race_date: string
+          race_number: number
+          race_time: string | null
+          race_type: string | null
+          scraped_at: string | null
+          source_url: string | null
+          surface: string | null
+          track_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          conditions?: string | null
+          created_at?: string | null
+          distance?: string | null
+          id?: string
+          post_time?: string | null
+          purse?: string | null
+          race_date: string
+          race_number: number
+          race_time?: string | null
+          race_type?: string | null
+          scraped_at?: string | null
+          source_url?: string | null
+          surface?: string | null
+          track_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          conditions?: string | null
+          created_at?: string | null
+          distance?: string | null
+          id?: string
+          post_time?: string | null
+          purse?: string | null
+          race_date?: string
+          race_number?: number
+          race_time?: string | null
+          race_type?: string | null
+          scraped_at?: string | null
+          source_url?: string | null
+          surface?: string | null
+          track_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       race_data: {
         Row: {
+          betting_pools: Json | null
           created_at: string
           id: string
           race_conditions: string | null
@@ -802,6 +981,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          betting_pools?: Json | null
           created_at?: string
           id?: string
           race_conditions?: string | null
@@ -811,6 +991,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          betting_pools?: Json | null
           created_at?: string
           id?: string
           race_conditions?: string | null
@@ -1165,6 +1346,45 @@ export type Database = {
         }
         Relationships: []
       }
+      scraper_jobs: {
+        Row: {
+          completed_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          horses_scraped: number | null
+          id: string
+          race_date: string
+          races_scraped: number | null
+          started_at: string | null
+          status: string
+          track_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          horses_scraped?: number | null
+          id?: string
+          race_date: string
+          races_scraped?: number | null
+          started_at?: string | null
+          status: string
+          track_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          horses_scraped?: number | null
+          id?: string
+          race_date?: string
+          races_scraped?: number | null
+          started_at?: string | null
+          status?: string
+          track_name?: string
+        }
+        Relationships: []
+      }
       speed_figures: {
         Row: {
           created_at: string | null
@@ -1458,6 +1678,7 @@ export type Database = {
           schedule_hour: number | null
           schedule_minute: number | null
           timezone: string | null
+          track_code: string | null
           track_name: string
           updated_at: string | null
         }
@@ -1468,6 +1689,7 @@ export type Database = {
           schedule_hour?: number | null
           schedule_minute?: number | null
           timezone?: string | null
+          track_code?: string | null
           track_name: string
           updated_at?: string | null
         }
@@ -1478,6 +1700,7 @@ export type Database = {
           schedule_hour?: number | null
           schedule_minute?: number | null
           timezone?: string | null
+          track_code?: string | null
           track_name?: string
           updated_at?: string | null
         }
