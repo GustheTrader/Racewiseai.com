@@ -1745,6 +1745,63 @@ export type Database = {
         }
         Relationships: []
       }
+      trained_models: {
+        Row: {
+          accuracy: number | null
+          created_at: string
+          created_by: string | null
+          epochs: number
+          error: string | null
+          features: Json
+          id: string
+          log_loss: number | null
+          model_type: string
+          name: string
+          notes: string | null
+          status: string
+          trained_at: string | null
+          training_samples: number | null
+          updated_at: string
+          weights: Json | null
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string
+          created_by?: string | null
+          epochs?: number
+          error?: string | null
+          features?: Json
+          id?: string
+          log_loss?: number | null
+          model_type: string
+          name: string
+          notes?: string | null
+          status?: string
+          trained_at?: string | null
+          training_samples?: number | null
+          updated_at?: string
+          weights?: Json | null
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string
+          created_by?: string | null
+          epochs?: number
+          error?: string | null
+          features?: Json
+          id?: string
+          log_loss?: number | null
+          model_type?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          trained_at?: string | null
+          training_samples?: number | null
+          updated_at?: string
+          weights?: Json | null
+        }
+        Relationships: []
+      }
       trainers: {
         Row: {
           barn_location: string | null
