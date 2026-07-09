@@ -85,7 +85,7 @@ const AuthCallback = () => {
           onClick={() => navigate('/auth')}
           className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
         >
-          Click here if not redirected
+          Return to sign in
         </button>
       </div>
     </div>

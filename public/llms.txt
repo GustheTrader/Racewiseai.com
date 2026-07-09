@@ -1,0 +1,11 @@
+# RaceWiseAI
+
+> AI-powered horse racing handicapping platform featuring the Quantum 5D predictive model, real-time odds streams, sharp bettor tracking, and value pick generation across every major U.S. track.
+
+RaceWiseAI combines Firecrawl-based scraping of live off-track betting data with a proprietary Quantum 5D model to surface value bets, price movement, and race-day analytics. The dashboard is authenticated; public content lives at the routes below.
+
+## Pages
+
+- [Home](/): Product overview and sign-in entry point for the RaceWiseAI dashboard.
+- [Public Results](/public-results): Publicly viewable race results and payoff summaries.
+- [Model Process](/model-process): Explanation of the Quantum 5D handicapping model, methodology, and community discussion.
