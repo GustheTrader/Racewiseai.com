@@ -24,8 +24,8 @@ const AdminSettingsPage: React.FC = () => {
       
       try {
         const { data, error } = await supabase
-          .from('api_connections')
-          .select('*')
+          .from('api_connections_safe')
+          .select('api_url, api_key_masked, is_test_mode')
           .eq('user_id', user.id)
           .maybeSingle();
 
@@ -33,7 +33,8 @@ const AdminSettingsPage: React.FC = () => {
 
         if (data) {
           setApiUrl(data.api_url || '');
-          setApiKey(data.api_key || '');
+          // api_key is never returned to the client for security; show masked placeholder
+          setApiKey(data.api_key_masked ? '' : '');
           setIsTestMode(data.is_test_mode !== false);
         }
       } catch (err) {
@@ -51,15 +52,19 @@ const AdminSettingsPage: React.FC = () => {
 
     setIsSaving(true);
     try {
+      const payload: Record<string, any> = {
+        user_id: user.id,
+        api_url: apiUrl,
+        is_test_mode: isTestMode,
+        updated_at: new Date().toISOString(),
+      };
+      // Only send api_key when the user typed a new value — never round-trip masked/empty
+      if (apiKey && apiKey.trim().length > 0) {
+        payload.api_key = apiKey;
+      }
       const { error } = await supabase
         .from('api_connections')
-        .upsert({
-          user_id: user.id,
-          api_url: apiUrl,
-          api_key: apiKey,
-          is_test_mode: isTestMode,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' });
+        .upsert(payload, { onConflict: 'user_id' });
 
       if (error) throw error;
 
