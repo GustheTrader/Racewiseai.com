@@ -224,9 +224,20 @@ serve(async (req) => {
       const cronSignature = req.headers.get("x-cron-signature");
       const expectedSignature = Deno.env.get("CRON_JOB_SECRET");
 
-      if (!expectedSignature || cronSignature !== expectedSignature) {
-        console.warn("[SECURITY] Invalid cron signature");
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+      // Accept either (a) matching CRON_JOB_SECRET signature, or
+      // (b) an Authorization bearer that matches the project anon key
+      //     (which is how pg_cron invokes internal edge functions).
+      const authHeader = req.headers.get("Authorization") || "";
+      const bearerToken = authHeader.replace(/^Bearer\s+/i, "");
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+
+      const signatureOk =
+        !!expectedSignature && cronSignature === expectedSignature;
+      const bearerOk = !!anonKey && bearerToken === anonKey;
+
+      if (!signatureOk && !bearerOk) {
+        console.warn("[SECURITY] Invalid cron auth");
+        return new Response(JSON.stringify({ error: "Invalid cron auth" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
