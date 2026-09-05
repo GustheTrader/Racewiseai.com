@@ -116,7 +116,7 @@ async function executeJob(
       }
 
       const result = await response.json();
-      recordsScraped = result.records_scraped || 0;
+      recordsScraped = await persistRaceData(supabase, job, result?.data);
     } else if (job.job_type === "results") {
       // Call scrape-race-results
       const response = await fetch(
