@@ -202,43 +202,31 @@ IMPORTANT:
 - Only return valid JSON`;
 
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
+        Authorization: `Bearer ${Deno.env.get('LOVABLE_API_KEY') ?? ''}`,
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2, // Low temperature for consistent data extraction
-          maxOutputTokens: 2048,
-        },
+        model: 'google/gemini-3-flash',
+        temperature: 0.2,
+        messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', response.status, errorText);
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      console.error('AI gateway error:', response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Gemini response structure:', JSON.stringify(Object.keys(data)));
-    
-    // FIXED: Correct path for Gemini API response
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    const content = data.choices?.[0]?.message?.content || '';
     
     if (!content) {
-      console.error('Empty Gemini response:', JSON.stringify(data));
+      console.error('Empty AI response:', JSON.stringify(data));
       throw new Error('Empty response from Gemini API');
     }
 
@@ -304,8 +292,8 @@ serve(async (req) => {
       });
     }
 
-    // Validate Gemini API key
-    if (!GEMINI_API_KEY) {
+    // Validate AI gateway key
+    if (!Deno.env.get('LOVABLE_API_KEY')) {
       return new Response(
         JSON.stringify({ error: 'Gemini API key not configured' }),
         {
