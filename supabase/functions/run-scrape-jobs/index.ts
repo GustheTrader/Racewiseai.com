@@ -254,7 +254,6 @@ async function executeJob(
       .update({
         status: "completed",
         next_run_at: calculateNextRunTime(job.interval_seconds),
-        retry_count: 0,
         updated_at: new Date().toISOString(),
       })
       .eq("id", jobId);
@@ -284,8 +283,6 @@ async function executeJob(
         .update({
           status: "pending",
           next_run_at: retryTime.toISOString(),
-          retry_count: currentRetry + 1,
-          error_message: errorMsg,
           updated_at: new Date().toISOString(),
         })
         .eq("id", jobId);
