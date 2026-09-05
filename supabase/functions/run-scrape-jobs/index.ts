@@ -267,7 +267,9 @@ serve(async (req) => {
       .from("scrape_jobs")
       .select("*")
       .eq("is_active", true)
-      .limit(100);  // Prevent querying unlimited jobs
+      // Gemini free tier allows ~5 requests/minute; process the oldest few per run
+      .order("next_run_at", { ascending: true })
+      .limit(4);
 
     if (!force_run) {
       // Only get jobs where next_run_at is in the past
@@ -302,8 +304,8 @@ serve(async (req) => {
       results.push(result);
       console.log(formatJobSummary(result));
 
-      // Add small delay between jobs
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Stay under the Gemini rate limit (5 requests / minute)
+      await new Promise((resolve) => setTimeout(resolve, 13000));
     }
 
     const successCount = results.filter((r) => r.status === "success").length;
