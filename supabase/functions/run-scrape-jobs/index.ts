@@ -250,7 +250,10 @@ serve(async (req) => {
     }
 
     // Initialize Supabase client
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY
+    );
 
     const body = await req.json();
     const { force_run = false } = body;
