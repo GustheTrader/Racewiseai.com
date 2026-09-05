@@ -163,7 +163,7 @@ Return ONLY a valid JSON array with this exact structure:
 
 If no results found, return an empty array: []`;
 
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`;
 
   const response = await fetch(apiUrl, {
     method: "POST",

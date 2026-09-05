@@ -23,7 +23,7 @@ function getCorsHeaders(origin?: string | null): Record<string, string> {
 
 // Gemini API configuration
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
 
 interface ScrapedRaceData {
   track_name: string;
@@ -323,7 +323,7 @@ serve(async (req) => {
       success: true,
       data: raceData,
       scraped_at: new Date().toISOString(),
-      method: 'gemini-2.0-flash',
+      method: 'gemini-3.6-flash',
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
