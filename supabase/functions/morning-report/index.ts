@@ -94,7 +94,8 @@ interface SupabaseClient {
  * - Sends report to admin users
  */
 async function generateMorningReport(
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  ownerId: string
 ): Promise<{ tracksRunning: string[]; jobsCreated: number; report: string }> {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
   const tracksRunning: string[] = [];
@@ -142,9 +143,7 @@ async function generateMorningReport(
             interval_seconds: 3600,  // Run every hour
             is_active: true,
             next_run_at: new Date().toISOString(),
-            retry_count: 0,
-            max_retries: 3,
-            created_by: "system",
+            created_by: ownerId,
           });
 
         if (insertError) {
