@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.firecrawl.dev/v1/scrape', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ url, formats: ['markdown'], onlyMainContent: false, waitFor: 8000, timeout: 60000 }),
+    body: JSON.stringify({ url, formats: ['markdown'], onlyMainContent: true, waitFor: 8000, timeout: 60000 }),
   });
 
   const data = await res.json();
