@@ -13,10 +13,11 @@ const Index = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(getMockData());
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleTimeString());
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number>(Date.now());
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [currentTrack, setCurrentTrack] = useState("CHURCHILL DOWNS");
   const [currentRace, setCurrentRace] = useState(7);
-  
+   
   // Use our custom hook for data updates
   const { nextUpdateIn, isLoading, refreshData, error, retryCount } = useDataUpdateManager({
     currentTrack,
@@ -24,6 +25,7 @@ const Index = () => {
     onDataUpdate: (updatedData, updatedTime) => {
       setData(updatedData);
       setLastUpdated(updatedTime);
+      setLastUpdatedAt(Date.now());
       setShowUpdateNotification(true);
       setTimeout(() => setShowUpdateNotification(false), 3000);
     }
@@ -41,6 +43,9 @@ const Index = () => {
     <DashboardLayout 
       title="RACEWISE AI TOOLBOX"
       subtitle="Live race track odds and pool movement dashboard"
+      lastUpdatedAt={lastUpdatedAt}
+      isLoading={isLoading}
+      nextUpdateIn={nextUpdateIn}
       extraButtons={
         <Button 
           variant="outline" 

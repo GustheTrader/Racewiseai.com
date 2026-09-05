@@ -6,19 +6,26 @@ import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import RacewiseLogo from './RacewiseLogo';
 import { AppSidebar } from '../AppSidebar';
+import DataFreshnessIndicator from './DataFreshnessIndicator';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle: string;
   extraButtons?: React.ReactNode;
+  lastUpdatedAt?: number | null;
+  isLoading?: boolean;
+  nextUpdateIn?: number;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   children, 
   title,
   subtitle,
-  extraButtons
+  extraButtons,
+  lastUpdatedAt = null,
+  isLoading = false,
+  nextUpdateIn
 }) => {
   const navigate = useNavigate();
   const [zoom, setZoom] = React.useState<number>(0.75);
@@ -54,13 +61,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="flex justify-between items-center gap-2 flex-wrap">
               <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
                 <RacewiseLogo />
-                <div className="hidden md:block h-10 w-px bg-gradient-to-b from-transparent via-muted-foreground/30 to-transparent" />
+              <div className="hidden md:block h-10 w-px bg-gradient-to-b from-transparent via-muted-foreground/30 to-transparent" />
                 <p className="hidden md:block text-xs lg:text-sm">
                   <span className="text-muted-foreground">AI/ML powered </span>
                   <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent font-medium">
                     {subtitle}
                   </span>
                 </p>
+                <DataFreshnessIndicator
+                  lastUpdatedAt={lastUpdatedAt}
+                  isLoading={isLoading}
+                  nextUpdateIn={nextUpdateIn}
+                />
               </div>
               <div className="flex items-center gap-2 md:gap-3">
                 {extraButtons}
