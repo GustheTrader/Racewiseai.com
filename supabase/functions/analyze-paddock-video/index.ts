@@ -254,7 +254,7 @@ serve(async (req) => {
     }
 
     // Call Gemini with vision capabilities and tool calling
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -375,7 +375,7 @@ serve(async (req) => {
         stride_length: assessmentData.stride_length,
         assessment_type,
         video_source_url: video_url,
-        model_used: 'gemini-2.0-flash',
+        model_used: 'gemini-3.6-flash',
         raw_analysis: assessmentData,
         confidence_score: assessmentData.confidence,
         is_return_from_layoff,

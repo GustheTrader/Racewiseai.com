@@ -70,6 +70,108 @@ function formatJobSummary(result: JobExecutionResult): string {
 }
 
 /**
+ * Save scraped race data (race, horses, odds) to the database.
+ * Returns the number of records written.
+ */
+// deno-lint-ignore no-explicit-any
+async function persistRaceData(supabase: any, job: ScrapeJob, data: any): Promise<number> {
+  if (!data) return 0;
+
+  const trackName = data.track_name || job.track_name;
+  const raceNumber = Number(data.race_number) || 1;
+  const raceDate = data.race_date
+    ? new Date(`${data.race_date}T00:00:00Z`).toISOString()
+    : new Date().toISOString();
+  const horses = Array.isArray(data.horses) ? data.horses : [];
+
+  if (horses.length === 0) return 0;
+
+  // Upsert the race row
+  const { data: existing } = await supabase
+    .from("race_data")
+    .select("id")
+    .eq("track_name", trackName)
+    .eq("race_number", raceNumber)
+    .gte("race_date", raceDate.split("T")[0])
+    .limit(1)
+    .maybeSingle();
+
+  let raceId = existing?.id;
+
+  if (raceId) {
+    await supabase
+      .from("race_data")
+      .update({
+        race_conditions: data.conditions ?? null,
+        betting_pools: data.betting_pools ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", raceId);
+  } else {
+    const { data: inserted, error: insertError } = await supabase
+      .from("race_data")
+      .insert({
+        track_name: trackName,
+        race_number: raceNumber,
+        race_date: raceDate,
+        race_conditions: data.conditions ?? null,
+        betting_pools: data.betting_pools ?? null,
+      })
+      .select("id")
+      .single();
+
+    if (insertError) throw new Error(`Save race failed: ${insertError.message}`);
+    raceId = inserted.id;
+  }
+
+  let records = 0;
+
+  for (const horse of horses) {
+    const pp = Number(horse.program_number);
+    const name = horse.horse_name;
+    if (!pp || !name) continue;
+
+    const { data: existingHorse } = await supabase
+      .from("race_horses")
+      .select("id")
+      .eq("race_id", raceId)
+      .eq("pp", pp)
+      .maybeSingle();
+
+    const horseRow = {
+      race_id: raceId,
+      pp,
+      name,
+      jockey: horse.jockey_name ?? null,
+      trainer: horse.trainer_name ?? null,
+      ml_odds: horse.morning_line_odds != null ? Number(horse.morning_line_odds) : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existingHorse?.id) {
+      await supabase.from("race_horses").update(horseRow).eq("id", existingHorse.id);
+    } else {
+      await supabase.from("race_horses").insert(horseRow);
+    }
+
+    await supabase.from("odds_data").insert({
+      track_name: trackName,
+      race_number: raceNumber,
+      race_date: raceDate.split("T")[0],
+      horse_number: pp,
+      horse_name: name,
+      win_odds: horse.current_odds != null ? String(horse.current_odds) : null,
+      pool_data: data.betting_pools ?? null,
+    });
+
+    records++;
+  }
+
+  return records;
+}
+
+
+/**
  * Execute a single scrape job
  */
 async function executeJob(
@@ -101,6 +203,7 @@ async function executeJob(
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "x-internal-secret": Deno.env.get("CRON_JOB_SECRET") || "",
         },
         body: JSON.stringify({
           job_id: jobId,
@@ -115,7 +218,7 @@ async function executeJob(
       }
 
       const result = await response.json();
-      recordsScraped = result.records_scraped || 0;
+      recordsScraped = await persistRaceData(supabase, job, result?.data);
     } else if (job.job_type === "results") {
       // Call scrape-race-results
       const response = await fetch(
@@ -125,6 +228,7 @@ async function executeJob(
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "x-internal-secret": Deno.env.get("CRON_JOB_SECRET") || "",
           },
           body: JSON.stringify({
             job_id: jobId,
@@ -150,7 +254,6 @@ async function executeJob(
       .update({
         status: "completed",
         next_run_at: calculateNextRunTime(job.interval_seconds),
-        retry_count: 0,
         updated_at: new Date().toISOString(),
       })
       .eq("id", jobId);
@@ -180,8 +283,6 @@ async function executeJob(
         .update({
           status: "pending",
           next_run_at: retryTime.toISOString(),
-          retry_count: currentRetry + 1,
-          error_message: errorMsg,
           updated_at: new Date().toISOString(),
         })
         .eq("id", jobId);
@@ -200,7 +301,7 @@ async function executeJob(
         .from("scrape_jobs")
         .update({
           status: "failed",
-          error_message: errorMsg,
+          next_run_at: calculateNextRunTime(job.interval_seconds || 300),
           updated_at: new Date().toISOString(),
         })
         .eq("id", jobId);
@@ -265,7 +366,9 @@ serve(async (req) => {
       .from("scrape_jobs")
       .select("*")
       .eq("is_active", true)
-      .limit(100);  // Prevent querying unlimited jobs
+      // Gemini free tier allows ~5 requests/minute; process the oldest few per run
+      .order("next_run_at", { ascending: true })
+      .limit(4);
 
     if (!force_run) {
       // Only get jobs where next_run_at is in the past
@@ -300,8 +403,8 @@ serve(async (req) => {
       results.push(result);
       console.log(formatJobSummary(result));
 
-      // Add small delay between jobs
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Stay under the Gemini rate limit (5 requests / minute)
+      await new Promise((resolve) => setTimeout(resolve, 13000));
     }
 
     const successCount = results.filter((r) => r.status === "success").length;
