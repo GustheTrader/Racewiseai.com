@@ -301,7 +301,7 @@ async function executeJob(
         .from("scrape_jobs")
         .update({
           status: "failed",
-          error_message: errorMsg,
+          next_run_at: calculateNextRunTime(job.interval_seconds || 300),
           updated_at: new Date().toISOString(),
         })
         .eq("id", jobId);
