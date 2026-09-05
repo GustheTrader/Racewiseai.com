@@ -256,7 +256,10 @@ serve(async (req) => {
       }
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      SUPABASE_URL,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || SUPABASE_ANON_KEY
+    );
 
     // Verify it's exactly 8 AM PST (or within 1 hour)
     const now = new Date();
