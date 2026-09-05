@@ -260,6 +260,17 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || SUPABASE_ANON_KEY
     );
 
+    // Optional manual override
+    let force = false;
+    try {
+      if (req.method === "POST") {
+        const body = await req.json();
+        force = body?.force === true;
+      }
+    } catch (_e) {
+      force = false;
+    }
+
     // Verify it's exactly 8 AM PST (or within 1 hour)
     const now = new Date();
     const pstTime = new Date(
@@ -268,10 +279,10 @@ serve(async (req) => {
     const hourPST = pstTime.getHours();
 
     console.log(`[MORNING REPORT] Current PST time: ${pstTime.toISOString()}`);
-    console.log(`[MORNING REPORT] Hour: ${hourPST}`);
+    console.log(`[MORNING REPORT] Hour: ${hourPST} (force: ${force})`);
 
     // Allow execution between 8 AM and 9 AM PST
-    if (hourPST < 8 || hourPST >= 9) {
+    if (!force && (hourPST < 8 || hourPST >= 9)) {
       return new Response(
         JSON.stringify({
           status: "skipped",
@@ -285,8 +296,32 @@ serve(async (req) => {
       );
     }
 
+    // Jobs must be owned by a real user account (admin)
+    // deno-lint-ignore no-explicit-any
+    const adminClient = supabase as any;
+    const { data: adminRole } = await adminClient
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin")
+      .limit(1)
+      .maybeSingle();
+
+    const ownerId = adminRole?.user_id;
+    if (!ownerId) {
+      return new Response(
+        JSON.stringify({
+          status: "error",
+          error: "No admin user found to own scrape jobs",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Generate morning report
-    const result = await generateMorningReport(supabase);
+    const result = await generateMorningReport(supabase, ownerId);
 
     return new Response(JSON.stringify(result), {
       status: 200,
