@@ -43,6 +43,9 @@ const Index = () => {
     <DashboardLayout 
       title="RACEWISE AI TOOLBOX"
       subtitle="Live race track odds and pool movement dashboard"
+      lastUpdatedAt={lastUpdatedAt}
+      isLoading={isLoading}
+      nextUpdateIn={nextUpdateIn}
       extraButtons={
         <Button 
           variant="outline" 
