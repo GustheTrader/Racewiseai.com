@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,13 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Brain, 
-  Play, 
-  Pause, 
-  Trash2, 
-  Download, 
-  BarChart3, 
+import {
+  Brain,
+  Play,
+  Trash2,
+  Download,
+  BarChart3,
   Zap,
   Clock,
   CheckCircle2,
@@ -23,21 +22,29 @@ import {
   Loader2,
   Settings,
   TrendingUp,
-  Database
+  Database,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-interface ModelConfig {
+type ModelStatus = 'idle' | 'training' | 'completed' | 'failed';
+
+interface TrainedModel {
   id: string;
   name: string;
-  type: 'gradient_boost' | 'neural_net' | 'ensemble' | 'random_forest';
-  status: 'idle' | 'training' | 'completed' | 'failed';
-  accuracy?: number;
+  model_type: string;
+  status: ModelStatus;
+  accuracy: number | null;
+  log_loss: number | null;
+  training_samples: number | null;
   features: string[];
-  createdAt: string;
-  trainedAt?: string;
-  epochs?: number;
-  progress?: number;
+  epochs: number;
+  notes: string | null;
+  error: string | null;
+  weights: Record<string, number> | null;
+  created_at: string;
+  trained_at: string | null;
 }
 
 const AVAILABLE_FEATURES = [
@@ -65,6 +72,9 @@ const MODEL_TYPES = [
   { id: 'random_forest', label: 'Random Forest', description: 'Robust, interpretable results' },
 ];
 
+const asFeatures = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+
 const ModelTrainingTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('train');
   const [modelName, setModelName] = useState('');
@@ -74,34 +84,60 @@ const ModelTrainingTab: React.FC = () => {
   ]);
   const [epochs, setEpochs] = useState(100);
   const [isTraining, setIsTraining] = useState(false);
-  const [trainingProgress, setTrainingProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [models, setModels] = useState<TrainedModel[]>([]);
 
-  const [models, setModels] = useState<ModelConfig[]>([
-    {
-      id: '1',
-      name: 'SpeedClass-v1',
-      type: 'gradient_boost',
-      status: 'completed',
-      accuracy: 67.4,
-      features: ['speed_figure', 'class_rating', 'pace_rating'],
-      createdAt: '2024-01-10T10:00:00Z',
-      trainedAt: '2024-01-10T12:30:00Z',
-    },
-    {
-      id: '2',
-      name: 'FullFeature-NN',
-      type: 'neural_net',
-      status: 'completed',
-      accuracy: 71.2,
-      features: ['speed_figure', 'class_rating', 'jockey_stats', 'trainer_stats', 'track_bias', 'odds_movement'],
-      createdAt: '2024-01-12T08:00:00Z',
-      trainedAt: '2024-01-12T14:45:00Z',
-    },
-  ]);
+  const loadModels = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('trained_models')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast.error(`Could not load models: ${error.message}`);
+      setIsLoading(false);
+      return;
+    }
+
+    setModels(
+      (data ?? []).map((row) => ({
+        id: row.id,
+        name: row.name,
+        model_type: row.model_type,
+        status: (row.status as ModelStatus) ?? 'idle',
+        accuracy: row.accuracy === null ? null : Number(row.accuracy),
+        log_loss: row.log_loss === null ? null : Number(row.log_loss),
+        training_samples: row.training_samples,
+        features: asFeatures(row.features),
+        epochs: row.epochs,
+        notes: row.notes,
+        error: row.error,
+        weights: (row.weights as Record<string, number> | null) ?? null,
+        created_at: row.created_at,
+        trained_at: row.trained_at,
+      })),
+    );
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadModels();
+
+    const channel = supabase
+      .channel('trained-models-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trained_models' }, () => {
+        loadModels();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadModels]);
 
   const toggleFeature = (featureId: string) => {
-    setSelectedFeatures(prev => 
-      prev.includes(featureId) 
+    setSelectedFeatures(prev =>
+      prev.includes(featureId)
         ? prev.filter(f => f !== featureId)
         : [...prev, featureId]
     );
@@ -118,51 +154,90 @@ const ModelTrainingTab: React.FC = () => {
     }
 
     setIsTraining(true);
-    setTrainingProgress(0);
 
-    const newModel: ModelConfig = {
-      id: Date.now().toString(),
-      name: modelName,
-      type: modelType as ModelConfig['type'],
-      status: 'training',
-      features: selectedFeatures,
-      createdAt: new Date().toISOString(),
-      epochs,
-      progress: 0,
-    };
+    try {
+      const { data: session } = await supabase.auth.getUser();
+      const { data: inserted, error: insertError } = await supabase
+        .from('trained_models')
+        .insert({
+          name: modelName.trim(),
+          model_type: modelType,
+          features: selectedFeatures,
+          epochs,
+          status: 'training',
+          created_by: session?.user?.id ?? null,
+        })
+        .select('id')
+        .single();
 
-    setModels(prev => [newModel, ...prev]);
-    toast.info(`Training started for ${modelName}`);
+      if (insertError) throw insertError;
 
-    // Simulate training progress
-    for (let i = 0; i <= 100; i += 5) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      setTrainingProgress(i);
-      setModels(prev => prev.map(m => 
-        m.id === newModel.id ? { ...m, progress: i } : m
-      ));
+      toast.info(`Training started for ${modelName}`);
+      await loadModels();
+
+      const { data, error } = await supabase.functions.invoke('train-model', {
+        body: { modelId: inserted.id },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      await loadModels();
+      const acc = data?.holdout?.accuracy;
+      toast.success(
+        acc != null
+          ? `${modelName} trained on ${data.trainRaces} races — holdout accuracy ${Number(acc).toFixed(1)}%`
+          : `${modelName} trained successfully`,
+      );
+      setModelName('');
+      setActiveTab('models');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Training failed';
+      toast.error(message);
+      await loadModels();
+    } finally {
+      setIsTraining(false);
     }
-
-    // Complete training
-    const accuracy = 60 + Math.random() * 15;
-    setModels(prev => prev.map(m => 
-      m.id === newModel.id 
-        ? { ...m, status: 'completed', accuracy: parseFloat(accuracy.toFixed(1)), trainedAt: new Date().toISOString(), progress: 100 }
-        : m
-    ));
-
-    setIsTraining(false);
-    setTrainingProgress(0);
-    setModelName('');
-    toast.success(`Model ${modelName} trained successfully! Accuracy: ${accuracy.toFixed(1)}%`);
   };
 
-  const handleDeleteModel = (modelId: string) => {
+  const handleRetrain = async (model: TrainedModel) => {
+    setIsTraining(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('train-model', {
+        body: { modelId: model.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`${model.name} retrained`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Retraining failed');
+    } finally {
+      await loadModels();
+      setIsTraining(false);
+    }
+  };
+
+  const handleDeleteModel = async (modelId: string) => {
+    const { error } = await supabase.from('trained_models').delete().eq('id', modelId);
+    if (error) {
+      toast.error(`Delete failed: ${error.message}`);
+      return;
+    }
     setModels(prev => prev.filter(m => m.id !== modelId));
     toast.success('Model deleted');
   };
 
-  const getStatusBadge = (status: ModelConfig['status']) => {
+  const handleDownload = (model: TrainedModel) => {
+    const blob = new Blob([JSON.stringify(model, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${model.name.replace(/\s+/g, '-').toLowerCase()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const getStatusBadge = (status: ModelStatus) => {
     switch (status) {
       case 'completed':
         return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle2 className="h-3 w-3 mr-1" />Trained</Badge>;
@@ -180,6 +255,8 @@ const ModelTrainingTab: React.FC = () => {
     acc[feature.category].push(feature);
     return acc;
   }, {} as Record<string, typeof AVAILABLE_FEATURES>);
+
+  const trainedModels = models.filter(m => m.status === 'completed' && m.accuracy !== null);
 
   return (
     <div className="space-y-4">
@@ -209,6 +286,9 @@ const ModelTrainingTab: React.FC = () => {
                   <Settings className="h-5 w-5" />
                   Model Configuration
                 </CardTitle>
+                <CardDescription>
+                  Trains on historical race results and past performances stored in your database.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -255,15 +335,15 @@ const ModelTrainingTab: React.FC = () => {
                 {isTraining && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Training Progress</span>
-                      <span className="text-primary font-medium">{trainingProgress}%</span>
+                      <span className="text-muted-foreground">Training in progress</span>
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
                     </div>
-                    <Progress value={trainingProgress} className="h-2" />
+                    <Progress value={undefined} className="h-2" />
                   </div>
                 )}
 
-                <Button 
-                  onClick={handleStartTraining} 
+                <Button
+                  onClick={handleStartTraining}
                   disabled={isTraining || !modelName.trim() || selectedFeatures.length < 3}
                   className="w-full"
                 >
@@ -301,12 +381,12 @@ const ModelTrainingTab: React.FC = () => {
                         <h4 className="text-sm font-semibold text-muted-foreground mb-2">{category}</h4>
                         <div className="space-y-2">
                           {features.map(feature => (
-                            <div 
+                            <div
                               key={feature.id}
                               className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
                               onClick={() => !isTraining && toggleFeature(feature.id)}
                             >
-                              <Checkbox 
+                              <Checkbox
                                 checked={selectedFeatures.includes(feature.id)}
                                 disabled={isTraining}
                               />
@@ -325,12 +405,23 @@ const ModelTrainingTab: React.FC = () => {
 
         <TabsContent value="models" className="mt-4">
           <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle>Trained Models</CardTitle>
-              <CardDescription>Manage your prediction models</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Trained Models</CardTitle>
+                <CardDescription>Saved to your database and shared across sessions</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={loadModels} disabled={isLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
             </CardHeader>
             <CardContent>
-              {models.length === 0 ? (
+              {isLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin" />
+                  <p>Loading models…</p>
+                </div>
+              ) : models.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Brain className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>No models trained yet</p>
@@ -338,61 +429,89 @@ const ModelTrainingTab: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   {models.map(model => (
-                    <div 
-                      key={model.id} 
-                      className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border"
+                    <div
+                      key={model.id}
+                      className="p-4 rounded-lg bg-muted/30 border border-border"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Brain className="h-5 w-5 text-primary" />
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Brain className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-foreground">{model.name}</h4>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                {MODEL_TYPES.find(t => t.id === model.model_type)?.label ?? model.model_type}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {model.features.length} features
+                              </span>
+                              {model.training_samples ? (
+                                <span className="text-xs text-muted-foreground">
+                                  {model.training_samples} samples
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-semibold text-foreground">{model.name}</h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {MODEL_TYPES.find(t => t.id === model.type)?.label}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {model.features.length} features
-                            </span>
+
+                        <div className="flex items-center gap-4">
+                          {model.accuracy !== null && (
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-green-400">{model.accuracy.toFixed(1)}%</p>
+                              <p className="text-xs text-muted-foreground">Holdout accuracy</p>
+                            </div>
+                          )}
+                          {model.log_loss !== null && (
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-blue-400">{model.log_loss.toFixed(3)}</p>
+                              <p className="text-xs text-muted-foreground">Log loss</p>
+                            </div>
+                          )}
+
+                          {getStatusBadge(model.status)}
+
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Retrain"
+                              onClick={() => handleRetrain(model)}
+                              disabled={isTraining || model.status === 'training'}
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Download weights"
+                              onClick={() => handleDownload(model)}
+                              disabled={model.status !== 'completed'}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteModel(model.id)}
+                              disabled={model.status === 'training'}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4">
-                        {model.status === 'training' && model.progress !== undefined && (
-                          <div className="w-24">
-                            <Progress value={model.progress} className="h-2" />
-                          </div>
-                        )}
-                        
-                        {model.accuracy && (
-                          <div className="text-right">
-                            <p className="text-lg font-bold text-green-400">{model.accuracy}%</p>
-                            <p className="text-xs text-muted-foreground">Accuracy</p>
-                          </div>
-                        )}
-
-                        {getStatusBadge(model.status)}
-
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            disabled={model.status !== 'completed'}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleDeleteModel(model.id)}
-                            disabled={model.status === 'training'}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
+                      {model.error && (
+                        <p className="mt-3 text-xs text-destructive flex items-start gap-2">
+                          <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                          {model.error}
+                        </p>
+                      )}
+                      {model.notes && (
+                        <p className="mt-3 text-xs text-muted-foreground">{model.notes}</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -406,7 +525,7 @@ const ModelTrainingTab: React.FC = () => {
             <Card className="bg-card border-border">
               <CardContent className="p-6 text-center">
                 <Brain className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <p className="text-3xl font-bold text-foreground">{models.filter(m => m.status === 'completed').length}</p>
+                <p className="text-3xl font-bold text-foreground">{trainedModels.length}</p>
                 <p className="text-sm text-muted-foreground">Trained Models</p>
               </CardContent>
             </Card>
@@ -414,8 +533,8 @@ const ModelTrainingTab: React.FC = () => {
               <CardContent className="p-6 text-center">
                 <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-400" />
                 <p className="text-3xl font-bold text-foreground">
-                  {models.filter(m => m.accuracy).length > 0 
-                    ? (models.filter(m => m.accuracy).reduce((a, m) => a + (m.accuracy || 0), 0) / models.filter(m => m.accuracy).length).toFixed(1)
+                  {trainedModels.length > 0
+                    ? (trainedModels.reduce((a, m) => a + (m.accuracy || 0), 0) / trainedModels.length).toFixed(1)
                     : '—'}%
                 </p>
                 <p className="text-sm text-muted-foreground">Avg Accuracy</p>
@@ -425,7 +544,7 @@ const ModelTrainingTab: React.FC = () => {
               <CardContent className="p-6 text-center">
                 <BarChart3 className="h-8 w-8 mx-auto mb-2 text-blue-400" />
                 <p className="text-3xl font-bold text-foreground">
-                  {models.filter(m => m.accuracy).sort((a, b) => (b.accuracy || 0) - (a.accuracy || 0))[0]?.accuracy?.toFixed(1) || '—'}%
+                  {[...trainedModels].sort((a, b) => (b.accuracy || 0) - (a.accuracy || 0))[0]?.accuracy?.toFixed(1) || '—'}%
                 </p>
                 <p className="text-sm text-muted-foreground">Best Accuracy</p>
               </CardContent>
@@ -437,12 +556,11 @@ const ModelTrainingTab: React.FC = () => {
               <CardTitle>Model Performance Comparison</CardTitle>
             </CardHeader>
             <CardContent>
-              {models.filter(m => m.accuracy).length === 0 ? (
+              {trainedModels.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No trained models to compare</p>
               ) : (
                 <div className="space-y-4">
-                  {models
-                    .filter(m => m.accuracy)
+                  {[...trainedModels]
                     .sort((a, b) => (b.accuracy || 0) - (a.accuracy || 0))
                     .map((model, idx) => (
                       <div key={model.id} className="flex items-center gap-4">
@@ -450,9 +568,9 @@ const ModelTrainingTab: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex justify-between mb-1">
                             <span className="font-medium text-foreground">{model.name}</span>
-                            <span className="text-green-400 font-bold">{model.accuracy}%</span>
+                            <span className="text-green-400 font-bold">{model.accuracy?.toFixed(1)}%</span>
                           </div>
-                          <Progress value={model.accuracy} className="h-2" />
+                          <Progress value={model.accuracy ?? 0} className="h-2" />
                         </div>
                       </div>
                     ))}
