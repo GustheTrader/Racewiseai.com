@@ -89,10 +89,48 @@ async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
 
 // Fetch webpage content
 async function fetchWebPageContent(url: string): Promise<string> {
+  // offtrackbetting.com is a JavaScript app, so a plain fetch returns an empty
+  // shell. Use Firecrawl (renders JS) first and fall back to a raw fetch.
+  const firecrawlKey =
+    Deno.env.get('FIRECRAWL_API_KEY_1') || Deno.env.get('FIRECRAWL_API_KEY');
+
+  if (firecrawlKey) {
+    try {
+      const fcRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${firecrawlKey}`,
+        },
+        body: JSON.stringify({
+          url,
+          formats: ['markdown'],
+          onlyMainContent: true,
+          waitFor: 5000,
+          timeout: 45000,
+        }),
+      });
+
+      if (fcRes.ok) {
+        const fcData = await fcRes.json();
+        const markdown = fcData?.data?.markdown || '';
+        if (markdown.trim().length > 200) {
+          return markdown.substring(0, 20000);
+        }
+        console.warn('Firecrawl returned little content, falling back to fetch');
+      } else {
+        console.warn(`Firecrawl error ${fcRes.status}, falling back to fetch`);
+      }
+    } catch (err) {
+      console.warn('Firecrawl request failed, falling back to fetch:', err);
+    }
+  }
+
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
@@ -101,13 +139,12 @@ async function fetchWebPageContent(url: string): Promise<string> {
     }
 
     const html = await response.text();
-    // Remove script tags and excessive whitespace
     const cleaned = html
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/\s+/g, ' ')
       .trim();
 
-    return cleaned.substring(0, 10000); // Limit to 10k chars for API
+    return cleaned.substring(0, 20000);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     throw new Error(`Failed to fetch page: ${message}`);
