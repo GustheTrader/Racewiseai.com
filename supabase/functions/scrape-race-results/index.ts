@@ -296,7 +296,11 @@ serve(async (req) => {
 
   try {
     // SECURITY FIX: Verify authentication
-    const auth = await verifyAuth(req);
+    const internalSecret = req.headers.get('x-internal-secret');
+    const expectedInternal = Deno.env.get('CRON_JOB_SECRET');
+    const isInternalCall = !!expectedInternal && internalSecret === expectedInternal;
+
+    const auth = isInternalCall ? { userId: 'system' } : await verifyAuth(req);
     if (!auth) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,

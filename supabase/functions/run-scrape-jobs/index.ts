@@ -101,6 +101,7 @@ async function executeJob(
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "x-internal-secret": Deno.env.get("CRON_JOB_SECRET") || "",
         },
         body: JSON.stringify({
           job_id: jobId,
@@ -125,6 +126,7 @@ async function executeJob(
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "x-internal-secret": Deno.env.get("CRON_JOB_SECRET") || "",
           },
           body: JSON.stringify({
             job_id: jobId,
