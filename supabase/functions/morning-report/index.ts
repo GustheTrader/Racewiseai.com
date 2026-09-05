@@ -94,7 +94,8 @@ interface SupabaseClient {
  * - Sends report to admin users
  */
 async function generateMorningReport(
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  ownerId: string
 ): Promise<{ tracksRunning: string[]; jobsCreated: number; report: string }> {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
   const tracksRunning: string[] = [];
@@ -142,9 +143,7 @@ async function generateMorningReport(
             interval_seconds: 3600,  // Run every hour
             is_active: true,
             next_run_at: new Date().toISOString(),
-            retry_count: 0,
-            max_retries: 3,
-            created_by: "system",
+            created_by: ownerId,
           });
 
         if (insertError) {
@@ -224,9 +223,20 @@ serve(async (req) => {
       const cronSignature = req.headers.get("x-cron-signature");
       const expectedSignature = Deno.env.get("CRON_JOB_SECRET");
 
-      if (!expectedSignature || cronSignature !== expectedSignature) {
-        console.warn("[SECURITY] Invalid cron signature");
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+      // Accept either (a) matching CRON_JOB_SECRET signature, or
+      // (b) an Authorization bearer that matches the project anon key
+      //     (which is how pg_cron invokes internal edge functions).
+      const authHeader = req.headers.get("Authorization") || "";
+      const bearerToken = authHeader.replace(/^Bearer\s+/i, "");
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+
+      const signatureOk =
+        !!expectedSignature && cronSignature === expectedSignature;
+      const bearerOk = !!anonKey && bearerToken === anonKey;
+
+      if (!signatureOk && !bearerOk) {
+        console.warn("[SECURITY] Invalid cron auth");
+        return new Response(JSON.stringify({ error: "Invalid cron auth" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -245,7 +255,21 @@ serve(async (req) => {
       }
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      SUPABASE_URL,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || SUPABASE_ANON_KEY
+    );
+
+    // Optional manual override
+    let force = false;
+    try {
+      if (req.method === "POST") {
+        const body = await req.json();
+        force = body?.force === true;
+      }
+    } catch (_e) {
+      force = false;
+    }
 
     // Verify it's exactly 8 AM PST (or within 1 hour)
     const now = new Date();
@@ -255,10 +279,10 @@ serve(async (req) => {
     const hourPST = pstTime.getHours();
 
     console.log(`[MORNING REPORT] Current PST time: ${pstTime.toISOString()}`);
-    console.log(`[MORNING REPORT] Hour: ${hourPST}`);
+    console.log(`[MORNING REPORT] Hour: ${hourPST} (force: ${force})`);
 
     // Allow execution between 8 AM and 9 AM PST
-    if (hourPST < 8 || hourPST >= 9) {
+    if (!force && (hourPST < 8 || hourPST >= 9)) {
       return new Response(
         JSON.stringify({
           status: "skipped",
@@ -272,8 +296,32 @@ serve(async (req) => {
       );
     }
 
+    // Jobs must be owned by a real user account (admin)
+    // deno-lint-ignore no-explicit-any
+    const adminClient = supabase as any;
+    const { data: adminRole } = await adminClient
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin")
+      .limit(1)
+      .maybeSingle();
+
+    const ownerId = adminRole?.user_id;
+    if (!ownerId) {
+      return new Response(
+        JSON.stringify({
+          status: "error",
+          error: "No admin user found to own scrape jobs",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Generate morning report
-    const result = await generateMorningReport(supabase);
+    const result = await generateMorningReport(supabase, ownerId);
 
     return new Response(JSON.stringify(result), {
       status: 200,

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_reports: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: number
+          jobs_created: number | null
+          report_date: string
+          report_type: string
+          tracks_running: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: number
+          jobs_created?: number | null
+          report_date: string
+          report_type?: string
+          tracks_running?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: number
+          jobs_created?: number | null
+          report_date?: string
+          report_type?: string
+          tracks_running?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       agent_analyses: {
         Row: {
           agent_name: string
@@ -109,6 +142,47 @@ export type Database = {
           total_pool?: number | null
         }
         Relationships: []
+      }
+      betting_probables: {
+        Row: {
+          captured_at: string | null
+          id: string
+          payoff_amount: number | null
+          probability: number | null
+          race_card_id: string
+          updated_at: string | null
+          wager_type: string
+          winning_combination: string
+        }
+        Insert: {
+          captured_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          probability?: number | null
+          race_card_id: string
+          updated_at?: string | null
+          wager_type: string
+          winning_combination: string
+        }
+        Update: {
+          captured_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          probability?: number | null
+          race_card_id?: string
+          updated_at?: string | null
+          wager_type?: string
+          winning_combination?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "betting_probables_race_card_id_fkey"
+            columns: ["race_card_id"]
+            isOneToOne: false
+            referencedRelation: "race_cards"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cosmic_bombs: {
         Row: {
@@ -761,6 +835,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payoff_results: {
+        Row: {
+          bet_type: string
+          created_at: string | null
+          id: string
+          payoff_amount: number | null
+          pool_total: number | null
+          race_date: string
+          race_number: number
+          race_result_id: string | null
+          track_name: string
+          updated_at: string | null
+          winning_numbers: string[] | null
+        }
+        Insert: {
+          bet_type: string
+          created_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          pool_total?: number | null
+          race_date: string
+          race_number: number
+          race_result_id?: string | null
+          track_name: string
+          updated_at?: string | null
+          winning_numbers?: string[] | null
+        }
+        Update: {
+          bet_type?: string
+          created_at?: string | null
+          id?: string
+          payoff_amount?: number | null
+          pool_total?: number | null
+          race_date?: string
+          race_number?: number
+          race_result_id?: string | null
+          track_name?: string
+          updated_at?: string | null
+          winning_numbers?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payoff_results_race_result_id_fkey"
+            columns: ["race_result_id"]
+            isOneToOne: false
+            referencedRelation: "race_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -791,8 +915,63 @@ export type Database = {
         }
         Relationships: []
       }
+      race_cards: {
+        Row: {
+          conditions: string | null
+          created_at: string | null
+          distance: string | null
+          id: string
+          post_time: string | null
+          purse: string | null
+          race_date: string
+          race_number: number
+          race_time: string | null
+          race_type: string | null
+          scraped_at: string | null
+          source_url: string | null
+          surface: string | null
+          track_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          conditions?: string | null
+          created_at?: string | null
+          distance?: string | null
+          id?: string
+          post_time?: string | null
+          purse?: string | null
+          race_date: string
+          race_number: number
+          race_time?: string | null
+          race_type?: string | null
+          scraped_at?: string | null
+          source_url?: string | null
+          surface?: string | null
+          track_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          conditions?: string | null
+          created_at?: string | null
+          distance?: string | null
+          id?: string
+          post_time?: string | null
+          purse?: string | null
+          race_date?: string
+          race_number?: number
+          race_time?: string | null
+          race_type?: string | null
+          scraped_at?: string | null
+          source_url?: string | null
+          surface?: string | null
+          track_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       race_data: {
         Row: {
+          betting_pools: Json | null
           created_at: string
           id: string
           race_conditions: string | null
@@ -802,6 +981,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          betting_pools?: Json | null
           created_at?: string
           id?: string
           race_conditions?: string | null
@@ -811,6 +991,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          betting_pools?: Json | null
           created_at?: string
           id?: string
           race_conditions?: string | null
@@ -1165,6 +1346,45 @@ export type Database = {
         }
         Relationships: []
       }
+      scraper_jobs: {
+        Row: {
+          completed_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          horses_scraped: number | null
+          id: string
+          race_date: string
+          races_scraped: number | null
+          started_at: string | null
+          status: string
+          track_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          horses_scraped?: number | null
+          id?: string
+          race_date: string
+          races_scraped?: number | null
+          started_at?: string | null
+          status: string
+          track_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          horses_scraped?: number | null
+          id?: string
+          race_date?: string
+          races_scraped?: number | null
+          started_at?: string | null
+          status?: string
+          track_name?: string
+        }
+        Relationships: []
+      }
       speed_figures: {
         Row: {
           created_at: string | null
@@ -1458,6 +1678,7 @@ export type Database = {
           schedule_hour: number | null
           schedule_minute: number | null
           timezone: string | null
+          track_code: string | null
           track_name: string
           updated_at: string | null
         }
@@ -1468,6 +1689,7 @@ export type Database = {
           schedule_hour?: number | null
           schedule_minute?: number | null
           timezone?: string | null
+          track_code?: string | null
           track_name: string
           updated_at?: string | null
         }
@@ -1478,6 +1700,7 @@ export type Database = {
           schedule_hour?: number | null
           schedule_minute?: number | null
           timezone?: string | null
+          track_code?: string | null
           track_name?: string
           updated_at?: string | null
         }
@@ -1519,6 +1742,63 @@ export type Database = {
           track_type?: string | null
           updated_at?: string | null
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      trained_models: {
+        Row: {
+          accuracy: number | null
+          created_at: string
+          created_by: string | null
+          epochs: number
+          error: string | null
+          features: Json
+          id: string
+          log_loss: number | null
+          model_type: string
+          name: string
+          notes: string | null
+          status: string
+          trained_at: string | null
+          training_samples: number | null
+          updated_at: string
+          weights: Json | null
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string
+          created_by?: string | null
+          epochs?: number
+          error?: string | null
+          features?: Json
+          id?: string
+          log_loss?: number | null
+          model_type: string
+          name: string
+          notes?: string | null
+          status?: string
+          trained_at?: string | null
+          training_samples?: number | null
+          updated_at?: string
+          weights?: Json | null
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string
+          created_by?: string | null
+          epochs?: number
+          error?: string | null
+          features?: Json
+          id?: string
+          log_loss?: number | null
+          model_type?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          trained_at?: string | null
+          training_samples?: number | null
+          updated_at?: string
+          weights?: Json | null
         }
         Relationships: []
       }
@@ -1931,7 +2211,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      api_connections_safe: {
+        Row: {
+          api_key_masked: string | null
+          api_url: string | null
+          created_at: string | null
+          id: string | null
+          is_test_mode: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_key_masked?: never
+          api_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_test_mode?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_key_masked?: never
+          api_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_test_mode?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -1960,12 +2269,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1989,11 +2298,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2014,11 +2323,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2039,11 +2348,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2056,11 +2365,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

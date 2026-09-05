@@ -1,5 +1,26 @@
 
 /**
+ * Parse a morning-line odds string into decimal odds (return value only).
+ * Handles fractional ("7-2", "5/2"), decimal ("3.5"), "EVEN"/"EVS", and "SCR".
+ * Returns null for missing/unparseable values.
+ */
+export const parseFractionalOdds = (raw?: string | number | null): number | null => {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === 'number') return isFinite(raw) ? raw : null;
+  const s = String(raw).trim().toUpperCase();
+  if (!s || s === 'SCR' || s === 'SCRATCH' || s === '-') return null;
+  if (s === 'EVEN' || s === 'EVS' || s === 'EV') return 1;
+  const frac = s.match(/^(\d+(?:\.\d+)?)\s*[-/]\s*(\d+(?:\.\d+)?)$/);
+  if (frac) {
+    const num = parseFloat(frac[1]);
+    const den = parseFloat(frac[2]);
+    if (den > 0) return num / den;
+  }
+  const dec = parseFloat(s);
+  return isFinite(dec) ? dec : null;
+};
+
+/**
  * Utility functions for odds comparison and formatting
  */
 

@@ -23,7 +23,7 @@ function getCorsHeaders(origin?: string | null): Record<string, string> {
 
 // Gemini API configuration
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
 
 interface ScrapedRaceData {
   track_name: string;
@@ -89,10 +89,48 @@ async function verifyAuth(req: Request): Promise<{ userId: string } | null> {
 
 // Fetch webpage content
 async function fetchWebPageContent(url: string): Promise<string> {
+  // offtrackbetting.com is a JavaScript app, so a plain fetch returns an empty
+  // shell. Use Firecrawl (renders JS) first and fall back to a raw fetch.
+  const firecrawlKey =
+    Deno.env.get('FIRECRAWL_API_KEY_1') || Deno.env.get('FIRECRAWL_API_KEY');
+
+  if (firecrawlKey) {
+    try {
+      const fcRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${firecrawlKey}`,
+        },
+        body: JSON.stringify({
+          url,
+          formats: ['markdown'],
+          onlyMainContent: true,
+          waitFor: 5000,
+          timeout: 45000,
+        }),
+      });
+
+      if (fcRes.ok) {
+        const fcData = await fcRes.json();
+        const markdown = fcData?.data?.markdown || '';
+        if (markdown.trim().length > 200) {
+          return markdown.substring(0, 20000);
+        }
+        console.warn('Firecrawl returned little content, falling back to fetch');
+      } else {
+        console.warn(`Firecrawl error ${fcRes.status}, falling back to fetch`);
+      }
+    } catch (err) {
+      console.warn('Firecrawl request failed, falling back to fetch:', err);
+    }
+  }
+
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
@@ -101,13 +139,12 @@ async function fetchWebPageContent(url: string): Promise<string> {
     }
 
     const html = await response.text();
-    // Remove script tags and excessive whitespace
     const cleaned = html
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/\s+/g, ' ')
       .trim();
 
-    return cleaned.substring(0, 10000); // Limit to 10k chars for API
+    return cleaned.substring(0, 20000);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     throw new Error(`Failed to fetch page: ${message}`);
@@ -165,43 +202,31 @@ IMPORTANT:
 - Only return valid JSON`;
 
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
+        Authorization: `Bearer ${Deno.env.get('LOVABLE_API_KEY') ?? ''}`,
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2, // Low temperature for consistent data extraction
-          maxOutputTokens: 2048,
-        },
+        model: 'google/gemini-3-flash',
+        temperature: 0.2,
+        messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', response.status, errorText);
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      console.error('AI gateway error:', response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Gemini response structure:', JSON.stringify(Object.keys(data)));
-    
-    // FIXED: Correct path for Gemini API response
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    const content = data.choices?.[0]?.message?.content || '';
     
     if (!content) {
-      console.error('Empty Gemini response:', JSON.stringify(data));
+      console.error('Empty AI response:', JSON.stringify(data));
       throw new Error('Empty response from Gemini API');
     }
 
@@ -248,7 +273,11 @@ serve(async (req) => {
 
   try {
     // SECURITY FIX: Verify authentication
-    const auth = await verifyAuth(req);
+    const internalSecret = req.headers.get('x-internal-secret');
+    const expectedInternal = Deno.env.get('CRON_JOB_SECRET');
+    const isInternalCall = !!expectedInternal && internalSecret === expectedInternal;
+
+    const auth = isInternalCall ? { userId: 'system' } : await verifyAuth(req);
     if (!auth) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
@@ -263,8 +292,8 @@ serve(async (req) => {
       });
     }
 
-    // Validate Gemini API key
-    if (!GEMINI_API_KEY) {
+    // Validate AI gateway key
+    if (!Deno.env.get('LOVABLE_API_KEY')) {
       return new Response(
         JSON.stringify({ error: 'Gemini API key not configured' }),
         {
@@ -319,7 +348,7 @@ serve(async (req) => {
       success: true,
       data: raceData,
       scraped_at: new Date().toISOString(),
-      method: 'gemini-2.0-flash',
+      method: 'gemini-3.6-flash',
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

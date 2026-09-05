@@ -497,6 +497,28 @@
     100% { background-position: 200% 0; }
   }
 
+  /* Ethereal floating animation for hero images */
+  .animate-float {
+    animation: ethereal-float 6s ease-in-out infinite;
+  }
+
+  @keyframes ethereal-float {
+    0%, 100% { 
+      transform: translateY(0) scale(1);
+      filter: drop-shadow(0 0 60px rgba(249, 115, 22, 0.5)) drop-shadow(0 0 100px rgba(34, 211, 238, 0.3));
+    }
+    50% { 
+      transform: translateY(-12px) scale(1.02);
+      filter: drop-shadow(0 0 80px rgba(249, 115, 22, 0.6)) drop-shadow(0 0 120px rgba(34, 211, 238, 0.4));
+    }
+  }
+
+  /* Multicolor gradient scroll animation */
+  @keyframes gradient-scroll {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
   /* Text gradient */
   .text-gradient {
     @apply bg-clip-text text-transparent;

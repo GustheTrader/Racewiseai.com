@@ -57,7 +57,7 @@ const OtcLiveScraperTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isScraping, setIsScraping] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
